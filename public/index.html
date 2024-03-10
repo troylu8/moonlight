@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <link rel="stylesheet" href="css/play-div.css">
+        <link rel="stylesheet" href="css/playlists-div.css">
+        <link rel="stylesheet" href="css/options-div.css">
+        <link rel="stylesheet" href="css/main-div.css">
+    </head>
+
+    <body style="margin: none;">
+
+        <nav id="options-div">
+            <button id="new">new</button>
+            <button id="settings">settings</button>
+        </nav>
+
+        <div id="playlists-div">
+            <h2> Playlists </h2>
+
+            <nav id="playlists-nav">
+                <div class="playlist">
+                    <div class="playlist__title"> playlist name </div>
+                    <button class="playlist__options"> ... </button>
+                </div>
+            </nav>
+        </div>
+
+        <main id="main">
+            <h1> playlist title </h1>
+
+            <nav id="songs-nav">
+                <div class="song">
+                    <div class="song__left">
+                        <button class="song__play"> p </button>
+                        <div class="song__title"> song title <span class="song__author"> by author </span> </div>    
+                    </div>
+
+                    <div class="song__right">
+                        <div class="song__duration"> 1:00 </div>
+                        <button class="song__options"> ... </button>
+                    </div>
+                </div>
+
+                <div class="song">
+                    <div class="song__left">
+                        <button class="song__play"> p </button>
+                        <div class="song__title"> song title <span class="song__author"> by author </span> </div>    
+                    </div>
+
+                    <div class="song__right">
+                        <div class="song__duration"> 1:00 </div>
+                        <button class="song__options"> ... </button>
+                    </div>
+                </div>
+            </nav>
+        </main>
+
+        
+        <div id="play-div">
+            <div id="info">
+                <p id="info__title"> title </p>
+                <p id="info__author"> author </p>
+            </div>
+
+            <div id="main-control">
+                <div id="main-control__buttons">
+                    <button id="prev">prev</button>
+                    <button id="play" onclick="togglePlay()">play</button>
+                    <button id="next">next</button>
+                </div>
+
+                <input id="progress" type="range" min="0" value="50" max="100" />
+            </div>
+
+            <div id="volume-control">
+                <button id="mute">mute</button>
+                <input id="volume" type="range" min="0" value="50" max="100" />
+            </div>
+        </div>
+
+    </body>
+
+    <script src="js/progress-color.js"></script>
+    <script src="js/play-song.js"></script>
+</html>

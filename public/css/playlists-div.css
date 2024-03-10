@@ -1,0 +1,49 @@
+:root {
+    --playlists-div-width: 200px;
+}
+
+#playlists-div {
+    background-color: lightcoral;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 65px;
+
+    width: calc(var(--playlists-div-width) - 2 * 20px);
+    padding: 20px;
+}
+
+h2 {
+    margin: 0;
+}
+
+#playlists-nav {
+    margin-top: 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.playlist {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+}
+.playlist:hover {
+    color: white;
+    background-color: black;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.playlist__title {
+}
+.playlist__options {
+    visibility: hidden;
+}
+.playlist:hover .playlist__options {
+    visibility: visible;
+}

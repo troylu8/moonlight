@@ -1,0 +1,54 @@
+#main {
+    background-color: lightgray;
+    position: absolute;
+    left: var(--playlists-div-width);
+    right: 0;
+    top: 40px;
+    bottom: 65px;
+    padding: 15px;
+}
+
+h1 {
+    margin: 0;
+}
+
+#songs-nav {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    margin-top: 15px;
+    gap: 15px;
+}
+
+.song {
+    display: flex;
+    justify-content: space-between;
+}
+
+.song__left {
+    display: flex;
+    gap: 15px;
+}
+
+.song__play, .song__options {
+    visibility: hidden;
+}
+.song:hover .song__play, .song:hover .song__options {
+    visibility: visible;
+}
+
+.song__title {
+    font-weight: bold;
+}
+
+.song__right {
+    display: flex;
+    align-items: end;
+    gap: 50px;
+}
+
+.song__author {
+    font-weight: 400;
+}
