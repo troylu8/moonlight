@@ -1,5 +1,5 @@
 #play-div {
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
@@ -30,7 +30,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    gap: 10px
 }
 
 #main-control__buttons {
@@ -47,6 +47,17 @@ input[type='range'] {
 }
 
 #progress {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+#progress__passed, #progress__total {
+    margin: 0;
+
+}
+
+#progress__slider {
     width: 100%;
 }
   
@@ -58,12 +69,12 @@ input[type='range']::-webkit-slider-thumb {
     border-radius: 2px;
 }
 
-#volume-control {
+#volume {
     display: flex;
     justify-content: end;
     align-items: center;
 }
 
-#volume {
+#volume__slider {
     width: 100px;
 }

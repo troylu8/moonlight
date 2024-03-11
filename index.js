@@ -1,12 +1,7 @@
-const express = require('express');
-const path = require('path');
+const express = require("express");
 
 const app = express();
 
-app.use("*", express.static(path.resolve(__dirname, "./public")));
-
-app.get("*", (req, res) => {
-    console.log(req.url);
-})
+app.use(express.static("./public"));
 
 app.listen(5000);

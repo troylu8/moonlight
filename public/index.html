@@ -2,16 +2,22 @@
 
 <html>
     <head>
-        <link rel="stylesheet" href="css/play-div.css">
-        <link rel="stylesheet" href="css/playlists-div.css">
-        <link rel="stylesheet" href="css/options-div.css">
-        <link rel="stylesheet" href="css/main-div.css">
+        <link rel="stylesheet" href="css/play.css">
+        <link rel="stylesheet" href="css/playlists.css">
+        <link rel="stylesheet" href="css/options.css">
+        <link rel="stylesheet" href="css/main.css">
     </head>
 
     <body style="margin: none;">
 
         <nav id="options-div">
-            <button id="new">new</button>
+            <button id="new">
+                new
+                <div id="new-song-dropdown">
+                    <div id="upload-mp3"> upload file </div>
+                    <input id="paste-link" type="text" placeholder="paste link">
+                </div>
+            </button>
             <button id="settings">settings</button>
         </nav>
 
@@ -66,21 +72,28 @@
             <div id="main-control">
                 <div id="main-control__buttons">
                     <button id="prev">prev</button>
-                    <button id="play" onclick="togglePlay()">play</button>
+                    <button id="play">play</button>
                     <button id="next">next</button>
                 </div>
 
-                <input id="progress" type="range" min="0" value="50" max="100" />
+                <div id="progress">
+                    <p id="progress__passed"> 0:00 </p>
+                    <input id="progress__slider" type="range" min="0" value="50" max="100" />
+                    <p id="progress__total"> 3:00 </p>
+                </div>
             </div>
 
-            <div id="volume-control">
+            <div id="volume">
                 <button id="mute">mute</button>
-                <input id="volume" type="range" min="0" value="50" max="100" />
+                <input id="volume__slider" type="range" min="0" value="50" max="100" />
             </div>
         </div>
 
+        
+
     </body>
 
-    <script src="js/progress-color.js"></script>
-    <script src="js/play-song.js"></script>
+    <script src="js/openDropdown.js"></script>
+    <script src="js/sliderColor.js"></script>
+    <!-- <script src="js/playSong.js"></script> -->
 </html>

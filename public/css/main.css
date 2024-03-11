@@ -1,6 +1,6 @@
 #main {
-    background-color: lightgray;
-    position: absolute;
+    background-color: rgb(252, 232, 232);
+    position: fixed;
     left: var(--playlists-div-width);
     right: 0;
     top: 40px;
@@ -25,6 +25,7 @@ h1 {
 .song {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 .song__left {

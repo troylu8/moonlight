@@ -1,6 +1,6 @@
 
-setSliderColors(document.getElementById("progress"), "#FF0000", "#DEE2E6");
-setSliderColors(document.getElementById("volume"), "#FF0000", "#DEE2E6");
+setSliderColors(document.getElementById("progress__slider"), "#FF0000", "#DEE2E6");
+setSliderColors(document.getElementById("volume__slider"), "#FF0000", "#DEE2E6");
 
 function setSliderColors(slider, left, right) {
     slider.oninput = function() {

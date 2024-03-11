@@ -5,7 +5,8 @@
 #playlists-div {
     background-color: lightcoral;
 
-    position: absolute;
+    position: fixed;
+    z-index: 2;
     left: 0;
     top: 0;
     bottom: 65px;
@@ -30,6 +31,7 @@ h2 {
 .playlist {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 5px;
 }
 .playlist:hover {
