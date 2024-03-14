@@ -1,11 +1,13 @@
-#main {
+#main-div {
     background-color: rgb(252, 232, 232);
     position: fixed;
     left: var(--playlists-div-width);
-    right: 0;
-    top: 40px;
-    bottom: 65px;
+    right: var(--sidebar-div-width);
+    top: var(--options-div-height);
+    bottom: var(--play-div-height);
     padding: 15px;
+
+    transition: 0.5s;
 }
 
 h1 {
@@ -28,9 +30,16 @@ h1 {
     align-items: center;
 }
 
-.song__left {
+.song__left, .song__right {
     display: flex;
+    align-items: center;
+}
+.song__left {
     gap: 15px;
+}
+.song__right {
+    justify-content: end;
+    gap: 50px;
 }
 
 .song__play, .song__options {
@@ -44,11 +53,7 @@ h1 {
     font-weight: bold;
 }
 
-.song__right {
-    display: flex;
-    align-items: end;
-    gap: 50px;
-}
+
 
 .song__author {
     font-weight: 400;

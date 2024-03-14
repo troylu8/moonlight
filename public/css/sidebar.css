@@ -1,0 +1,13 @@
+#sidebar {
+    background-color: lightcoral;
+
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: var(--play-div-height);
+    width: 400px;
+
+    padding: 20px;
+
+    transition: 0.5s;
+}

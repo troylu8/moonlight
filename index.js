@@ -1,7 +1,22 @@
-const express = require("express");
+const {app, BrowserWindow} = require("electron");
 
-const app = express();
+const createWindow = () => {
+    const window = new BrowserWindow({
+        width: 1000,
+        height: 700,
+    })
 
-app.use(express.static("./public"));
+    window.webContents.openDevTools();
 
-app.listen(5000);
+    window.loadFile("public/index.html");
+}
+
+// app.whenReady().then(createWindow);
+
+
+const express = require('express');
+
+const server = express()
+    .use(express.static("./public"));
+
+server.listen(5000, () => console.log("listening"));

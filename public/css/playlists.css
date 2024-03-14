@@ -1,15 +1,12 @@
-:root {
-    --playlists-div-width: 200px;
-}
+
 
 #playlists-div {
     background-color: lightcoral;
 
     position: fixed;
-    z-index: 2;
     left: 0;
     top: 0;
-    bottom: 65px;
+    bottom: var(--play-div-height);
 
     width: calc(var(--playlists-div-width) - 2 * 20px);
     padding: 20px;
