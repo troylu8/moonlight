@@ -46,18 +46,18 @@ input[type='range'] {
     -webkit-appearance: none;
 }
 
-#progress {
+#seek {
     display: flex;
     align-items: center;
     width: 100%;
 }
 
-#progress__passed, #progress__total {
+#seek__passed, #seek__total {
     margin: 0;
 
 }
 
-#progress__slider {
+#seek__slider {
     width: 100%;
 }
   

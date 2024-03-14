@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="css/playlists.css">
         <link rel="stylesheet" href="css/options.css">
         <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/sidebar.css">
     </head>
 
     <body>
@@ -21,7 +22,7 @@
                     <input id="paste-link" type="text" placeholder="paste link">
                 </div>
             </button>
-            <button id="settings">settings</button>
+            <button id="settings-btn">settings</button>
         </nav>
 
         <div id="playlists-div">
@@ -64,12 +65,6 @@
                 </div>
             </nav>
         </main>
-
-
-        <div id="sidebar-div">
-            test
-        </div>
-
         
         <div id="play-div">
             <div id="info">
@@ -84,25 +79,54 @@
                     <button id="next">next</button>
                 </div>
 
-                <div id="progress">
-                    <p id="progress__passed"> 0:00 </p>
-                    <input id="progress__slider" type="range" min="0" value="50" max="100" />
-                    <p id="progress__total"> 3:00 </p>
+                <div id="seek">
+                    <p id="seek__passed"> 0:00 </p>
+                    <input id="seek__slider" class="slider" type="range" min="0" value="50" max="100" />
+                    <p id="seek__total"> 3:00 </p>
                 </div>
             </div>
 
             <div id="volume">
                 <button id="mute">mute</button>
-                <input id="volume__slider" type="range" min="0" value="50" max="100" />
+                <input id="volume__slider" class="slider" type="range" min="0" value="50" max="100" />
             </div>
         </div>
 
         
+        <div id="sidebar-div">
+            <div id="sidebar__content">
+                
+                <div id="song-settings">
+                    <div id="song-settings__metadata">
+                        <p> music.mp3 </p>
+                        <p> 123 mb </p>
+                    </div>
+                    
+                    <p>title</p>
+                    <input type="text">
+                    <p>artist</p>
+                    <input type="text">
 
+                    <p> volume </p>
+                    <input id="song-settings__volume-slider" class="slider" type="range" min="0" value="50" max="100" />
+                </div>
+
+                <div id="settings">
+                    
+                    <div>
+                        <input type="checkbox" id="show-logo">
+                        <label for="show-logo"> show logo </label>    
+                    </div>
+
+                    <p> total space used: <span>456 mb</span> </p>
+                </div>
+
+            </div>
+        </div>
     </body>
 
     <script src="js/toggleDropdown.js"></script>
     <script src="js/sliderColor.js"></script>
     <script src="js/togglePlay.js"></script>
-    <script src="js/toggleSidebar.js"></script>
+    <script src="js/sidebar.js"></script>
 </html>

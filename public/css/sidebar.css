@@ -1,13 +1,32 @@
-#sidebar {
+#sidebar-div {
     background-color: lightcoral;
 
     position: fixed;
     right: 0;
     top: 0;
     bottom: var(--play-div-height);
-    width: 400px;
-
-    padding: 20px;
+    width: var(--sidebar-div-width);
 
     transition: 0.5s;
+}
+
+#sidebar__content {
+    padding: 20px;
+}
+
+#song-settings {
+    display: none;
+    flex-direction: column;
+}
+
+#song-settings__metadata {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    white-space: nowrap;
+}
+
+#settings {
+    display: none;
+    flex-direction: column;
 }
