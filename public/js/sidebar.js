@@ -13,15 +13,15 @@ const toggleSidebar = () => {
 
 let currentContent = null;
 
-function setSidebarContent(elem) {
+function setSidebarContent(elem, toggle) {
     if (currentContent === elem) {
-        toggleSidebar();
+        if (toggle) toggleSidebar();
+        else        setSidebarOpen(true);
         console.log("toggle");
         return;
     }
 
     if (currentContent !== null) currentContent.style.display = "none";
-    
     
     currentContent = elem;
     currentContent.style.display = "flex";
@@ -29,10 +29,12 @@ function setSidebarContent(elem) {
     setSidebarOpen(true);
 }
 
-const songSettings = document.getElementById("song-settings");
-const settings = document.getElementById("settings");
+document.getElementById("sidebar__collapse").onclick = () => setSidebarOpen(false);
 
-document.getElementById("settings-btn").onclick = () => setSidebarContent(settings);
+const settings = document.getElementById("settings");
+const songSettings = document.getElementById("song-settings");
+
+document.getElementById("settings-btn").onclick = () => setSidebarContent(settings, true);
 
 const songSettingsBtns = document.getElementsByClassName("song__options");
 for (b of songSettingsBtns) {
