@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "electron": "^29.1.1",
-    "express": "^4.18.3"
+    "express": "^4.18.3",
+    "ytdl-core": "^4.11.5"
   }
 }

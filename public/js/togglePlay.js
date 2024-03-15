@@ -3,7 +3,7 @@ var path = document.location.pathname;
 var dirname = path.substring(path.indexOf('/')+1, path.lastIndexOf('/'));
 
 const audio = new Audio();
-let currentSong = dirname + "/resources/songs/summertime.mp3";
+let currentSong = dirname + "../resources/songs/summertime.mp3";
 
 
 function togglePlay(song) {

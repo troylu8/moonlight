@@ -1,5 +1,5 @@
 
-const input = document.getElementById("input");
+const input = document.getElementById("paste-link");
 
 input.addEventListener("keypress", async (e) => {
     if (e.key !== "Enter") return;
