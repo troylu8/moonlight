@@ -9,3 +9,10 @@ add.addEventListener("click", (e) => {
     dropdown.style.display = visible? "none" : "flex";
     visible = !visible;
 });
+
+document.body.addEventListener("mousedown", (e) => {
+    if (visible && !add.contains(e.target)) {
+        dropdown.style.display = "none";
+        visible = false;
+    }
+})

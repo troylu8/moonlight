@@ -36,22 +36,33 @@ const tracker = {
     total: 1
 };
 
+let count = 0; //TODO: remove this
+
+let destroy;
 async function download(id, cb) {
     const info = await ytdl.getInfo(id);
+    const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
     
-    const dlstream = ytdl(id, {quality: "highestaudio", filter: "audioonly"});
-    
-    dlstream.pipe(fs.createWriteStream(`./public/resources/songs/${cleanFileName(info.videoDetails.title)}.mp3`));
+    const path = `./public/resources/songs/${cleanFileName(info.videoDetails.title)} ${count++}.mp3`;
+
+    dlstream.pipe(fs.createWriteStream(path));
     dlstream.on("progress", (chunk, downloaded, total) => {
+        if (destroy) {
+            destroy(dlstream, path);
+            cb(500)
+        }
+
         tracker.downloaded = downloaded;
         tracker.total = total;
-   });
+    });
+
     dlstream.on("end", () => {
         tracker.downloaded = 0;
         tracker.total = 1;
 
-        cb();
-    })
+        cb(200);
+    });
+    
 }
 
 const express = require("express");
@@ -61,21 +72,40 @@ const server = express();
 server.use(cors());
 server.use(express.static("./public"));
 
+
 server.get("/getyt/:id", async (req, res) => {
     console.log(`${req.method} at ${req.url}`);
 
+    console.log("checking if video exists");
     if (!(await videoExists(req.params["id"]))) {
         res.status(404).end("video doesnt exist");
         return;
     }
+    console.log("beginning download");
     
-    download(req.params["id"], () => {
-        res.status(200).end("success");
+    download(req.params["id"], (status) => {
+        res.status(status).end();
     });
 })
 
 server.get("/loaded", (req, res) => {
     res.status(200).send("" + (tracker.downloaded / tracker.total));
+})
+server.get("/destroy", (req, res) => {
+    console.log(`${req.method} at ${req.url}`)
+
+    console.log("destroy queued");
+
+    destroy = (dlstream, path) => {
+        console.log("destroying ");
+        dlstream.destroy();
+        destroy = null;
+
+        fs.unlink(path, (err) => {if (err) throw err});
+
+        res.status(200).send("destroyed");
+    }
+
 })
 
 server.listen(5000, () => console.log("listening.."));

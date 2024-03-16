@@ -1,55 +1,82 @@
 console.log("V0BwILbJDOY");
 
-const input = document.getElementById("paste-link");
+const input = document.getElementById("paste-link__input");
+const button = document.getElementById("paste-link__btn");
 
-const loadingBar = document.getElementById("loading-bar");
+let loading = false;
 
-input.addEventListener("keypress", async (e) => {
-    if (e.key !== "Enter") return;
-    
-    if (!isValidLink(input.value)) {
+async function getyt(link) {
+    if (!isValidLink(link)) {
+        input.style.color = "red";
         console.log("invalid link");
         return;
     }
 
-    let loading = true;
-
+    loading = true;
+    button.innerText = "x";
     loadingBar.style.opacity = "1";
     setLoadingBar(0.05);
 
     const updateLoadingBar = setInterval( async () => {
-        if (!loading) return;
 
         const percent = await fetch("http://127.0.0.1:5000/loaded");
+        
+        if (!loading) return clearInterval(updateLoadingBar) // loading turned false while fetch response was on its way back
+        
         const n = Number(await percent.text())
         console.log("received " + n);
         setLoadingBar(Math.max(n, 0.05));
     }, 50); 
 
     console.log("starting getyt");
-    const res = await fetch("http://127.0.0.1:5000/getyt/" + getYTID(input.value));
-
-    loading = false;
-    clearInterval(updateLoadingBar);
+    const res = await fetch("http://127.0.0.1:5000/getyt/" + getYTID(link));
+    
+    if (res.status === 200) setLoadingBar(1);
+    stopLoadingBarUpdates();
+    button.innerText = "ent";
 
     console.log(await res.text());
+}
 
-    setLoadingBar(1);
+function stopLoadingBarUpdates() {
+    loading = false;
     setTimeout(() => {
         loadingBar.style.opacity = "0";
         setTimeout(() => setLoadingBar(0), 300);
     }, 500)
-})
+}
 
+async function destroy() {
+    button.innerText = "...";
+    const res = await fetch("http://127.0.0.1:5000/destroy");
+    console.log(res);
+    button.innerText = "ent";
+
+    stopLoadingBarUpdates();
+    loading = false;
+}
+
+button.onclick = () => {
+    if (loading) destroy();
+    else         getyt(input.value);
+}
+
+input.onkeydown = (e) => {
+    input.style.color = "black";
+    if (e.key !== "Enter") return;
+    getyt(input.value);
+}
+
+const loadingBar = document.getElementById("loading-bar");
 function setLoadingBar(percent) {
     loadingBar.style.width = percent * 100 + "%";
 }
-let percent = 0.5;
-document.getElementById("prev").onclick = () => setLoadingBar(percent -= 0.5);
-document.getElementById("next").onclick = async () => {
-    const percent = await fetch("http://127.0.0.1:5000/loaded");
-    console.log(await percent.json());
-}
+
+// document.getElementById("next").onclick = async () => {
+//     const percent = await fetch("http://127.0.0.1:5000/loaded");
+//     console.log(await percent.json());
+// }
+
 /** 
  * @param {string} input yt link 
  */

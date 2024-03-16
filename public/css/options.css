@@ -19,8 +19,10 @@
     transition: 0.5s;
 }
 
-#new {
+.options-btn {
+    background-color: lightblue;
     position: relative;
+    cursor: pointer;
 }
 
 #new-song-dropdown {    
@@ -30,17 +32,33 @@
 
     display: none;
     flex-direction: column;
+
+    background-color: lightgrey;
+    padding: 10px;
+
+    cursor: default;
 }
 
 #upload-mp3 {
     background-color: lightblue;
 }
 
+#paste-link {
+    display: flex;
+}
+#paste-link__button {
+    display: inline;
+}
+
 #loading-bar {
     background-color: rgb(70, 70, 255);
     
     width: 0%;
-    height: 10px;
+    height: 6px;
 
     transition: 0.2s;
+
+    position: absolute;
+    bottom: 0;
+    left: 0;
 }

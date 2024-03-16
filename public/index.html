@@ -15,15 +15,20 @@
     <body>
 
         <nav id="options-div">
-            <button id="new">
+            <div id="new" class="options-btn">
                 new
                 <div id="new-song-dropdown">
                     <div id="upload-mp3"> upload file </div>
-                    <input id="paste-link" type="text" placeholder="paste link">
+                
+                    <div id="paste-link">
+                        <input id="paste-link__input" type="text" placeholder="paste link" value="igS9v4r0NiA" >
+                        <button id="paste-link__btn"> ent </button>
+                    </div>
+
                     <div id="loading-bar"></div>
                 </div>
-            </button>
-            <button id="settings-btn">settings</button>
+            </div>
+            <div id="settings-btn" class="options-btn">settings</div>
         </nav>
 
         <div id="playlists-div">
@@ -132,5 +137,4 @@
     <script src="js/togglePlay.js"></script>
     <script src="js/sidebar.js"></script>
     <script src="js/newSong.js"></script>
-    <script src="js/test.js"></script>
 </html>
