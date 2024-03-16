@@ -1,2 +1,1 @@
-
-console.log(__dirname);
+console.log(1 / Infinity);

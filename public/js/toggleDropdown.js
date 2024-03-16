@@ -6,6 +6,6 @@ let visible = false;
 add.addEventListener("click", (e) => {
     if (e.target !== add) return;
     
-    dropdown.style.visibility = visible? "hidden" : "visible";
-    visible = !visible;   
+    dropdown.style.display = visible? "none" : "flex";
+    visible = !visible;
 });

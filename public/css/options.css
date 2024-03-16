@@ -23,19 +23,24 @@
     position: relative;
 }
 
-#new-song-dropdown {
-    visibility: hidden;
-    
+#new-song-dropdown {    
     position: absolute;
     top: 20px;
     right: 0;
 
-    
-
-    display: flex;
+    display: none;
     flex-direction: column;
 }
 
 #upload-mp3 {
     background-color: lightblue;
+}
+
+#loading-bar {
+    background-color: rgb(70, 70, 255);
+    
+    width: 0%;
+    height: 10px;
+
+    transition: 0.2s;
 }
