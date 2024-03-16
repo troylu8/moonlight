@@ -41,10 +41,16 @@ let count = 0; //TODO: remove this
 let destroy;
 async function download(id, cb) {
     const info = await ytdl.getInfo(id);
-    const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
-    
-    const path = `./public/resources/songs/${cleanFileName(info.videoDetails.title)} ${count++}.mp3`;
+    if (destroy) {      // destroy request comes in while getting info
+        destroy();
+        cb(500);
+        return;
+    }
 
+    const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
+
+    const path = `./public/resources/songs/${cleanFileName(info.videoDetails.title)} ${count++}.mp3`;
+    
     dlstream.pipe(fs.createWriteStream(path));
     dlstream.on("progress", (chunk, downloaded, total) => {
         if (destroy) {
@@ -97,9 +103,11 @@ server.get("/destroy", (req, res) => {
     console.log("destroy queued");
 
     destroy = (dlstream, path) => {
+        destroy = null;
+        if (!dlstream) return res.status(200).send("destroyed");
+
         console.log("destroying ");
         dlstream.destroy();
-        destroy = null;
 
         fs.unlink(path, (err) => {if (err) throw err});
 
