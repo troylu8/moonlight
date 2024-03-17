@@ -58,7 +58,7 @@ function getTimeDisplay(totalSeconds) {
     return minutes + ":" + seconds;
 }
 
-audio.addEventListener("canplay", () => { 
+audio.addEventListener("loadedmetadata", () => { 
     seek.max = Math.floor(audio.duration * 5);
     seekTotal.innerText = getTimeDisplay(audio.duration);
 
@@ -66,12 +66,17 @@ audio.addEventListener("canplay", () => {
 });
 
 audio.addEventListener("timeupdate", () => {
+    if (seek.dragging) return;
+
+    console.log("timeupdate called");
     seek.value = audio.currentTime * 5;
     seek.oninput(); // update slider color
     seekPassed.innerText = getTimeDisplay(audio.currentTime);
 })
 
-addSliderDragEvent(seek, () => {
+addSliderDragEvent(seek, () => {}); // init drag events to keep track of seek.dragging
+
+seek.addEventListener("mouseup", () => {
     console.log("drag to", getTimeDisplay(seek.value / 5));
     audio.currentTime = seek.value / 5;
     console.log("new current", audio.currentTime);
