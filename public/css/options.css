@@ -32,6 +32,7 @@
 
     display: none;
     flex-direction: column;
+    align-items: center;
 
     background-color: lightgrey;
     padding: 10px;
@@ -39,15 +40,16 @@
     cursor: default;
 }
 
-#upload-mp3 {
-    background-color: lightblue;
+#label {
+    background-color: rgb(70, 70, 255);
+    color: white;
+}
+#myfile {
+    display: none;
 }
 
 #paste-link {
     display: flex;
-}
-#paste-link__button {
-    display: inline;
 }
 
 #loading-bar {

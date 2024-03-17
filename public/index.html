@@ -18,11 +18,12 @@
             <div id="new" class="options-btn">
                 new
                 <div id="new-song-dropdown">
-                    <div id="upload-mp3"> upload file </div>
-                
+                    <label for="myfile" id="label">choose file</label>
+                    <input type="file" id="myfile" name="myfile">
+                    
                     <div id="paste-link">
                         <input id="paste-link__input" type="text" placeholder="paste link" value="igS9v4r0NiA" >
-                        <button id="paste-link__btn"> ent </button>
+                        <button id="paste-link__btn"> ent </button>    
                     </div>
 
                     <div id="loading-bar"></div>
@@ -87,7 +88,7 @@
 
                 <div id="seek">
                     <p id="seek__passed"> 0:00 </p>
-                    <input id="seek__slider" class="slider" type="range" min="0" value="50" max="100" />
+                    <input id="seek__slider" class="slider" type="range" min="0" value="50" max="300" />
                     <p id="seek__total"> 3:00 </p>
                 </div>
             </div>
@@ -133,8 +134,10 @@
     </body>
 
     <script src="js/toggleDropdown.js"></script>
-    <script src="js/sliderColor.js"></script>
-    <script src="js/togglePlay.js"></script>
     <script src="js/sidebar.js"></script>
     <script src="js/newSong.js"></script>
+
+    <!-- <script type="module" src="js/sliderColors.js"></script> -->
+    <script type="module" src="js/play.js"></script>
+    
 </html>

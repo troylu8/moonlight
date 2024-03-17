@@ -16,3 +16,8 @@ document.body.addEventListener("mousedown", (e) => {
         visible = false;
     }
 })
+
+const up = document.getElementById("myfile");
+up.onchange = (e) => {
+    console.log(up.value);
+}
