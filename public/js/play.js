@@ -76,8 +76,4 @@ audio.addEventListener("timeupdate", () => {
 
 addSliderDragEvent(seek, () => {}); // init drag events to keep track of seek.dragging
 
-seek.addEventListener("mouseup", () => {
-    console.log("drag to", getTimeDisplay(seek.value / 5));
-    audio.currentTime = seek.value / 5;
-    console.log("new current", audio.currentTime);
-})
+seek.addEventListener("mouseup", () => { audio.currentTime = seek.value / 5; });

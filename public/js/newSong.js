@@ -19,7 +19,7 @@ async function getyt(link) {
 
     const updateLoadingBar = setInterval( async () => {
 
-        const percent = await fetch("http://127.0.0.1:5000/loaded");
+        const percent = await fetch("http://127.0.0.1:5000/getyt/loaded");
         
         if (!loading) return clearInterval(updateLoadingBar) // loading turned false while fetch response was on its way back
         
@@ -29,7 +29,7 @@ async function getyt(link) {
     }, 50); 
 
     console.log("starting getyt");
-    const res = await fetch("http://127.0.0.1:5000/getyt/" + getYTID(link));
+    const res = await fetch("http://127.0.0.1:5000/getyt/link/" + getYTID(link));
     
     if (res.status === 200) setLoadingBar(1);
     stopLoadingBarUpdates();
@@ -48,7 +48,7 @@ function stopLoadingBarUpdates() {
 
 async function destroy() {
     button.innerText = "...";
-    const res = await fetch("http://127.0.0.1:5000/destroy");
+    const res = await fetch("http://127.0.0.1:5000/getyt/destroy");
     console.log(res);
     button.innerText = "ent";
 
@@ -73,7 +73,7 @@ function setLoadingBar(percent) {
 }
 
 // document.getElementById("next").onclick = async () => {
-//     const percent = await fetch("http://127.0.0.1:5000/loaded");
+//     const percent = await fetch("http://127.0.0.1:5000/getyt/loaded");
 //     console.log(await percent.json());
 // }
 
@@ -89,6 +89,13 @@ function isValidLink(input) {
 }
 
 /** 
- * @param {string} link yt link 
+ * @param {string} link yt li   nk 
  */
 function getYTID(link) { return link.slice(-11); }
+
+
+const uploadInput = document.getElementById("song-upload__input");
+const uploadSubmit = document.getElementById("song-upload__submit");
+uploadInput.addEventListener("change", () => {
+    uploadSubmit.click();
+})

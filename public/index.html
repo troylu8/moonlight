@@ -18,8 +18,11 @@
             <div id="new" class="options-btn">
                 new
                 <div id="new-song-dropdown">
-                    <label for="myfile" id="label">choose file</label>
-                    <input type="file" id="myfile" name="myfile">
+                    <form id="song-upload" action="/upload" method="post" enctype="multipart/form-data">
+                        <label id="song-upload__label" for="song-upload__input"> choose file </label>
+                        <input id="song-upload__input" type="file" name="song-file">
+                        <button id="song-upload__submit" type="submit">Upload</button>
+                    </form>
                     
                     <div id="paste-link">
                         <input id="paste-link__input" type="text" placeholder="paste link" value="igS9v4r0NiA" >

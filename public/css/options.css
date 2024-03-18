@@ -40,11 +40,12 @@
     cursor: default;
 }
 
-#label {
+
+#song-upload__label {
     background-color: rgb(70, 70, 255);
     color: white;
 }
-#myfile {
+#song-upload__input, #song-upload__submit {
     display: none;
 }
 
