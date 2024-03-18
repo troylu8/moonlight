@@ -28,7 +28,7 @@ let count = 0; //TODO: remove this
 let destroy;
 async function download(id, cb) {
     const info = await ytdl.getInfo(id);
-    // if (destroy) {      // destroy request comes in while getting info
+    // if (destroy) {      // destroy request comes in while getting info //TODO: remove this
     //     destroy();
     //     cb(500);
     //     return;
@@ -38,10 +38,12 @@ async function download(id, cb) {
 
     const path = `./public/resources/songs/${cleanFileName(info.videoDetails.title)} ${count++}.mp3`;
     
-    dlstream.pipe(fs.createWriteStream(path));
+    const writeStream = fs.createWriteStream(path);
+    dlstream.pipe(writeStream);
+
     dlstream.on("progress", (chunk, downloaded, total) => {
         if (destroy) {
-            destroy(dlstream, path);
+            destroy(dlstream, path, writeStream);
             cb(500)
         }
 
@@ -82,15 +84,14 @@ router.get("/destroy", (req, res) => {
 
     console.log("destroy queued");
 
-    destroy = (dlstream, path) => {
+    destroy = (dlstream, path, writeStream) => {
         destroy = null;
         if (!dlstream) return res.status(200).send("destroyed");
 
         console.log("calling stream.destroy()");
         dlstream.destroy();
-        
 
-        setTimeout(() => {
+        writeStream.end(() => {
             fs.unlink(path, (err) => {
                 if (err) {
                     res.status(500).send(err);
@@ -100,14 +101,11 @@ router.get("/destroy", (req, res) => {
                 
                 console.log("should be deleted?????");
                 
+                res.status(200).send("destroyed");
             });
-        }, 10000)
-        
-        res.status(200).send("destroyed");
+        });
 
     }
-
-    
 
 })
 module.exports = router;

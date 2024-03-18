@@ -89,7 +89,7 @@ function isValidLink(input) {
 }
 
 /** 
- * @param {string} link yt li   nk 
+ * @param {string} link yt link 
  */
 function getYTID(link) { return link.slice(-11); }
 
