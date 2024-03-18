@@ -11,6 +11,13 @@ async function getyt(link) {
         console.log("invalid link");
         return;
     }
+    const id = getYTID(link);
+
+    if ( !(await videoExists(id)) ) {
+        input.style.color = "red";
+        console.log("video doesnt exist");
+        return;
+    }
 
     loading = true;
     button.innerText = "x";
@@ -29,7 +36,7 @@ async function getyt(link) {
     }, 50); 
 
     console.log("starting getyt");
-    const res = await fetch("http://127.0.0.1:5000/getyt/link/" + getYTID(link));
+    const res = await fetch("http://127.0.0.1:5000/getyt/ytid/" + id);
     
     if (res.status === 200) setLoadingBar(1);
     stopLoadingBarUpdates();
@@ -76,6 +83,11 @@ function setLoadingBar(percent) {
 //     const percent = await fetch("http://127.0.0.1:5000/getyt/loaded");
 //     console.log(await percent.json());
 // }
+
+async function videoExists(id) {
+    const res = await fetch("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + id);
+    return res.status === 200; 
+}
 
 /** 
  * @param {string} input yt link 

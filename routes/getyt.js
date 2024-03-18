@@ -13,99 +13,96 @@ async function getQualityOptions(url) {
 function cleanFileName(str) {
     return str.replace(/[/\\?%*:|"<>]/g, '-')
 }
-async function videoExists(id) {
-    const res = await fetch("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + id);
-    return res.status === 200; 
-}
+
 
 const tracker = {
     downloaded: 0,
     total: 1
 };
 
-let count = 0; //TODO: remove this
+let c = 0; //TODO: remove this
 
-let destroy;
-async function download(id, cb) {
-    const info = await ytdl.getInfo(id);
-    // if (destroy) {      // destroy request comes in while getting info //TODO: remove this
-    //     destroy();
-    //     cb(500);
-    //     return;
-    // }
+class DownloadProcess {
 
-    const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
+    constructor(c) {
+        this.c = c;
+    }
 
-    const path = `./public/resources/songs/${cleanFileName(info.videoDetails.title)} ${count++}.mp3`;
+    async download(id, cb) {
+        const info = await ytdl.getInfo(id);
+        // if (this.destroy) return cb(500);      // destroy request comes in while getting info 
     
-    const writeStream = fs.createWriteStream(path);
-    dlstream.pipe(writeStream);
-
-    dlstream.on("progress", (chunk, downloaded, total) => {
-        if (destroy) {
-            destroy(dlstream, path, writeStream);
-            cb(500)
-        }
-
-        tracker.downloaded = downloaded;
-        tracker.total = total;
-    });
-
-    dlstream.on("end", () => {
+        const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
+    
+        const path = `./public/resources/songs/${cleanFileName(info.videoDetails.title)} ${c}.mp3`;
         
-        tracker.downloaded = 0;
-        tracker.total = 1;
-
-        cb(200);
-    });
-
+        const writeStream = fs.createWriteStream(path);
+        dlstream.pipe(writeStream);
+    
+        dlstream.on("progress", (chunk, downloaded, total) => {
+            if (this.destroy) {
+                this.destroy(dlstream, path, writeStream);
+                console.log("c " + this.c + " .destroy() called");
+                cb(500)
+            }
+    
+            tracker.downloaded = downloaded;
+            tracker.total = total;
+        });
+    
+        dlstream.on("end", () => {
+            
+            tracker.downloaded = 0;
+            tracker.total = 1;
+    
+            cb(200);
+        });
+    
+    }
+    
 }
 
-router.get("/link/:id", async (req, res) => {
+let currentDP;
+
+router.get("/ytid/:id", async (req, res) => {
+
+    // shouldnt continue unless after a destroy request
+
     console.log(`${req.method} at ${req.url}`);
 
-    console.log("checking if video exists");
-    if (!(await videoExists(req.params["id"]))) {
-        res.status(404).end("video doesnt exist");
-        return;
-    }
     console.log("beginning download");
-    
-    download(req.params["id"], (status) => {
+
+    currentDP = new DownloadProcess(c++);
+    currentDP.download(req.params["id"], (status) => {
         res.status(status).end();
     });
 })
 
 router.get("/loaded", (req, res) => {
+
+    // if we send a value back here to signify that were done loading, then
+    // we dont need to depend on the getyt request to decide when to stop sending loading requests.
+    
+    // that way, we can allow get requests to come back faster to prevent 
+    // breaking the getyt-destroy-getyt-destroy pattern
+    
     res.status(200).send("" + (tracker.downloaded / tracker.total));
 })
 router.get("/destroy", (req, res) => {
+
+    // shouldnt continue unless after a getyt request
+
     console.log(`${req.method} at ${req.url}`)
 
+    if (!currentDP) return;
+
     console.log("destroy queued");
-
-    destroy = (dlstream, path, writeStream) => {
-        destroy = null;
-        if (!dlstream) return res.status(200).send("destroyed");
-
-        console.log("calling stream.destroy()");
+    currentDP.destroy = (dlstream, path, writeStream) => {
         dlstream.destroy();
-
-        writeStream.end(() => {
-            fs.unlink(path, (err) => {
-                if (err) {
-                    res.status(500).send(err);
-                    throw err;
-                }
-                // else res.status(200).send("destroyed");
-                
-                console.log("should be deleted?????");
-                
-                res.status(200).send("destroyed");
-            });
-        });
-
+        writeStream.end(() => fs.unlink(path, () => {}));
     }
+
+    res.status(200).end();
 
 })
 module.exports = router;
