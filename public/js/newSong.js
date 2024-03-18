@@ -3,7 +3,10 @@ console.log("V0BwILbJDOY");
 const input = document.getElementById("paste-link__input");
 const button = document.getElementById("paste-link__btn");
 
-let loading = false;
+/** between dings from getyt and destroy, button is disabled */
+let enabled = true;
+/** determines whether button sends getyt or destroy, and stops loading bar  */
+let tracking = false;
 
 async function getyt(link) {
     if (!isValidLink(link)) {
@@ -11,61 +14,65 @@ async function getyt(link) {
         console.log("invalid link");
         return;
     }
-    const id = getYTID(link);
 
+    const id = getYTID(link);
     if ( !(await videoExists(id)) ) {
         input.style.color = "red";
         console.log("video doesnt exist");
         return;
     }
 
-    loading = true;
-    button.innerText = "x";
+    enabled = false;
+    button.innerText = "...";
+    tracking = true;
     loadingBar.style.opacity = "1";
     setLoadingBar(0.05);
 
     const updateLoadingBar = setInterval( async () => {
 
         const percent = await fetch("http://127.0.0.1:5000/getyt/loaded");
-        
-        if (!loading) return clearInterval(updateLoadingBar) // loading turned false while fetch response was on its way back
-        
-        const n = Number(await percent.text())
-        console.log("received " + n);
-        setLoadingBar(Math.max(n, 0.05));
-    }, 50); 
+                
+        if (!tracking || percent.status === 205) { // not tracking anymore
+            console.log(tracking);
+            button.innerText = "ent";
 
-    console.log("starting getyt");
-    const res = await fetch("http://127.0.0.1:5000/getyt/ytid/" + id);
-    
-    if (res.status === 200) setLoadingBar(1);
-    stopLoadingBarUpdates();
-    button.innerText = "ent";
+            if (tracking) setLoadingBar(1); // if finished loading without cancelling
+            setTimeout(() => {
+                loadingBar.style.opacity = "0";
+                setTimeout(() => setLoadingBar(0), 300); // wait for transition time before resetting loading bar
+            }, 200);
+            
+            tracking = false;
+            return clearInterval(updateLoadingBar);
+        }
 
-    console.log(await res.text());
-}
+        const progress = Number(await percent.text());
+        console.log("received " + progress);
+        setLoadingBar(Math.max(progress, 0.05));
+    }, 50);
 
-function stopLoadingBarUpdates() {
-    loading = false;
-    setTimeout(() => {
-        loadingBar.style.opacity = "0";
-        setTimeout(() => setLoadingBar(0), 300);
-    }, 500)
+    await fetch("http://127.0.0.1:5000/getyt/ytid/" + id);
+
+    enabled = true;
+    button.innerText = "x";
 }
 
 async function destroy() {
+    enabled = false;
     button.innerText = "...";
-    const res = await fetch("http://127.0.0.1:5000/getyt/destroy");
-    console.log(res);
-    button.innerText = "ent";
+    tracking = false;
 
-    stopLoadingBarUpdates();
-    loading = false;
+    await fetch("http://127.0.0.1:5000/getyt/destroy");
+
+    enabled = true;
+    button.innerText = "ent";
 }
 
 button.onclick = () => {
-    if (loading) destroy();
-    else         getyt(input.value);
+    if (!enabled) return console.log("can't click now!");
+
+    if (tracking) destroy();
+    else          getyt(input.value);
 }
 
 input.onkeydown = (e) => {

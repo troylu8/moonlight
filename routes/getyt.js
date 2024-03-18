@@ -17,7 +17,13 @@ function cleanFileName(str) {
 
 const tracker = {
     downloaded: 0,
-    total: 1
+    total: 1,
+    tracking: false,
+    reset: function () {
+        this.downloaded = 0;
+        this.total = 1;
+        this.tracking = false;
+    }
 };
 
 let c = 0; //TODO: remove this
@@ -43,7 +49,6 @@ class DownloadProcess {
             if (this.destroy) {
                 this.destroy(dlstream, path, writeStream);
                 console.log("c " + this.c + " .destroy() called");
-                cb(500)
             }
     
             tracker.downloaded = downloaded;
@@ -51,11 +56,7 @@ class DownloadProcess {
         });
     
         dlstream.on("end", () => {
-            
-            tracker.downloaded = 0;
-            tracker.total = 1;
-    
-            cb(200);
+            tracker.reset();
         });
     
     }
@@ -64,37 +65,36 @@ class DownloadProcess {
 
 let currentDP;
 
+// shouldnt continue unless after a destroy request
 router.get("/ytid/:id", async (req, res) => {
-
-    // shouldnt continue unless after a destroy request
+    
+    if (tracker.tracking) return;
 
     console.log(`${req.method} at ${req.url}`);
 
-    console.log("beginning download");
-
     currentDP = new DownloadProcess(c++);
-    currentDP.download(req.params["id"], (status) => {
-        res.status(status).end();
-    });
+    currentDP.download(req.params["id"]);
+
+    tracker.tracking = true;
+    res.status(200).end("started download");
 })
 
 router.get("/loaded", (req, res) => {
 
-    // if we send a value back here to signify that were done loading, then
-    // we dont need to depend on the getyt request to decide when to stop sending loading requests.
-    
-    // that way, we can allow get requests to come back faster to prevent 
-    // breaking the getyt-destroy-getyt-destroy pattern
-    
-    res.status(200).send("" + (tracker.downloaded / tracker.total));
+    if (tracker.tracking === false) 
+        res.status(205).send("not tracking");
+    else 
+        res.status(200).send("" + (tracker.downloaded / tracker.total));
 })
-router.get("/destroy", (req, res) => {
 
-    // shouldnt continue unless after a getyt request
+// shouldnt continue unless after a getyt request
+router.get("/destroy", (req, res) => {
 
     console.log(`${req.method} at ${req.url}`)
 
     if (!currentDP) return;
+
+    tracker.tracking = false;
 
     console.log("destroy queued");
     currentDP.destroy = (dlstream, path, writeStream) => {
@@ -102,7 +102,7 @@ router.get("/destroy", (req, res) => {
         writeStream.end(() => fs.unlink(path, () => {}));
     }
 
-    res.status(200).end();
+    res.status(200).end("destroy queued");
 
 })
 module.exports = router;
