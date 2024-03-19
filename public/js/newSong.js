@@ -15,15 +15,16 @@ async function getyt(link) {
         return;
     }
 
+    setButtonEnabled(false, "...");
+
     const id = getYTID(link);
     if ( !(await videoExists(id)) ) {
         input.style.color = "red";
         console.log("video doesnt exist");
+        setButtonEnabled(true, "ent");
         return;
     }
-
-    enabled = false;
-    button.innerText = "...";
+ 
     tracking = true;
     loadingBar.style.opacity = "1";
     setLoadingBar(0.05);
@@ -32,17 +33,12 @@ async function getyt(link) {
 
         const percent = await fetch("http://127.0.0.1:5000/getyt/loaded");
                 
-        if (!tracking || percent.status === 205) { // not tracking anymore
-            console.log(tracking);
-            button.innerText = "ent";
-
-            if (tracking) setLoadingBar(1); // if finished loading without cancelling
+        if (!tracking) { 
             setTimeout(() => {
                 loadingBar.style.opacity = "0";
                 setTimeout(() => setLoadingBar(0), 300); // wait for transition time before resetting loading bar
             }, 200);
             
-            tracking = false;
             return clearInterval(updateLoadingBar);
         }
 
@@ -51,21 +47,38 @@ async function getyt(link) {
         setLoadingBar(Math.max(progress, 0.05));
     }, 50);
 
-    await fetch("http://127.0.0.1:5000/getyt/ytid/" + id);
+    
+    await fetch("http://127.0.0.1:5000/getyt/ready");
 
-    enabled = true;
-    button.innerText = "x";
+    setButtonEnabled(true, "x");
+    
+
+    const res = await fetch("http://127.0.0.1:5000/getyt/ytid/" + id);
+    console.log("download ended");
+
+    if (res.status === 200) { // video downloaded fully
+        setLoadingBar(1);
+        tracking = false;
+        button.innerText = "ent";
+    }
+
+}
+
+document.getElementById("next").onclick = () => {
+    console.log("button enabled", enabled);
+}
+
+function setButtonEnabled(val, text) {
+    enabled = val;
+    button.innerText = text;
 }
 
 async function destroy() {
-    enabled = false;
-    button.innerText = "...";
     tracking = false;
 
+    setButtonEnabled(false, "...");
     await fetch("http://127.0.0.1:5000/getyt/destroy");
-
-    enabled = true;
-    button.innerText = "ent";
+    setButtonEnabled(true, "ent");
 }
 
 button.onclick = () => {

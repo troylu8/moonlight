@@ -18,29 +18,27 @@ function cleanFileName(str) {
 const tracker = {
     downloaded: 0,
     total: 1,
-    tracking: false,
     reset: function () {
         this.downloaded = 0;
         this.total = 1;
-        this.tracking = false;
     }
 };
 
-let c = 0; //TODO: remove this
+let dpCount = 0;
 
 class DownloadProcess {
 
-    constructor(c) {
-        this.c = c;
+    constructor (id) {
+        this.dpID = id;
     }
 
     async download(id, cb) {
         const info = await ytdl.getInfo(id);
-        // if (this.destroy) return cb(500);      // destroy request comes in while getting info 
+        if (this.destroy) return cb(500);      // destroy request comes in while getting info 
     
         const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
     
-        const path = `./public/resources/songs/${cleanFileName(info.videoDetails.title)} ${c}.mp3`;
+        const path = `./public/resources/songs/${cleanFileName(info.videoDetails.title)} ${this.dpID}.mp3`;
         
         const writeStream = fs.createWriteStream(path);
         dlstream.pipe(writeStream);
@@ -48,7 +46,7 @@ class DownloadProcess {
         dlstream.on("progress", (chunk, downloaded, total) => {
             if (this.destroy) {
                 this.destroy(dlstream, path, writeStream);
-                console.log("c " + this.c + " .destroy() called");
+                cb(500);
             }
     
             tracker.downloaded = downloaded;
@@ -57,6 +55,7 @@ class DownloadProcess {
     
         dlstream.on("end", () => {
             tracker.reset();
+            cb(200);
         });
     
     }
@@ -65,26 +64,31 @@ class DownloadProcess {
 
 let currentDP;
 
-// shouldnt continue unless after a destroy request
-router.get("/ytid/:id", async (req, res) => {
-    
-    if (tracker.tracking) return;
+router.get("/ready", (req, res) => {
 
     console.log(`${req.method} at ${req.url}`);
 
-    currentDP = new DownloadProcess(c++);
-    currentDP.download(req.params["id"]);
+    currentDP = new DownloadProcess(dpCount++);
 
-    tracker.tracking = true;
-    res.status(200).end("started download");
+    res.status(200).end("new download process ready");
+})
+
+// shouldnt continue unless after a destroy request
+router.get("/ytid/:id", (req, res) => {
+    
+    console.log(`${req.method} at ${req.url}`);
+
+    currentDP.download(req.params["id"], (status) => {
+        res.status(status).end("download ended");
+    });
 })
 
 router.get("/loaded", (req, res) => {
 
-    if (tracker.tracking === false) 
-        res.status(205).send("not tracking");
-    else 
-        res.status(200).send("" + (tracker.downloaded / tracker.total));
+    // if (tracker.tracking === false) 
+    //     res.status(205).send("not tracking");
+    // else 
+    res.status(200).send("" + (tracker.downloaded / tracker.total));
 })
 
 // shouldnt continue unless after a getyt request
@@ -92,9 +96,7 @@ router.get("/destroy", (req, res) => {
 
     console.log(`${req.method} at ${req.url}`)
 
-    if (!currentDP) return;
-
-    tracker.tracking = false;
+    if (!currentDP) return res.status(500).end("no process running");
 
     console.log("destroy queued");
     currentDP.destroy = (dlstream, path, writeStream) => {
