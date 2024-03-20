@@ -39,3 +39,5 @@ const router = express.Router();
 router.get("/song/:id", (req, res) => {
     res.send(songs.get(req.params["id"]));
 })
+
+module.exports = router;

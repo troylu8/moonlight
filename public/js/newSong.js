@@ -1,3 +1,4 @@
+
 console.log("V0BwILbJDOY");
 
 const input = document.getElementById("paste-link__input");
@@ -5,8 +6,8 @@ const button = document.getElementById("paste-link__btn");
 
 /** between dings from getyt and destroy, button is disabled */
 let enabled = true;
-/** determines whether button sends getyt or destroy, and stops loading bar  */
-let tracking = false;
+/** if true, loading bar active. determines whether button sends getyt or destroy, and stops loading bar  */
+export let tracking = false;
 
 async function getyt(link) {
     if (!isValidLink(link)) {

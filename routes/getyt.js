@@ -33,13 +33,15 @@ class DownloadProcess {
     }
 
     async download(id, cb) {
+        if (this.destroy) return cb(500);      // destroy request comes in before getyt request
+
         const info = await ytdl.getInfo(id);
+
         if (this.destroy) return cb(500);      // destroy request comes in while getting info 
-    
-        const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
-    
+        
         const path = `./public/resources/songs/${cleanFileName(info.videoDetails.title)} ${this.dpID}.mp3`;
         
+        const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
         const writeStream = fs.createWriteStream(path);
         dlstream.pipe(writeStream);
     
