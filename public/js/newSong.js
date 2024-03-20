@@ -126,8 +126,10 @@ function isValidLink(input) {
 function getYTID(link) { return link.slice(-11); }
 
 
-const uploadInput = document.getElementById("song-upload__input");
-const uploadSubmit = document.getElementById("song-upload__submit");
-uploadInput.addEventListener("change", () => {
-    uploadSubmit.click();
-})
+
+document.getElementById("song-upload").addEventListener("click", async () => {
+    const res = await fetch("http://127.0.0.1:5000/upload", {method: "POST"});
+    if (res.status === 200) {
+        console.log(await res.text());
+    }
+});

@@ -41,12 +41,10 @@
 }
 
 
-#song-upload__label {
+#song-upload {
     background-color: rgb(70, 70, 255);
+    border: none;
     color: white;
-}
-#song-upload__input, #song-upload__submit {
-    display: none;
 }
 
 #paste-link {
