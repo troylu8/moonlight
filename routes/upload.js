@@ -15,7 +15,6 @@ router.post('/:playlistID', async (req, res) => {
     
     console.log(data.filePaths);
     
-    
     if (data.filePaths.length === 0) 
         return res.status(204).end();
 

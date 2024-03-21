@@ -1,7 +1,7 @@
 const express = require('express');
 const ytdl = require('ytdl-core');
 const fs = require("fs");
-const musicdata = require("./data.js");
+const userdata = require("./userdata.js");
 
 const router = express.Router();
 
@@ -89,15 +89,15 @@ router.get("/ytid/:playlistID/:id", async (req, res) => {
     console.log(`${req.method} at ${req.url}`);
 
     currentDP.download(req.params["id"], async (status, song) => {
-        
-        song.playlistIDs.push(Number(req.params["playlistID"]));
 
+        song.playlistIDs = [ Number(req.params["playlistID"]) ];
         song.size = (await fs.promises.stat("./public/resources/songs/" + song.filename)).size;
 
         res.status(status).json(JSON.stringify(song));
 
         // load song after so that playlistIDs is still an array when stringified
-        musicdata.loadSong(song); 
+        userdata.loadSong(song);
+        
     });
 })
 
