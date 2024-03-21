@@ -5,10 +5,12 @@ for (const s of document.getElementsByClassName("slider")) {
 }
 
 function setSliderColors(slider, left, right) {
-    slider.oninput = function() {
-        this.style.background = `linear-gradient(to right, ${left} 0%, ${left} ${(this.value-this.min)/(this.max-this.min)*100}%, ${right} ${(this.value-this.min)/(this.max-this.min)*100}%, ${right} 100%)`
+    slider.updateSliderColors = function () {
+        this.style.background = `linear-gradient(to right, ${left} 0%, ${left} ${(this.value-this.min)/(this.max-this.min)*100}%, ${right} ${(this.value-this.min)/(this.max-this.min)*100}%, ${right} 100%)`;
     }
-    slider.oninput();
+    slider.oninput = slider.updateSliderColors;
+
+    slider.updateSliderColors();
 }
 
 export function addSliderDragEvent(slider, ondrag) {

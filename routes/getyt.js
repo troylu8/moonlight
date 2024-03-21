@@ -92,7 +92,7 @@ router.get("/ytid/:playlistID/:id", async (req, res) => {
         
         song.playlistIDs.push(Number(req.params["playlistID"]));
 
-        song.size = (await fs.promises.stat("./public/resources/songs/" + song.filename)).size / (1024 * 1000);
+        song.size = (await fs.promises.stat("./public/resources/songs/" + song.filename)).size;
 
         res.status(status).json(JSON.stringify(song));
 

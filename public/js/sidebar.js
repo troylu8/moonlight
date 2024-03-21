@@ -52,10 +52,9 @@ const artist = document.getElementById("song-settings__artist");
 
 export function openSongOptions(song) {
     filename.innerText = song.filename;
-    size.innerText = song.size ?? "?";
+    size.innerText = (song.size / (1024 * 1000)).toFixed(2) + " MB";
     title.value = song.title;
     artist.value = song.artist;
-
 
     setSidebarContent(songSettings);
 }
