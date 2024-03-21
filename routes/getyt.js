@@ -34,11 +34,17 @@ class DownloadProcess {
     }
 
     async download(id, cb) {
-        if (this.destroy) return cb(500);      // destroy request comes in before getyt request
+        if (this.destroy) { // destroy request comes in before getyt request
+            tracker.reset();
+            return cb(500);
+        }      
 
         const info = await ytdl.getInfo(id);
 
-        if (this.destroy) return cb(500);      // destroy request comes in while getting info 
+        if (this.destroy) { // destroy request comes in while getting info 
+            tracker.reset();
+            return cb(500);
+        }      
         
         const filename = `${cleanFileName(info.videoDetails.title)} ${this.dpID}.mp3`
         const path = "./public/resources/songs/" + filename;
@@ -49,6 +55,7 @@ class DownloadProcess {
     
         dlstream.on("progress", (chunk, downloaded, total) => {
             if (this.destroy) {
+                tracker.reset();
                 this.destroy(dlstream, path, writeStream);
                 cb(500);
             }
@@ -58,14 +65,14 @@ class DownloadProcess {
         });
     
         dlstream.on("end", () => {
-            tracker.reset();
             cb(200, {
                 "id": new Date().getTime(),
                 "filename": filename,
                 "title": info.videoDetails.title,
                 "artist": info.videoDetails.author.name,
-                "playlistIDs": [ ]
+                "size": tracker.total
             });
+            tracker.reset();
         });
     
     }
@@ -89,11 +96,13 @@ router.get("/ytid/:playlistID/:id", async (req, res) => {
     console.log(`${req.method} at ${req.url}`);
 
     currentDP.download(req.params["id"], async (status, song) => {
+        if (status !== 200) return res.status(status).end();
+
+        console.log("song was successful???");
 
         song.playlistIDs = [ Number(req.params["playlistID"]) ];
-        song.size = (await fs.promises.stat("./public/resources/songs/" + song.filename)).size;
-
-        res.status(status).json(JSON.stringify(song));
+        
+        res.status(200).json(JSON.stringify(song));
 
         // load song after so that playlistIDs is still an array when stringified
         userdata.loadSong(song);

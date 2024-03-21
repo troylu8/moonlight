@@ -1,15 +1,32 @@
 {
     "playlistNames": {
-        "1": "a new name!!",
-        "2": "another playlist",
-        "3": "last playlist"
+        "1": "first playlist?",
+        "2": "asdasd"
     },
     "songs": {
-        "5": {
-            "filename": "555filename.mp3",
-            "title": "5th title",
-            "artist": "5th artist",
-            "playlistIDs": [2, 3]
+        "1711029694086": {
+            "filename": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】 0.mp3",
+            "title": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】",
+            "artist": "Will Stetson",
+            "playlistIDs": [1]
+        },
+        "1711030141378": {
+            "filename": "Daily Dose of Zy0x - #27 - -did everyone forget about genshin anime-- 1.mp3",
+            "title": "Daily Dose of Zy0x | #27 - \"did everyone forget about genshin anime?\"",
+            "artist": "Daily Dose of Zy0x",
+            "playlistIDs": [2]
+        },
+        "1711031250840": {
+            "filename": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】 0.mp3",
+            "title": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】",
+            "artist": "Will Stetson",
+            "playlistIDs": [1]
+        },
+        "1711031343988": {
+            "filename": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】 0.mp3",
+            "title": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】",
+            "artist": "Will Stetson",
+            "playlistIDs": [1]
         }
     }
 }

@@ -9,8 +9,11 @@ const playlists = new Map();
 fs.readFile("./public/resources/userdata.json",  "utf8", (err, data) => {
     userdata = JSON.parse(data);
 
-    for (const id in userdata.songs) 
+    for (const id in userdata.songs) {
+        console.log(id);
         loadSong(userdata.songs[id])
+    }
+        
 })
 
 /** convert playlistIDs to set, add to playlists, add to userdata.songs */
@@ -21,8 +24,11 @@ function loadSong(song) {
         playlists.set(pid, (playlists.get(pid) ?? new Set()).add(song));       
     }
 
-    if (userdata.songs[song.id] === undefined)
+    if (song.id !== undefined) {
+        console.log(song.id + " is being written");
         userdata.songs[song.id] = song;
+    }
+        
 }
 
 function deleteSong(id) {
@@ -35,20 +41,18 @@ function deleteSong(id) {
 }
 
 function saveData(cb) {
-    console.log(userdata);
+    
     fs.writeFile(
         "./public/resources/userdata.json", 
         JSON.stringify(userdata, 
             (key, value) => {
                 if (value instanceof Set) return Array.from(value);
-                if (key === "id") return undefined;
+                if (key === "id" || key === "size") return undefined;
                 return value;
-            } 
+            },
+            4
         ),
-        (err) => {
-            console.log("saved");
-            cb();
-        }
+        (err) => { cb(); }
     )
 }
 
@@ -59,5 +63,12 @@ const router = express.Router();
 router.put("/save", (req, res) => {
     saveData(() => res.end("saved"));
 });
+router.get("/test-print-playlists", (req, res) => {
+    for (const entry of playlists) {
+        console.log(userdata.playlistNames["" + entry[0]]);
+        console.log(Array.from(entry[1]).map(e => e.title));
+    }
+    res.end("printed")
+})
 
 module.exports = {loadSong, deleteSong, saveData, router};
