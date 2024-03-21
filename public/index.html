@@ -105,17 +105,14 @@
                 
                 <div id="song-settings">
                     <div id="song-settings__metadata">
-                        <p> music.mp3 </p>
-                        <p> 123 mb </p>
+                        <p id="song-settings__filename"> music.mp3 </p>
+                        <p id="song-settings__size"> 123 mb </p>
                     </div>
                     
                     <p>title</p>
-                    <input type="text">
+                    <input id="song-settings__title" type="text">
                     <p>artist</p>
-                    <input type="text">
-
-                    <p> volume </p>
-                    <input id="song-settings__volume-slider" class="slider" type="range" min="0" value="50" max="100" />
+                    <input id="song-settings__artist" type="text">
                 </div>
 
                 <div id="settings">
@@ -135,11 +132,12 @@
         </div>
     </body>
 
-    <script type="module" src="js/toggleDropdown.js"></script>
-    <script src="js/sidebar.js"></script>
-    <script type="module" src="js/newSong.js"></script>
+    <script src="js/temp.js"></script>
 
-    <!-- <script type="module" src="js/sliderColors.js"></script> -->
-    <script type="module" src="js/play.js"></script>
+    <script src="js/toggleDropdown.js" type="module"></script>
+    <script src="js/sidebar.js" type="module"></script>
+    <script src="js/newSong.js" type="module"></script>
+
+    <script src="js/play.js" type="module"></script>
     
 </html>

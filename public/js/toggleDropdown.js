@@ -20,11 +20,11 @@ document.body.addEventListener("mousedown", (e) => {
     }
 })
 
-function open() {
+export function open() {
     dropdown.style.display = "flex";
     visible = true;
 }
-function close() {
+export function close() {
     dropdown.style.display = "none";
     visible = false;
 }

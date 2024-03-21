@@ -1,7 +1,30 @@
 {
-    "playlists": {},
-
+    "playlistNames": {
+        "1": "a new name!!",
+        "2": "another playlist",
+        "3": "last playlist"
+    },
     "songs": {
-        
+        "5": {
+            "filename": "555filename.mp3",
+            "title": "5th title",
+            "artist": "5th artist",
+            "playlistIDs": [2, 3],
+            "id": 5
+        },
+        "6": {
+            "filename": "555filename.mp3",
+            "title": "5th title",
+            "artist": "5th artist",
+            "playlistIDs": [2, 3],
+            "id": 6
+        },
+        "1710982607375": {
+            "id": 1710982607375,
+            "filename": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】 0.mp3",
+            "title": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】",
+            "artist": "Will Stetson",
+            "playlistIDs": [1]
+        }
     }
 }

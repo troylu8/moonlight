@@ -27,12 +27,6 @@ function togglePlay(song) {
 
 document.getElementById("play").onclick = () => togglePlay();
 
-
-document.getElementById("prev").onclick = () => {
-    fetch("http://127.0.0.1:5000/newfile/somesuffix", 
-          {method:"POST"}).then(res => console.log("woaw"));
-};
-
 const volume = document.getElementById("volume__slider");
 
 addSliderDragEvent(volume, () => {

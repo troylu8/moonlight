@@ -37,9 +37,25 @@ const songSettings = document.getElementById("song-settings");
 document.getElementById("settings-btn").onclick = () => setSidebarContent(settings, true);
 
 const songSettingsBtns = document.getElementsByClassName("song__options");
-for (b of songSettingsBtns) {
+for (const b of songSettingsBtns) {
     b.onclick = () => {
         // update song settings to current song
         setSidebarContent(songSettings);
     }
+}
+
+const filename = document.getElementById("song-settings__filename");
+const size = document.getElementById("song-settings__size");
+const title = document.getElementById("song-settings__title");
+const artist = document.getElementById("song-settings__artist");
+
+
+export function openSongOptions(song) {
+    filename.innerText = song.filename;
+    size.innerText = song.size ?? "?";
+    title.value = song.title;
+    artist.value = song.artist;
+
+
+    setSidebarContent(songSettings);
 }

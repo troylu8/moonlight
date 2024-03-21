@@ -1,3 +1,5 @@
+import * as dropdown from "./toggleDropdown.js"
+import * as sidebar from "./sidebar.js"
 
 console.log("V0BwILbJDOY");
 
@@ -8,6 +10,8 @@ const button = document.getElementById("paste-link__btn");
 let enabled = true;
 /** if true, loading bar active. determines whether button sends getyt or destroy, and stops loading bar  */
 export let tracking = false;
+
+let updateLoadingBarID;
 
 async function getyt(link) {
     if (!isValidLink(link)) {
@@ -30,18 +34,9 @@ async function getyt(link) {
     loadingBar.style.opacity = "1";
     setLoadingBar(0.05);
 
-    const updateLoadingBar = setInterval( async () => {
+    updateLoadingBarID = setInterval( async () => {
 
         const percent = await fetch("http://127.0.0.1:5000/getyt/loaded");
-                
-        if (!tracking) { 
-            setTimeout(() => {
-                loadingBar.style.opacity = "0";
-                setTimeout(() => setLoadingBar(0), 300); // wait for transition time before resetting loading bar
-            }, 200);
-            
-            return clearInterval(updateLoadingBar);
-        }
 
         const progress = Number(await percent.text());
         console.log("received " + progress);
@@ -54,19 +49,33 @@ async function getyt(link) {
     setButtonEnabled(true, "x");
     
 
-    const res = await fetch("http://127.0.0.1:5000/getyt/ytid/" + id);
+    const res = await fetch("http://127.0.0.1:5000/getyt/ytid/1/" + id);
     console.log("download ended");
 
     if (res.status === 200) { // video downloaded fully
         setLoadingBar(1);
-        tracking = false;
+        stopLoading(true);
         button.innerText = "ent";
+
+        const song = JSON.parse(await res.json());
+        
+        // open sidebar to song 
+        sidebar.openSongOptions(song);
     }
 
 }
 
-document.getElementById("next").onclick = () => {
-    console.log("button enabled", enabled);
+function stopLoading(closeDropdown) {
+    tracking = false;
+    setTimeout(() => {
+        loadingBar.style.opacity = "0";
+        setTimeout(() => {  // wait for transition time before resetting loading bar
+            setLoadingBar(0);
+            if (closeDropdown) dropdown.close();
+        }, 300);
+    }, 200);
+    
+    return clearInterval(updateLoadingBarID);
 }
 
 function setButtonEnabled(val, text) {
@@ -75,7 +84,7 @@ function setButtonEnabled(val, text) {
 }
 
 async function destroy() {
-    tracking = false;
+    stopLoading(false);
 
     setButtonEnabled(false, "...");
     await fetch("http://127.0.0.1:5000/getyt/destroy");
@@ -100,11 +109,6 @@ function setLoadingBar(percent) {
     loadingBar.style.width = percent * 100 + "%";
 }
 
-// document.getElementById("next").onclick = async () => {
-//     const percent = await fetch("http://127.0.0.1:5000/getyt/loaded");
-//     console.log(await percent.json());
-// }
-
 async function videoExists(id) {
     const res = await fetch("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + id);
     return res.status === 200; 
@@ -127,10 +131,11 @@ function isValidLink(input) {
 function getYTID(link) { return link.slice(-11); }
 
 
-
 document.getElementById("song-upload").addEventListener("click", async () => {
-    const res = await fetch("http://127.0.0.1:5000/upload", {method: "POST"});
+    const res = await fetch("http://127.0.0.1:5000/upload/1/", {method: "POST"});
     if (res.status === 200) {
         console.log(await res.text());
+
+        dropdown.close();
     }
 });

@@ -1,6 +1,7 @@
 const express = require('express');
 const ytdl = require('ytdl-core');
 const fs = require("fs");
+const musicdata = require("./data.js");
 
 const router = express.Router();
 
@@ -39,7 +40,8 @@ class DownloadProcess {
 
         if (this.destroy) return cb(500);      // destroy request comes in while getting info 
         
-        const path = `./public/resources/songs/${cleanFileName(info.videoDetails.title)} ${this.dpID}.mp3`;
+        const filename = `${cleanFileName(info.videoDetails.title)} ${this.dpID}.mp3`
+        const path = "./public/resources/songs/" + filename;
         
         const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
         const writeStream = fs.createWriteStream(path);
@@ -57,7 +59,13 @@ class DownloadProcess {
     
         dlstream.on("end", () => {
             tracker.reset();
-            cb(200);
+            cb(200, {
+                "id": new Date().getTime(),
+                "filename": filename,
+                "title": info.videoDetails.title,
+                "artist": info.videoDetails.author.name,
+                "playlistIDs": [ ]
+            });
         });
     
     }
@@ -76,12 +84,20 @@ router.get("/ready", (req, res) => {
 })
 
 // shouldnt continue unless after a destroy request
-router.get("/ytid/:id", (req, res) => {
+router.get("/ytid/:playlistID/:id", async (req, res) => {
     
     console.log(`${req.method} at ${req.url}`);
 
-    currentDP.download(req.params["id"], (status) => {
-        res.status(status).end("download ended");
+    currentDP.download(req.params["id"], async (status, song) => {
+        
+        song.playlistIDs.push(Number(req.params["playlistID"]));
+
+        song.size = (await fs.promises.stat("./public/resources/songs/" + song.filename)).size / (1024 * 1000);
+
+        res.status(status).json(JSON.stringify(song));
+
+        // load song after so that playlistIDs is still an array when stringified
+        musicdata.loadSong(song); 
     });
 })
 

@@ -1,7 +1,6 @@
 
 
-const sliders = document.getElementsByClassName("slider");
-for (const s of sliders) {
+for (const s of document.getElementsByClassName("slider")) {
     setSliderColors(s, "#FF0000", "#DEE2E6");
 }
 
