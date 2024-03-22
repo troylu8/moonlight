@@ -2,12 +2,13 @@ let open = false;
 
 const setSidebarOpen = (val) => {
     if (open === val) return;
-    document.body.style.setProperty("--sidebar-div-width", val? "350px" : "0");
+    console.log("changing");
+    document.body.style.setProperty("--sidebar-div-width", val? "350px" : "0px");
     open = val;
 }
 const toggleSidebar = () => {
+    console.log("sidebar is " + open);
     setSidebarOpen(!open);
-    console.log("toggle");
 };
 
 
@@ -17,7 +18,6 @@ function setSidebarContent(elem, toggle) {
     if (currentContent === elem) {
         if (toggle) toggleSidebar();
         else        setSidebarOpen(true);
-        console.log("toggle");
         return;
     }
 

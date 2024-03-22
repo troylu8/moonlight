@@ -9,7 +9,9 @@
             "filename": "cinnamons evening cinema summertime Official Music Video.wav",
             "title": "cinnamons evening cinema summertime Official Music Video",
             "artist": "uploaded by you",
-            "playlistIDs": [1],
+            "playlistIDs": [
+                1
+            ],
             "duration": 251.80370833333333
         },
         "ytigS9v4r0NiA": {
@@ -17,7 +19,9 @@
             "title": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】",
             "artist": "Will Stetson",
             "duration": "187",
-            "playlistIDs": [2]
+            "playlistIDs": [
+                2
+            ]
         }
     }
 }

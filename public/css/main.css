@@ -15,7 +15,7 @@ h1 {
 }
 
 .playlist__group {
-    display: flex;
+    display: none;
     flex-direction: column;
     overflow-y: auto;
     overflow-x: hidden;
@@ -36,6 +36,7 @@ h1 {
 }
 .song__left {
     gap: 15px;
+    overflow: hidden;
 }
 .song__right {
     justify-content: end;
@@ -51,10 +52,13 @@ h1 {
 
 .song__title {
     font-weight: bold;
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
 }
 
 
 
-.song__author {
+.song__artist {
     font-weight: 400;
 }

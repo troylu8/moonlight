@@ -5,10 +5,13 @@ const audio = new Audio();
 
 let currentFilename = "short.mp3";
 
-export function togglePlay(filename) {
-    if (audio.src === "" && filename === undefined) return;
+const title = document.getElementById("info__title");
+const artist = document.getElementById("info__artist");
 
-    filename = filename ?? currentFilename;
+export function togglePlay(song) {
+    if (audio.src === "" && song === undefined) return;
+
+    const filename = song ? song.filename : currentFilename;
     // if unpaused and same song, pause
     if (!audio.paused && filename === currentFilename) return audio.pause();
     
@@ -19,6 +22,10 @@ export function togglePlay(filename) {
     //TODO: WHEN USING ELECTRON, USE ./ INSTEAD OF ../
     audio.src = "../resources/songs/" + encodeURIComponent(filename);
     currentFilename = filename;
+
+    title.innerText = song.title;
+    artist.innerText = song.artist;
+
     audio.play();
 }
 

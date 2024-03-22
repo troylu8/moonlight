@@ -1,11 +1,12 @@
 #sidebar-div {
+
     background-color: lightcoral;
 
     position: fixed;
-    right: 0;
+    right:  calc(var(--sidebar-div-width) - 350px); 
     top: 0;
     bottom: var(--play-div-height);
-    width: var(--sidebar-div-width);
+    width: 350px;
 
     transition: 0.5s;
 }

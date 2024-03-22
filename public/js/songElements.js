@@ -8,7 +8,7 @@ export function createSongElem(song, playlistGroupElem) {
     const songElem = createElement("div", "song", song.id);
     songElem.innerHTML = 
        `<div class="song__left">
-            <div class="song__title"> ${song.title} <span class="song__author"> ${song.artist} </span> </div>    
+            <div class="song__title"> ${song.title} <span class="song__artist"> ${song.artist} </span> </div>    
         </div>
 
         <div class="song__right">
@@ -23,7 +23,7 @@ export function createSongElem(song, playlistGroupElem) {
     song__options.innerText = "...";
     songElem.lastChild.appendChild(song__options);
 
-    song__play.addEventListener("click", () => play.togglePlay(song.filename));
+    song__play.addEventListener("click", () => play.togglePlay(song));
     song__options.addEventListener("click", () => sidebar.openSongOptions(song));
 
     playlistGroupElem.appendChild(songElem);

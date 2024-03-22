@@ -17,12 +17,16 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    text-wrap: nowrap;
+    overflow: hidden;
 
     gap: 5px;
 }
 
-#info__title, #info__author {
+#info__title, #info__artist {
     margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #main-control {
