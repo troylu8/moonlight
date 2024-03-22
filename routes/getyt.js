@@ -34,17 +34,11 @@ class DownloadProcess {
     }
 
     async download(id, cb) {
-        if (this.destroy) { // destroy request comes in before getyt request
-            tracker.reset();
-            return cb(500);
-        }      
+        if (this.destroy) return cb(500); // destroy request comes in before getyt request
 
         const info = await ytdl.getInfo(id);
 
-        if (this.destroy) { // destroy request comes in while getting info 
-            tracker.reset();
-            return cb(500);
-        }      
+        if (this.destroy) return cb(500);  // destroy request comes in while getting info 
         
         const filename = `${cleanFileName(info.videoDetails.title)} ${this.dpID}.mp3`
         const path = "./public/resources/songs/" + filename;

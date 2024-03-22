@@ -61,8 +61,6 @@ async function getyt(link) {
 
         const song = JSON.parse(await res.json());
         userdata.loadSong(song);
-
-        // open sidebar to song 
         sidebar.openSongOptions(song);
     }
 
@@ -145,8 +143,9 @@ function getYTID(link) { return link.slice(-11); }
 document.getElementById("song-upload").addEventListener("click", async () => {
     const res = await fetch("http://localhost:5000/upload/1/", {method: "POST"});
     if (res.status === 200) {
-        console.log(await res.text());
+        const song = JSON.parse(await res.json());
 
-        dropdown.close();
+        userdata.loadSong(song);
+        sidebar.openSongOptions(song);
     }
 });

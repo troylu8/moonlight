@@ -2,5 +2,42 @@
     "playlistNames": {
         "1": "my playlist name"
     },
-    "songs": {}
+    "songs": {
+        "1711076533064": {
+            "filename": "cinnamons evening cinema summertime Official Music Video.wav",
+            "title": "cinnamons evening cinema summertime Official Music Video",
+            "artist": "uploaded by you",
+            "playlistIDs": [
+                1
+            ],
+            "duration": 251.80370833333333
+        },
+        "1711076550653": {
+            "filename": "cinnamons  evening cinema  summertime Official Music Video.mp3",
+            "title": "cinnamons  evening cinema  summertime Official Music Video",
+            "artist": "uploaded by you",
+            "playlistIDs": [
+                1
+            ],
+            "duration": 251.832
+        },
+        "1711076559146": {
+            "filename": "cinnamons evening cinema summertime Official Music Video.wav",
+            "title": "cinnamons evening cinema summertime Official Music Video",
+            "artist": "uploaded by you",
+            "playlistIDs": [
+                1
+            ],
+            "duration": 251.80370833333333
+        },
+        "1711076564637": {
+            "filename": "cinnamons  evening cinema  summertime Official Music Video.mp3",
+            "title": "cinnamons  evening cinema  summertime Official Music Video",
+            "artist": "uploaded by you",
+            "playlistIDs": [
+                1
+            ],
+            "duration": 251.832
+        }
+    }
 }
