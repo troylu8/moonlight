@@ -11,8 +11,8 @@ router.get("/read-userdata", (req, res) => {
     })
 })
 
-router.delete("/:path", (req, res) => {
-    fs.unlink(join(dirname(__dirname), req.params["path"]), () => res.end());
+router.delete("/:songFilename", (req, res) => {
+    fs.unlink(join(dirname(__dirname), "public/resources/songs" , req.params["songFilename"]), () => res.end());
 })
 
 router.use("/save-userdata", express.text())

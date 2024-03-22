@@ -4,21 +4,24 @@ export let data;
 
 // playlistid -> set of songs
 const playlists = new Map();
-const playlistElems = new Map();
+
 
 async function fetchUserdata() {
     const res = await fetch("http://localhost:5000/files/read-userdata");
     data = await res.json();
 
-    for (const pid in data.playlistNames) {
+    for (let pid in data.playlistNames) {
         playlists.set(Number(pid), new Set());
-        playlistElems.set(Number(pid), document.getElementById(pid));
+        songElements.createPlaylistElems(Number(pid), data.playlistNames[pid]);
+        songElements.playlistGroupElems.set(Number(pid), document.getElementById("group " + pid));
     }
+    console.log(songElements.playlistGroupElems);
 
     for (const id in data.songs) {
-        console.log(id);
         loadSong(data.songs[id])
     }
+
+    songElements.setActivePlaylist(1);
 }
 fetchUserdata();
 
@@ -38,7 +41,8 @@ export function loadSong(song) {
 
 export function addToPlaylist(song, playlistID) {
     playlists.get(playlistID).add(song);
-    songElements.createSongElem(song, playlistElems.get(playlistID));
+    
+    songElements.createSongElem(song, songElements.playlistGroupElems.get(playlistID));
 }
 
 export async function deleteSong(id) {
@@ -49,7 +53,7 @@ export async function deleteSong(id) {
 
     delete data.songs[id];
 
-    await fetch("")//TODO:
+    await fetch("http://localhost:5000/files/" + song.filename)
 }
 
 export async function saveData(cb) {

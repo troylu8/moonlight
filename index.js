@@ -9,7 +9,7 @@ const createWindow = () => {
         height: 700,
     })
 
-    window.webContents.openDevTools();
+    // window.webContents.openDevTools();
 
     window.loadFile("public/index.html");
 }

@@ -1,6 +1,8 @@
 import * as sidebar from "./sidebar.js"
 import * as play from "./play.js"
 
+export const playlistGroupElems = new Map();
+
 export function createSongElem(song, playlistGroupElem) {
 
     const songElem = createElement("div", "song", song.id);
@@ -25,6 +27,36 @@ export function createSongElem(song, playlistGroupElem) {
     song__options.addEventListener("click", () => sidebar.openSongOptions(song));
 
     playlistGroupElem.appendChild(songElem);
+}
+
+const mainDiv = document.getElementById("main-div");
+const playlistsNav = document.getElementById("playlists-nav");
+
+/** adds entry to playlist nav, and creates playlist__group */
+export function createPlaylistElems(playlistID, playlistName) {
+    const playlist__group = createElement("nav", "playlist__group");
+    playlist__group.id = "group " + playlistID;
+    mainDiv.appendChild(playlist__group);
+
+    const playlist = createElement("div", "playlist");
+    playlist.id = "li " + playlistID;
+    playlist.addEventListener("click", () => setActivePlaylist(playlistID));
+    playlist.innerHTML = `<div class="playlist__title"> ${playlistName} </div>`;
+    
+    const playlist__options = createElement("button", "playlist__options");
+    playlist__options.innerText = "...";
+    // add event listener
+    playlist.appendChild(playlist__options);
+
+    playlistsNav.appendChild(playlist);
+}
+
+let activePlaylistGroup;
+
+export function setActivePlaylist(playlistID) {
+    if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
+    activePlaylistGroup = playlistGroupElems.get(playlistID);
+    activePlaylistGroup.style.display = "flex";
 }
 
 function createElement(tagName, ...classes) {

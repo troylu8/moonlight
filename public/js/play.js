@@ -16,6 +16,7 @@ export function togglePlay(filename) {
     if (filename === currentFilename) return audio.play();
 
     // setting a new audio.src will reset seek to beginning
+    //TODO: WHEN USING ELECTRON, USE ./ INSTEAD OF ../
     audio.src = "../resources/songs/" + encodeURIComponent(filename);
     currentFilename = filename;
     audio.play();

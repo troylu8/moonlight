@@ -19,7 +19,6 @@ const tracker = {
     downloaded: 0,
     total: 1,
     reset: function () {
-        console.log("reset tracker");
         this.downloaded = 0;
         this.total = 1;
     }
