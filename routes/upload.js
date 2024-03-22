@@ -26,7 +26,7 @@ router.post('/:playlistID', async (req, res) => {
         {
             "id": new Date().getTime(),
             "filename": filename,
-            "title": filename.replace(/\.[^/.]+$/, ""),
+            "title": filename.replace(/\.[^\/.]+$/, ""),
             "artist": "??",
             "playlistIDs": [ req.params["playlistID"] ]
         }

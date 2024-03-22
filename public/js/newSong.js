@@ -1,5 +1,6 @@
 import * as dropdown from "./toggleDropdown.js"
 import * as sidebar from "./sidebar.js"
+import * as userdata from "./userdata.js";
 
 console.log("V0BwILbJDOY");
 
@@ -14,20 +15,20 @@ export let tracking = false;
 let updateLoadingBarID;
 
 async function getyt(link) {
-    if (!isValidLink(link)) {
-        input.style.color = "red";
-        console.log("invalid link");
-        return;
-    }
+    if (!isValidLink(link)) 
+        return showErrorMsg("invalid link");
 
     setButtonEnabled(false, "...");
 
     const id = getYTID(link);
     if ( !(await videoExists(id)) ) {
-        input.style.color = "red";
-        console.log("video doesnt exist");
-        setButtonEnabled(true, "ent");
-        return;
+        showErrorMsg("video doesnt exist");
+        return setButtonEnabled(true, "ent");
+    }
+
+    if ( userdata.data.songs[id] !== undefined ) {
+        showErrorMsg("yt video already downloaded");
+        return setButtonEnabled(true, "ent");
     }
  
     tracking = true;
@@ -36,7 +37,7 @@ async function getyt(link) {
 
     updateLoadingBarID = setInterval( async () => {
 
-        const percent = await fetch("http://127.0.0.1:5000/getyt/loaded");
+        const percent = await fetch("http://localhost:5000/getyt/loaded");
 
         const progress = Number(await percent.text());
         console.log("received " + progress);
@@ -44,12 +45,12 @@ async function getyt(link) {
     }, 50);
 
     
-    await fetch("http://127.0.0.1:5000/getyt/ready");
+    await fetch("http://localhost:5000/getyt/ready");
 
     setButtonEnabled(true, "x");
     
 
-    const res = await fetch("http://127.0.0.1:5000/getyt/ytid/1/" + id);
+    const res = await fetch("http://localhost:5000/getyt/ytid/1/" + id);
     console.log("download ended");
 
     if (res.status === 200) { // video downloaded fully
@@ -58,11 +59,17 @@ async function getyt(link) {
         button.innerText = "ent";
 
         const song = JSON.parse(await res.json());
-        
+        userdata.loadSong(song);
+
         // open sidebar to song 
         sidebar.openSongOptions(song);
     }
 
+}
+
+function showErrorMsg(msg) {
+    input.style.color = "red";
+    console.log(msg);
 }
 
 function stopLoading(closeDropdown) {
@@ -87,7 +94,7 @@ async function destroy() {
     stopLoading(false);
 
     setButtonEnabled(false, "...");
-    await fetch("http://127.0.0.1:5000/getyt/destroy");
+    await fetch("http://localhost:5000/getyt/destroy");
     setButtonEnabled(true, "ent");
 }
 
@@ -132,7 +139,7 @@ function getYTID(link) { return link.slice(-11); }
 
 
 document.getElementById("song-upload").addEventListener("click", async () => {
-    const res = await fetch("http://127.0.0.1:5000/upload/1/", {method: "POST"});
+    const res = await fetch("http://localhost:5000/upload/1/", {method: "POST"});
     if (res.status === 200) {
         console.log(await res.text());
 

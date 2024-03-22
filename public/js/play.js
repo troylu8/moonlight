@@ -4,22 +4,24 @@ var path = document.location.pathname;
 var dirname = path.substring(path.indexOf('/')+1, path.lastIndexOf('/'));
 
 const audio = new Audio();
-let currentSong = dirname + "../resources/songs/short.mp3";
+let currentSongPath = dirname + "../resources/songs/short.mp3";
 
 
-function togglePlay(song) {
-    if ((song === undefined ||  song === currentSong) && !audio.paused) {
-        audio.pause();
-        return;
+function togglePlay(filename) {
+    let path;
+    if (!audio.paused) {
+        if (filename === undefined) return audio.pause();
+        path = "../resources/songs/" + filename;
+        if (path === currentSongPath) return audio.pause();
     }
 
-    const toBePlayed = song ?? currentSong;
+    const toBePlayed = path ?? currentSongPath;
     console.log("now playing " + toBePlayed);
 
     // setting a new audio.src will reset seek to beginning
     if (toBePlayed != audio.src) {
         audio.src = toBePlayed;
-        currentSong = audio.src;
+        currentSongPath = audio.src;
     }
     
     audio.play();

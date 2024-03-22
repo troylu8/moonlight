@@ -21,6 +21,6 @@ server.use(cors());
 server.use(express.static("./public"));
 server.use("/getyt", require("./routes/getyt.js"));
 server.use("/upload", require("./routes/upload.js"));
-server.use("/userdata", require("./routes/userdata.js").router);
+server.use("/files", require("./routes/files.js"));
 
 server.listen(5000, () => console.log("listening.."));

@@ -1,7 +1,6 @@
 const express = require('express');
 const ytdl = require('ytdl-core');
 const fs = require("fs");
-const userdata = require("./userdata.js");
 
 const router = express.Router();
 
@@ -66,7 +65,7 @@ class DownloadProcess {
     
         dlstream.on("end", () => {
             cb(200, {
-                "id": new Date().getTime(),
+                "id": "yt" + id,
                 "filename": filename,
                 "title": info.videoDetails.title,
                 "artist": info.videoDetails.author.name,
@@ -98,14 +97,9 @@ router.get("/ytid/:playlistID/:id", async (req, res) => {
     currentDP.download(req.params["id"], async (status, song) => {
         if (status !== 200) return res.status(status).end();
 
-        console.log("song was successful???");
-
         song.playlistIDs = [ Number(req.params["playlistID"]) ];
         
         res.status(200).json(JSON.stringify(song));
-
-        // load song after so that playlistIDs is still an array when stringified
-        userdata.loadSong(song);
         
     });
 })
