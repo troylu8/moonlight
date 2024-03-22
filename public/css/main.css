@@ -50,15 +50,14 @@ h1 {
     visibility: visible;
 }
 
-.song__title {
-    font-weight: bold;
+.song__title, .song__artist {
     overflow: hidden;
     text-wrap: nowrap;
     text-overflow: ellipsis;
 }
-
-
-
+.song__title {
+    font-weight: bold;
+}
 .song__artist {
     font-weight: 400;
 }

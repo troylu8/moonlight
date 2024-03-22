@@ -20,8 +20,9 @@ async function getyt(link) {
 
     const id = getYTID(link);
 
-    if ( userdata.data.songs["yt" + id] !== undefined ) 
-        return showErrorMsg("yt video already downloaded");
+    //TODO: enable this
+    // if ( userdata.data.songs["yt" + id] !== undefined ) 
+    //     return showErrorMsg("yt video already downloaded");
 
     setButtonEnabled(false, "...");
     
@@ -51,7 +52,7 @@ async function getyt(link) {
     setButtonEnabled(true, "x");
     
 
-    const res = await fetch("http://localhost:5000/getyt/ytid/1/" + id);
+    const res = await fetch(`http://localhost:5000/getyt/ytid/${userdata.data.currentPlaylistID}/` + id);
     console.log("download ended");
 
     if (res.status === 200) { // video downloaded fully
@@ -61,7 +62,6 @@ async function getyt(link) {
 
         const song = JSON.parse(await res.json());
         userdata.loadSong(song);
-        songSettings.openSongOptions(song);
     }
 
 
@@ -141,11 +141,10 @@ function getYTID(link) { return link.slice(-11); }
 
 
 document.getElementById("song-upload").addEventListener("click", async () => {
-    const res = await fetch("http://localhost:5000/upload/1/", {method: "POST"});
+    const res = await fetch(`http://localhost:5000/upload/${userdata.data.currentPlaylistID}/`, {method: "POST"});
     if (res.status === 200) {
         const song = JSON.parse(await res.json());
 
         userdata.loadSong(song);
-        songSettings.openSongOptions(song);
     }
 });

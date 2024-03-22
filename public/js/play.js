@@ -1,5 +1,6 @@
 import { addSliderDragEvent } from "./sliders.js";
 import { getTimeDisplay } from "./songElements.js";
+import { data } from "./userdata.js";
 
 const audio = new Audio();
 
@@ -8,27 +9,28 @@ export let currentlyPlaying = null;
 export const titleElem = document.getElementById("info__title");
 export const artistElem = document.getElementById("info__artist");
 
-export function togglePlay(song) {
-
-    if (audio.src === "" && song === undefined) return;
-
-    song = song ?? currentlyPlaying;
-    
-    // if unpaused and same song, pause
-    if (!audio.paused && song === currentlyPlaying) return audio.pause();
-    
-    //if paused and same song, play
-    if (song === currentlyPlaying) return audio.play();
-
-    // setting a new audio.src will reset seek to beginning
+/** set a new currently playing song, will reset seek to beginning */
+export function setSong(song) {
     //TODO: WHEN USING ELECTRON, USE ./ INSTEAD OF ../
     audio.src = "../resources/songs/" + encodeURIComponent(song.filename);
     currentlyPlaying = song;
 
     titleElem.innerText = song.title;
     artistElem.innerText = song.artist;
+    
+    data.currentSongID = song.id;
+    console.log("set currentsongid to " + data.currentSongID);
+}
 
-    audio.play();
+export function togglePlay(song) {
+    if (song === undefined || song === currentlyPlaying) {
+        if (audio.paused)   audio.play();
+        else                audio.pause();
+    }
+    else {
+        setSong(song);
+        audio.play();
+    }   
 }
 
 document.getElementById("play").onclick = () => togglePlay();
@@ -58,8 +60,6 @@ audio.addEventListener("loadedmetadata", () => {
     seek.updateSliderColors(); 
     seek.max = Math.floor(audio.duration * 5);
     seekTotal.innerText = getTimeDisplay(audio.duration);
-
-    console.log("new max", seek.max);
 });
 
 audio.addEventListener("timeupdate", () => {

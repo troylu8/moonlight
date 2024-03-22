@@ -64,7 +64,7 @@ class DownloadProcess {
                 "title": info.videoDetails.title,
                 "artist": info.videoDetails.author.name,
                 "size": tracker.total,
-                "duration": info.videoDetails.lengthSeconds
+                "duration": Number(info.videoDetails.lengthSeconds)
             });
             tracker.reset();
         });

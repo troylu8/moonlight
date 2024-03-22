@@ -1,24 +1,48 @@
 {
+    "currentSongID": "ytV0BwILbJDOY",
+    "currentPlaylistID": 2,
     "playlistNames": {
         "1": "my playlist name",
         "2": "another playlist!!!",
         "3": "empty??"
     },
     "songs": {
-        "1711076533064": {
-            "filename": "cinnamons evening cinema summertime Official Music Video.wav",
-            "title": "cinnamons evening cinema summertime Official Music Video",
-            "artist": "uploaded by you",
-            "playlistIDs": [
-                1
-            ],
-            "duration": 251.80370833333333
-        },
         "ytigS9v4r0NiA": {
             "filename": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】 0.mp3",
-            "title": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】",
+            "title": "asdasd",
+            "artist": "some muasdasd",
+            "size": 2963880,
+            "duration": 187,
+            "playlistIDs": [
+                1
+            ]
+        },
+        "ytV0BwILbJDOY": {
+            "filename": "Daily Dose of Zy0x - #27 - -did everyone forget about genshin anime-- 0.mp3",
+            "title": "is it really shaft",
+            "artist": "asdlkjasdkjadoioasdijlkkkkawdklj",
+            "size": 18008743,
+            "duration": 1232,
+            "playlistIDs": [
+                1
+            ]
+        },
+        "ytuZdnPgDaOpk": {
+            "filename": "稲葉曇『余裕欲』Vo. nagiβ & カゼヒキβ 0.mp3",
+            "title": "i changed the titlsade here",
+            "artist": "稲葉曇",
+            "size": 2770590,
+            "duration": 175,
+            "playlistIDs": [
+                2
+            ]
+        },
+        "yt4LrX2NCVCcI": {
+            "filename": "Bling-Bang-Bang-Born (English Cover)「MASHLE S2 OP」【Will Stetson】 0.mp3",
+            "title": "no i have no idea",
             "artist": "Will Stetson",
-            "duration": "187",
+            "size": 2827429,
+            "duration": 169,
             "playlistIDs": [
                 2
             ]

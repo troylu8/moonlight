@@ -1,32 +1,43 @@
 import * as songSettings from "./songSettings.js"
 import * as play from "./play.js"
+import { data } from "./userdata.js"
 
 export const playlistGroupElems = new Map();
 
-export function createSongElem(song, playlistGroupElem) {
+export function createSongEntry(song, playlistGroupElem) {
 
-    const songElem = createElement("div", "song", song.id);
-    songElem.innerHTML = 
-       `<div class="song__left">
-            <div class="song__title"> ${song.title} <span class="song__artist"> ${song.artist} </span> </div>    
-        </div>
+    const songEntry = createElement("div", "song");
+    songEntry.innerHTML = 
+       `<div class="song__left"></div>
 
         <div class="song__right">
             <div class="song__duration"> ${getTimeDisplay(song.duration)} </div>
         </div>`
     
-    const song__play = createElement("button", "song__play");
-    song__play.innerText = "p";
-    songElem.firstChild.insertBefore(song__play, songElem.firstChild.firstChild);
+    const song__title = createElement("span", "song__title-" + song.id);
+    song__title.innerText = song.title;
+    songEntry.firstChild.appendChild(song__title);
+
+    const song__artist = createElement("span", "song__artist-" + song.id);
+    song__artist.innerText = song.artist;
+    songEntry.firstChild.appendChild(song__artist);    
 
     const song__options = createElement("button", "song__options");
     song__options.innerText = "...";
-    songElem.lastChild.appendChild(song__options);
+    songEntry.lastChild.appendChild(song__options);
+
+    const song__play = createElement("button", "song__play");    
+    song__play.innerText = "p";
+    songEntry.firstChild.insertBefore(song__play, song__title);
 
     song__play.addEventListener("click", () => play.togglePlay(song));
-    song__options.addEventListener("click", () => songSettings.openSongOptions(song));
+    song__options.addEventListener("click", () => 
+        songSettings.openSongSettings(song, song__title, song__artist)
+    )
 
-    playlistGroupElem.appendChild(songElem);
+    playlistGroupElem.appendChild(songEntry);
+
+    return [songEntry, song__title, song__artist];
 }
 
 const mainDiv = document.getElementById("main-div");
@@ -52,8 +63,15 @@ export function createPlaylistElems(playlistID, playlistName) {
 }
 
 let activePlaylistGroup;
+const playlistHeader = document.getElementById("playlist-header");
 
-export function setActivePlaylist(playlistID) {
+export function setActivePlaylist(playlistID, init) {
+    if (data.currentPlaylistID === playlistID && !init) return;
+
+    data.currentPlaylistID = playlistID;
+    playlistHeader.innerText = data.playlistNames[playlistID];
+    songSettings.updateSongEntries();
+
     if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
     activePlaylistGroup = playlistGroupElems.get(playlistID);
     activePlaylistGroup.style.display = "flex";

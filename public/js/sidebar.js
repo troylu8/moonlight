@@ -1,3 +1,5 @@
+import { updateSongEntries, songSettings } from "./songSettings.js";
+
 export let open = false;
 
 export const setSidebarOpen = (val) => {
@@ -9,10 +11,16 @@ export const toggleSidebar = () => {
     setSidebarOpen(!open);
 };
 
+const settings = document.getElementById("settings");
+document.getElementById("settings-btn").onclick = () => setSidebarContent(settings, true);
+
 
 let currentContent = null;
 
 export function setSidebarContent(elem, toggle) {
+    // if switching away from songsettings or to different song, update song entries of song we were just editing
+    if (currentContent === songSettings) updateSongEntries();
+
     if (currentContent === elem) {
         if (toggle) toggleSidebar();
         else        setSidebarOpen(true);

@@ -1,21 +1,20 @@
 import * as sidebar from "./sidebar.js";
-import { currentlyPlaying, titleElem, artistElem } from "./play.js";
-
-const settings = document.getElementById("settings");
-document.getElementById("settings-btn").onclick = () => sidebar.setSidebarContent(settings, true);
+import { currentlyPlaying, titleElem as playingTitleElem, artistElem as playingArtistElem } from "./play.js";
 
 
-const songSettings = document.getElementById("song-settings");
+
+export const songSettings = document.getElementById("song-settings");
 
 const filename = document.getElementById("song-settings__filename");
 const size = document.getElementById("song-settings__size");
 const titleInput = document.getElementById("song-settings__title");
 const artistInput = document.getElementById("song-settings__artist");
 
-let currentlyEditing = null;
+let currentlyEditing;
+let allEntriesUpdated = true; 
 
-export function openSongOptions(song) {
-    if (song === currentlyEditing) sidebar.setSidebarOpen(false);
+export function openSongSettings(song, song__title, song__artist) {
+    if (song === currentlyEditing) return sidebar.setSidebarOpen(false);
 
     currentlyEditing = song;
 
@@ -24,14 +23,42 @@ export function openSongOptions(song) {
     titleInput.value = song.title;
     artistInput.value = song.artist;
 
+    // using oninput instead of addEventListener to override past event handlers
+    titleInput.oninput = () => {
+        allEntriesUpdated = false;
+    
+        currentlyEditing.title = titleInput.value;
+    
+        if (currentlyPlaying === currentlyEditing) 
+            playingTitleElem.innerText = titleInput.value;
+        song__title.innerText = titleInput.value;
+    }
+    artistInput.oninput = () => {
+        allEntriesUpdated = false;
+    
+        currentlyEditing.artist = artistInput.value;
+    
+        if (currentlyPlaying === currentlyEditing) 
+            playingArtistElem.innerText = artistInput.value;
+        song__artist.innerText = artistInput.value;
+    }
+
     sidebar.setSidebarContent(songSettings);
 }
 
-const songElemTitle = document.getElementById("song " + currentlyEditing.id).firstChild.lastChild;
+const playlistsNav = document.getElementById("playlists-nav");
 
-titleInput.addEventListener("input", (e) => {
-    if (currentlyPlaying === currentlyEditing) {
-        titleElem.innerText = titleInput.value;
-        songElemTitle.innerText = titleInput.value;
+/** updates all song entries to match currentlyEditing's title and artist */
+export function updateSongEntries() {
+    if (allEntriesUpdated) return;
+
+    for (const song__title of playlistsNav.querySelectorAll(".song__title-" + currentlyEditing.id)) {
+        song__title.innerText = currentlyEditing.title;
     }
-})
+    for (const song__artist of playlistsNav.querySelectorAll(".song__artist-" + currentlyEditing.id)) {
+        song__artist.innerText = currentlyEditing.artist;
+    }
+    console.log("all entries updated");
+
+    allEntriesUpdated = true;
+}
