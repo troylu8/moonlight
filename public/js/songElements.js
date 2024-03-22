@@ -1,4 +1,4 @@
-import * as sidebar from "./sidebar.js"
+import * as songSettings from "./songSettings.js"
 import * as play from "./play.js"
 
 export const playlistGroupElems = new Map();
@@ -24,7 +24,7 @@ export function createSongElem(song, playlistGroupElem) {
     songElem.lastChild.appendChild(song__options);
 
     song__play.addEventListener("click", () => play.togglePlay(song));
-    song__options.addEventListener("click", () => sidebar.openSongOptions(song));
+    song__options.addEventListener("click", () => songSettings.openSongOptions(song));
 
     playlistGroupElem.appendChild(songElem);
 }

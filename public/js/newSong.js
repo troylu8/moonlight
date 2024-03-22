@@ -1,5 +1,5 @@
 import * as dropdown from "./toggleDropdown.js"
-import * as sidebar from "./sidebar.js"
+import * as songSettings from "./songSettings.js"
 import * as userdata from "./userdata.js";
 
 console.log("V0BwILbJDOY");
@@ -61,7 +61,7 @@ async function getyt(link) {
 
         const song = JSON.parse(await res.json());
         userdata.loadSong(song);
-        sidebar.openSongOptions(song);
+        songSettings.openSongOptions(song);
     }
 
 
@@ -146,6 +146,6 @@ document.getElementById("song-upload").addEventListener("click", async () => {
         const song = JSON.parse(await res.json());
 
         userdata.loadSong(song);
-        sidebar.openSongOptions(song);
+        songSettings.openSongOptions(song);
     }
 });

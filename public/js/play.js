@@ -3,28 +3,30 @@ import { getTimeDisplay } from "./songElements.js";
 
 const audio = new Audio();
 
-let currentFilename = "short.mp3";
+export let currentlyPlaying = null;
 
-const title = document.getElementById("info__title");
-const artist = document.getElementById("info__artist");
+export const titleElem = document.getElementById("info__title");
+export const artistElem = document.getElementById("info__artist");
 
 export function togglePlay(song) {
+
     if (audio.src === "" && song === undefined) return;
 
-    const filename = song ? song.filename : currentFilename;
+    song = song ?? currentlyPlaying;
+    
     // if unpaused and same song, pause
-    if (!audio.paused && filename === currentFilename) return audio.pause();
+    if (!audio.paused && song === currentlyPlaying) return audio.pause();
     
     //if paused and same song, play
-    if (filename === currentFilename) return audio.play();
+    if (song === currentlyPlaying) return audio.play();
 
     // setting a new audio.src will reset seek to beginning
     //TODO: WHEN USING ELECTRON, USE ./ INSTEAD OF ../
-    audio.src = "../resources/songs/" + encodeURIComponent(filename);
-    currentFilename = filename;
+    audio.src = "../resources/songs/" + encodeURIComponent(song.filename);
+    currentlyPlaying = song;
 
-    title.innerText = song.title;
-    artist.innerText = song.artist;
+    titleElem.innerText = song.title;
+    artistElem.innerText = song.artist;
 
     audio.play();
 }
