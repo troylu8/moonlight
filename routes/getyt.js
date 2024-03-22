@@ -19,6 +19,7 @@ const tracker = {
     downloaded: 0,
     total: 1,
     reset: function () {
+        console.log("reset tracker");
         this.downloaded = 0;
         this.total = 1;
     }
@@ -56,7 +57,7 @@ class DownloadProcess {
             if (this.destroy) {
                 tracker.reset();
                 this.destroy(dlstream, path, writeStream);
-                cb(500);
+                return cb(500);
             }
     
             tracker.downloaded = downloaded;
@@ -69,7 +70,8 @@ class DownloadProcess {
                 "filename": filename,
                 "title": info.videoDetails.title,
                 "artist": info.videoDetails.author.name,
-                "size": tracker.total
+                "size": tracker.total,
+                "duration": info.videoDetails.lengthSeconds
             });
             tracker.reset();
         });
@@ -105,10 +107,6 @@ router.get("/ytid/:playlistID/:id", async (req, res) => {
 })
 
 router.get("/loaded", (req, res) => {
-
-    // if (tracker.tracking === false) 
-    //     res.status(205).send("not tracking");
-    // else 
     res.status(200).send("" + (tracker.downloaded / tracker.total));
 })
 

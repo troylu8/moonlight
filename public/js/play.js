@@ -1,29 +1,23 @@
 import { addSliderDragEvent } from "./sliders.js";
-
-var path = document.location.pathname;
-var dirname = path.substring(path.indexOf('/')+1, path.lastIndexOf('/'));
+import { getTimeDisplay } from "./songElements.js";
 
 const audio = new Audio();
-let currentSongPath = dirname + "../resources/songs/short.mp3";
 
+let currentFilename = "short.mp3";
 
-function togglePlay(filename) {
-    let path;
-    if (!audio.paused) {
-        if (filename === undefined) return audio.pause();
-        path = "../resources/songs/" + filename;
-        if (path === currentSongPath) return audio.pause();
-    }
+export function togglePlay(filename) {
+    if (audio.src === "" && filename === undefined) return;
 
-    const toBePlayed = path ?? currentSongPath;
-    console.log("now playing " + toBePlayed);
+    filename = filename ?? currentFilename;
+    // if unpaused and same song, pause
+    if (!audio.paused && filename === currentFilename) return audio.pause();
+    
+    //if paused and same song, play
+    if (filename === currentFilename) return audio.play();
 
     // setting a new audio.src will reset seek to beginning
-    if (toBePlayed != audio.src) {
-        audio.src = toBePlayed;
-        currentSongPath = audio.src;
-    }
-    
+    audio.src = "../resources/songs/" + encodeURIComponent(filename);
+    currentFilename = filename;
     audio.play();
 }
 
@@ -48,11 +42,6 @@ const seek = document.getElementById("seek__slider");
 const seekPassed = document.getElementById("seek__passed");
 const seekTotal = document.getElementById("seek__total");
 
-function getTimeDisplay(totalSeconds) {
-    const minutes = ("" + Math.floor(totalSeconds / 60)).padStart(2, "0");
-    const seconds = ("" + Math.floor(totalSeconds % 60)).padStart(2, "0");
-    return minutes + ":" + seconds;
-}
 
 audio.addEventListener("loadedmetadata", () => { 
     seek.value = 0;

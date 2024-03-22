@@ -18,18 +18,19 @@ async function getyt(link) {
     if (!isValidLink(link)) 
         return showErrorMsg("invalid link");
 
-    setButtonEnabled(false, "...");
-
     const id = getYTID(link);
+
+    if ( userdata.data.songs["yt" + id] !== undefined ) 
+        return showErrorMsg("yt video already downloaded");
+
+    setButtonEnabled(false, "...");
+    
     if ( !(await videoExists(id)) ) {
         showErrorMsg("video doesnt exist");
         return setButtonEnabled(true, "ent");
     }
 
-    if ( userdata.data.songs[id] !== undefined ) {
-        showErrorMsg("yt video already downloaded");
-        return setButtonEnabled(true, "ent");
-    }
+    
  
     tracking = true;
     loadingBar.style.opacity = "1";
@@ -65,6 +66,7 @@ async function getyt(link) {
         sidebar.openSongOptions(song);
     }
 
+
 }
 
 function showErrorMsg(msg) {
@@ -79,6 +81,8 @@ function stopLoading(closeDropdown) {
         setTimeout(() => {  // wait for transition time before resetting loading bar
             setLoadingBar(0);
             if (closeDropdown) dropdown.close();
+
+            console.log("stopped loading");
         }, 300);
     }, 200);
     

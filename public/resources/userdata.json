@@ -2,14 +2,5 @@
     "playlistNames": {
         "1": "my playlist name"
     },
-    "songs": {
-        "ytigS9v4r0NiA": {
-            "filename": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】 0.mp3",
-            "title": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】",
-            "artist": "Will Stetson",
-            "playlistIDs": [
-                1
-            ]
-        }
-    }
+    "songs": {}
 }

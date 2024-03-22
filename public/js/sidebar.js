@@ -36,14 +36,6 @@ const songSettings = document.getElementById("song-settings");
 
 document.getElementById("settings-btn").onclick = () => setSidebarContent(settings, true);
 
-const songSettingsBtns = document.getElementsByClassName("song__options");
-for (const b of songSettingsBtns) {
-    b.onclick = () => {
-        // update song settings to current song
-        setSidebarContent(songSettings);
-    }
-}
-
 const filename = document.getElementById("song-settings__filename");
 const size = document.getElementById("song-settings__size");
 const title = document.getElementById("song-settings__title");

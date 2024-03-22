@@ -14,7 +14,7 @@ h1 {
     margin: 0;
 }
 
-#songs-nav {
+.playlist__group {
     display: flex;
     flex-direction: column;
     overflow-y: auto;

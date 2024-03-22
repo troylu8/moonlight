@@ -1,12 +1,19 @@
+import * as songElements from "./songElements.js"
 
 export let data;
 
 // playlistid -> set of songs
 const playlists = new Map();
+const playlistElems = new Map();
 
 async function fetchUserdata() {
     const res = await fetch("http://localhost:5000/files/read-userdata");
     data = await res.json();
+
+    for (const pid in data.playlistNames) {
+        playlists.set(Number(pid), new Set());
+        playlistElems.set(Number(pid), document.getElementById(pid));
+    }
 
     for (const id in data.songs) {
         console.log(id);
@@ -19,14 +26,19 @@ fetchUserdata();
 export function loadSong(song) {
     song.playlistIDs = new Set(song.playlistIDs);
 
-    for (const pid of song.playlistIDs) {
-        playlists.set(pid, (playlists.get(pid) ?? new Set()).add(song));       
-    }
+    for (const pid of song.playlistIDs) 
+        addToPlaylist(song, pid);
 
     if (song.id !== undefined) {
         console.log(song.id + " added to data.songs");
         data.songs[song.id] = song;
     }
+
+}
+
+export function addToPlaylist(song, playlistID) {
+    playlists.get(playlistID).add(song);
+    songElements.createSongElem(song, playlistElems.get(playlistID));
 }
 
 export async function deleteSong(id) {
