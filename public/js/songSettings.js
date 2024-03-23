@@ -23,11 +23,25 @@ export function openSongSettings(song, song__title, song__artist) {
     size.innerText = (song.size / (1024 * 1000)).toFixed(2) + " MB";
     titleInput.value = song.title;
     artistInput.value = song.artist;
-    for (const checkboxDiv of playlistCheckboxes.childNodes) {
-        const checkbox = checkboxDiv.firstChild;
-        console.log(currentlyEditing);
-        checkbox.checked = currentlyEditing.playlistIDs.has( checkbox.playlistID );
+
+    const notchecked = [];
+
+    for (const checkboxDiv of playlistCheckboxes.childNodes) 
+        checkboxDiv.remove();
+    
+    for (const pid of Object.keys(data.playlists)) {
+        const checkboxDiv = data.playlists[pid].checkboxDiv;
+        checkboxDiv.firstChild.checked = currentlyEditing.playlistIDs.has( Number(pid) );
+
+        if (checkboxDiv.firstChild.checked) 
+            playlistCheckboxes.appendChild(checkboxDiv);
+        else 
+            notchecked.push(checkboxDiv);
+        
     }
+    for (const checkboxDiv of notchecked) 
+        playlistCheckboxes.appendChild(checkboxDiv);
+    
 
     // using oninput instead of addEventListener to override past event handlers
     titleInput.oninput = () => {
@@ -72,10 +86,10 @@ const playlistsNav = document.getElementById("playlists-nav");
 export function updateSongEntries() {
     if (allEntriesUpdated) return;
 
-    for (const song__title of playlistsNav.querySelectorAll(".song__title-" + currentlyEditing.id)) {
+    for (const song__title of playlistsNav.querySelectorAll(".song__title:" + currentlyEditing.id)) {
         song__title.innerText = currentlyEditing.title;
     }
-    for (const song__artist of playlistsNav.querySelectorAll(".song__artist-" + currentlyEditing.id)) {
+    for (const song__artist of playlistsNav.querySelectorAll(".song__artist:" + currentlyEditing.id)) {
         song__artist.innerText = currentlyEditing.artist;
     }
     console.log("all entries updated");

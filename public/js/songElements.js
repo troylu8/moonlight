@@ -13,10 +13,10 @@ export function createSongEntry(song, playlist) {
             <div class="song__duration"> ${getTimeDisplay(song.duration)} </div>
         </div>`
     
-    const song__title = createElement("span", null, "song__title-" + song.id, song.title);
+    const song__title = createElement("span", null, "song__title:" + song.id, song.title);
     songEntry.firstChild.appendChild(song__title);
 
-    const song__artist = createElement("span", null, "song__artist-" + song.id, song.artist);
+    const song__artist = createElement("span", null, "song__artist:" + song.id, song.artist);
     songEntry.firstChild.appendChild(song__artist);
 
     const song__options = createElement("button", null, "song__options", "...");
@@ -47,7 +47,7 @@ const playlistCheckboxes = document.getElementById("song-settings__playlists");
 export function createPlaylistElems(playlist) {
 
     // PLAYLIST ENTRY IN LEFT NAV ===
-    const playlistElem = createElement("div", "li " + playlist.id, "playlist");
+    const playlistElem = createElement("div", "li:" + playlist.id, "playlist");
     playlistElem.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
     playlistElem.addEventListener("click", () => setActivePlaylist(playlist));
     
@@ -59,15 +59,16 @@ export function createPlaylistElems(playlist) {
 
 
     // PLAYLIST GROUP ===
-    const playlist__group = createElement("nav", "group " + playlist.id, "playlist__group");
+    const playlist__group = createElement("nav", "group:" + playlist.id, "playlist__group");
     mainDiv.appendChild(playlist__group);
     playlist.groupElem = playlist__group;
 
 
     // PLAYLIST OPTION IN SONG SETTINGS ===
     const option = createElement("div", null, "song-settings__playlists__option");
+    playlist.checkboxDiv = option;
 
-    const checkbox = createElement("input", "song-settings__playlist-" + playlist.id);
+    const checkbox = createElement("input", "song-settings__playlist:" + playlist.id);
     checkbox.type = "checkbox";
     checkbox.playlistID = playlist.id;
     checkbox.addEventListener("change", () => {
@@ -79,7 +80,7 @@ export function createPlaylistElems(playlist) {
     option.appendChild(checkbox);
     
     const label = createElement("label", null, null, playlist.title);
-    label.setAttribute("for", "song-settings__playlist-" + playlist.id);
+    label.setAttribute("for", "song-settings__playlist:" + playlist.id);
     option.appendChild(label);
 
     playlistCheckboxes.appendChild(option);

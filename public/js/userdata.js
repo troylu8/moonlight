@@ -18,15 +18,14 @@ async function fetchUserdata() {
         playlist.id = Number(pid);
 
         playlist.songIDs = new Set(playlist.songIDs);
+
+        songElements.createPlaylistElems(playlist);
         
         for (const sid of playlist.songIDs) {
-            console.log(data.songs[sid]);
-            data.songs[sid].playlistIDs.add(pid);
+            addToPlaylist(data.songs[sid], playlist);
         }
-
-        playlist.groupElem = document.getElementById("group " + pid);
         
-        songElements.createPlaylistElems(playlist);
+        
     }
 
     setSong(data.songs[data.currentSongID]);
@@ -61,7 +60,7 @@ export async function saveData(cb) {
     
     const stringified = JSON.stringify(data, 
         (key, value) => {
-            if (["id", "playlistIDs", "groupElem"].includes(key)) return undefined;
+            if (["id", "playlistIDs", "groupElem", "optionElem"].includes(key)) return undefined;
             if (value instanceof Set) return Array.from(value)
             return value;
         }, 4

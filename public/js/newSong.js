@@ -2,7 +2,7 @@ import * as dropdown from "./toggleDropdown.js"
 import * as songSettings from "./songSettings.js"
 import { data, addToPlaylist} from "./userdata.js";
 
-console.log("V0BwILbJDOY");
+console.log("ORofRTMg-iY");
 
 const input = document.getElementById("paste-link__input");
 const button = document.getElementById("paste-link__btn");

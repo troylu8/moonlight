@@ -1,18 +1,33 @@
 {
-    "currentPlaylistID": 3,
+    "currentPlaylistID": 1,
     "playlists": {
         "1": {
             "title": "another start again??????",
-            "songIDs": []
+            "songIDs": [
+                "ytigS9v4r0NiA"
+            ],
+            "checkboxDiv": {}
         },
         "2": {
             "title": "i wish i could go",
-            "songIDs": []
+            "songIDs": [],
+            "checkboxDiv": {}
         },
         "3": {
             "title": "this whole time.",
-            "songIDs": []
+            "songIDs": [
+                "ytigS9v4r0NiA"
+            ],
+            "checkboxDiv": {}
         }
     },
-    "songs": {}
+    "songs": {
+        "ytigS9v4r0NiA": {
+            "filename": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】.mp3",
+            "title": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】",
+            "artist": "Will Stetson",
+            "size": 2963880,
+            "duration": 187
+        }
+    }
 }
