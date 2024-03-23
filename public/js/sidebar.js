@@ -7,25 +7,14 @@ export function setSidebarOpen(val) {
     document.body.style.setProperty("--sidebar-div-width", val? "350px" : "0px");
     open = val;
 }
-export function toggleSidebar() {
-    setSidebarOpen(!open);
-};
-
-const settings = document.getElementById("settings");
-document.getElementById("settings-btn").onclick = () => setSidebarContent(settings, true);
 
 
 let currentContent = null;
 
-export function setSidebarContent(elem, toggle) {
+export function setSidebarContent(elem) {
     // if switching away from songsettings or to different song, update song entries of song we were just editing
     if (currentContent === songSettings) updateSongEntries();
-
-    if (currentContent === elem) {
-        if (toggle) toggleSidebar();
-        else        setSidebarOpen(true);
-        return;
-    }
+    if (currentContent === elem) return setSidebarOpen(true);
 
     if (currentContent !== null) currentContent.style.display = "none";
     
