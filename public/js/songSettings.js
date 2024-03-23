@@ -9,12 +9,13 @@ const filename = document.getElementById("song-settings__filename");
 const size = document.getElementById("song-settings__size");
 const titleInput = document.getElementById("song-settings__title");
 const artistInput = document.getElementById("song-settings__artist");
+const playlistCheckboxes = document.getElementById("song-settings__playlists");
 
-let currentlyEditing;
+export let currentlyEditing;
 let allEntriesUpdated = true; 
 
 export function openSongSettings(song, song__title, song__artist) {
-    if (song === currentlyEditing) return sidebar.setSidebarOpen(false);
+    if (song === currentlyEditing) return sidebar.toggleSidebar();
 
     currentlyEditing = song;
 
@@ -22,6 +23,11 @@ export function openSongSettings(song, song__title, song__artist) {
     size.innerText = (song.size / (1024 * 1000)).toFixed(2) + " MB";
     titleInput.value = song.title;
     artistInput.value = song.artist;
+    for (const checkboxDiv of playlistCheckboxes.childNodes) {
+        const checkbox = checkboxDiv.firstChild;
+        checkbox.checked = song.playlistIDs.has( checkbox.playlistID );
+    }
+
 
     // using oninput instead of addEventListener to override past event handlers
     titleInput.oninput = () => {

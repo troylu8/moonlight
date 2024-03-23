@@ -1,12 +1,13 @@
 import * as songSettings from "./songSettings.js"
 import * as play from "./play.js"
-import { data } from "./userdata.js"
+import * as userdata from "./userdata.js"
 
 export const playlistGroupElems = new Map();
 
-export function createSongEntry(song, playlistGroupElem) {
-
-    const songEntry = createElement("div", "song");
+export function createSongEntry(song, playlistID) {
+    const playlistGroupElem = playlistGroupElems.get(playlistID);
+    
+    const songEntry = createElement("div", null, "song " + song.id);
     songEntry.innerHTML = 
        `<div class="song__left"></div>
 
@@ -14,20 +15,16 @@ export function createSongEntry(song, playlistGroupElem) {
             <div class="song__duration"> ${getTimeDisplay(song.duration)} </div>
         </div>`
     
-    const song__title = createElement("span", "song__title-" + song.id);
-    song__title.innerText = song.title;
+    const song__title = createElement("span", null, "song__title-" + song.id, song.title);
     songEntry.firstChild.appendChild(song__title);
 
-    const song__artist = createElement("span", "song__artist-" + song.id);
-    song__artist.innerText = song.artist;
-    songEntry.firstChild.appendChild(song__artist);    
+    const song__artist = createElement("span", null, "song__artist-" + song.id, song.artist);
+    songEntry.firstChild.appendChild(song__artist);
 
-    const song__options = createElement("button", "song__options");
-    song__options.innerText = "...";
+    const song__options = createElement("button", null, "song__options", "...");
     songEntry.lastChild.appendChild(song__options);
 
-    const song__play = createElement("button", "song__play");    
-    song__play.innerText = "p";
+    const song__play = createElement("button", null, "song__play", "p");    
     songEntry.firstChild.insertBefore(song__play, song__title);
 
     song__play.addEventListener("click", () => play.togglePlay(song));
@@ -40,36 +37,64 @@ export function createSongEntry(song, playlistGroupElem) {
     return [songEntry, song__title, song__artist];
 }
 
+export function deleteSongEntry(song, playlistID) {
+    const playlistGroupElem = playlistGroupElems.get(playlistID);
+    playlistGroupElem.querySelector("." + song.id).remove();
+}
+
 const mainDiv = document.getElementById("main-div");
 const playlistsNav = document.getElementById("playlists-nav");
+const playlistCheckboxes = document.getElementById("song-settings__playlists");
 
-/** adds entry to playlist nav, and creates playlist__group */
+/** adds entry to playlist nav, create playlist__group, create song settings playlist option */
 export function createPlaylistElems(playlistID, playlistName) {
-    const playlist__group = createElement("nav", "playlist__group");
-    playlist__group.id = "group " + playlistID;
-    mainDiv.appendChild(playlist__group);
 
-    const playlist = createElement("div", "playlist");
-    playlist.id = "li " + playlistID;
-    playlist.addEventListener("click", () => setActivePlaylist(playlistID));
+    // PLAYLIST ENTRY IN LEFT NAV ===
+    const playlist = createElement("div", "li " + playlistID, "playlist");
     playlist.innerHTML = `<div class="playlist__title"> ${playlistName} </div>`;
+    playlist.addEventListener("click", () => setActivePlaylist(playlistID));
     
-    const playlist__options = createElement("button", "playlist__options");
-    playlist__options.innerText = "...";
+    const playlist__options = createElement("button", null, "playlist__options", "...");
     // add event listener
     playlist.appendChild(playlist__options);
 
     playlistsNav.appendChild(playlist);
+
+
+    // PLAYLIST GROUP ===
+    const playlist__group = createElement("nav", "group " + playlistID, "playlist__group");
+    mainDiv.appendChild(playlist__group);
+
+
+    // PLAYLIST OPTION IN SONG SETTINGS ===
+    const option = createElement("div", null, "song-settings__playlists__option");
+
+    const checkbox = createElement("input", "song-settings__playlist-" + playlistID);
+    checkbox.type = "checkbox";
+    checkbox.playlistID = playlistID;
+    checkbox.addEventListener("change", () => {
+        if (checkbox.checked)
+            userdata.addToPlaylist(songSettings.currentlyEditing, playlistID);
+        else
+            userdata.removeFromPlaylist(songSettings.currentlyEditing, playlistID);
+    })
+    option.appendChild(checkbox);
+    
+    const label = createElement("label", null, null, playlistName);
+    label.setAttribute("for", "song-settings__playlist-" + playlistID);
+    option.appendChild(label);
+
+    playlistCheckboxes.appendChild(option);
 }
 
 let activePlaylistGroup;
 const playlistHeader = document.getElementById("playlist-header");
 
 export function setActivePlaylist(playlistID, init) {
-    if (data.currentPlaylistID === playlistID && !init) return;
+    if (userdata.data.currentPlaylistID === playlistID && !init) return;
 
-    data.currentPlaylistID = playlistID;
-    playlistHeader.innerText = data.playlistNames[playlistID];
+    userdata.data.currentPlaylistID = playlistID;
+    playlistHeader.innerText = userdata.data.playlistNames[playlistID];
     songSettings.updateSongEntries();
 
     if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
@@ -77,9 +102,11 @@ export function setActivePlaylist(playlistID, init) {
     activePlaylistGroup.style.display = "flex";
 }
 
-function createElement(tagName, ...classes) {
-    const elem = document.createElement(tagName);
-    elem.classList.add(...classes);
+function createElement(tag, id, classes, text) {
+    const elem = document.createElement(tag);
+    if (id) elem.id = id;
+    if (classes) elem.classList = classes;
+    if (text) elem.innerText = text;
     return elem;
 }
 

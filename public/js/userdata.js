@@ -7,7 +7,6 @@ export let data;
 // playlistid -> set of songs
 const playlists = new Map();
 
-
 async function fetchUserdata() {
     const res = await fetch("http://localhost:5000/files/read-userdata");
     data = await res.json();
@@ -53,10 +52,14 @@ export function loadSong(song, id) {
 }
 
 export function addToPlaylist(song, playlistID) {
-    console.log(playlistID);
     playlists.get(playlistID).add(song);
-    
-    return songElements.createSongEntry(song, songElements.playlistGroupElems.get(playlistID));
+    song.playlistIDs.add(playlistID);
+    return songElements.createSongEntry(song, playlistID);
+}
+export function removeFromPlaylist(song, playlistID) {
+    playlists.get(playlistID).delete(song);
+    song.playlistIDs.delete(playlistID);
+    songElements.deleteSongEntry(song, playlistID);
 }
 
 export async function deleteSong(id) {
@@ -74,7 +77,10 @@ export async function saveData(cb) {
     
     const stringified = JSON.stringify(data, 
         (key, value) => {
-            if (value instanceof Set) return Array.from(value);
+            if (value instanceof Set) {
+                console.log(value);
+                return Array.from(value)
+            };
             if (key === "id") return undefined;
             return value;
         }, 4

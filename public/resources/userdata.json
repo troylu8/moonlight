@@ -1,6 +1,6 @@
 {
-    "currentSongID": "ytV0BwILbJDOY",
-    "currentPlaylistID": 2,
+    "currentSongID": "ytigS9v4r0NiA",
+    "currentPlaylistID": 3,
     "playlistNames": {
         "1": "my playlist name",
         "2": "another playlist!!!",
@@ -14,7 +14,8 @@
             "size": 2963880,
             "duration": 187,
             "playlistIDs": [
-                1
+                1,
+                3
             ]
         },
         "ytV0BwILbJDOY": {
@@ -34,7 +35,9 @@
             "size": 2770590,
             "duration": 175,
             "playlistIDs": [
-                2
+                2,
+                1,
+                3
             ]
         },
         "yt4LrX2NCVCcI": {

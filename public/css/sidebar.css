@@ -18,6 +18,7 @@
 #song-settings {
     display: none;
     flex-direction: column;
+    gap: 10px
 }
 
 #song-settings__metadata {
@@ -29,4 +30,11 @@
 #settings {
     display: none;
     flex-direction: column;
+}
+
+#song-settings__playlists {
+    display: flex;
+    flex-direction: column;
+
+    border: solid 2px white;
 }

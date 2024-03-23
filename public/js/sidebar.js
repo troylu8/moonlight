@@ -2,12 +2,12 @@ import { updateSongEntries, songSettings } from "./songSettings.js";
 
 export let open = false;
 
-export const setSidebarOpen = (val) => {
+export function setSidebarOpen(val) {
     if (open === val) return;
     document.body.style.setProperty("--sidebar-div-width", val? "350px" : "0px");
     open = val;
 }
-export const toggleSidebar = () => {
+export function toggleSidebar() {
     setSidebarOpen(!open);
 };
 
