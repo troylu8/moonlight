@@ -1,6 +1,6 @@
 import * as sidebar from "./sidebar.js";
-import { currentlyPlaying, titleElem as playingTitleElem, artistElem as playingArtistElem } from "./play.js";
-import { data } from "./userdata.js";
+import { currentlyPlaying, titleElem as playingTitleElem, artistElem as playingArtistElem, setSong } from "./play.js";
+import { data, removeFromPlaylist } from "./userdata.js";
 
 
 export const songSettings = document.getElementById("song-settings");
@@ -10,6 +10,7 @@ const size = document.getElementById("song-settings__size");
 const titleInput = document.getElementById("song-settings__title");
 const artistInput = document.getElementById("song-settings__artist");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
+const deleteBtn = document.getElementById("song-settings__delete");
 
 export let currentlyEditing;
 let allEntriesUpdated = true; 
@@ -50,6 +51,20 @@ export function openSongSettings(song, song__title, song__artist) {
 
     sidebar.setSidebarContent(songSettings);
 }
+
+deleteBtn.addEventListener("click", () => {
+    for (const pid of currentlyEditing.playlistIDs) {
+        removeFromPlaylist(currentlyEditing, data.playlists[pid]);
+    }
+    delete data.songs[currentlyEditing.id];
+
+    fetch("http://localhost:5000/files/" + currentlyEditing.filename, {method: "DELETE"});
+
+    if (currentlyPlaying === currentlyEditing) setSong("none");
+    currentlyEditing = null;
+
+    sidebar.setSidebarOpen(false);
+})
 
 const playlistsNav = document.getElementById("playlists-nav");
 

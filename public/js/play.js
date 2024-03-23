@@ -12,6 +12,15 @@ export const artistElem = document.getElementById("info__artist");
 /** set a new currently playing song, will reset seek to beginning */
 export function setSong(song) {
     if (!song) return;
+    if (song === "none") {
+        audio.src = "";
+        currentlyPlaying = null;
+
+        titleElem.innerText = "-";
+        artistElem.innerText = "-";
+        data.currentSongID = undefined;
+        return;
+    };
 
     //TODO: WHEN USING ELECTRON, USE ./ INSTEAD OF ../
     audio.src = "../resources/songs/" + encodeURIComponent(song.filename);
