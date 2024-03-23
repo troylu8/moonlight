@@ -1,6 +1,6 @@
 import * as dropdown from "./toggleDropdown.js"
 import * as songSettings from "./songSettings.js"
-import * as userdata from "./userdata.js";
+import { data, addToPlaylist} from "./userdata.js";
 
 console.log("V0BwILbJDOY");
 
@@ -21,7 +21,7 @@ async function getyt(link) {
     const id = getYTID(link);
 
     //TODO: enable this
-    // if ( userdata.data.songs["yt" + id] !== undefined ) 
+    // if ( data.songs["yt" + id] !== undefined ) 
     //     return showErrorMsg("yt video already downloaded");
 
     setButtonEnabled(false, "...");
@@ -52,7 +52,7 @@ async function getyt(link) {
     setButtonEnabled(true, "x");
     
 
-    const res = await fetch(`http://localhost:5000/getyt/ytid/${userdata.data.currentPlaylistID}/` + id);
+    const res = await fetch(`http://localhost:5000/getyt/ytid/` + id);
     console.log("download ended");
 
     if (res.status === 200) { // video downloaded fully
@@ -60,11 +60,20 @@ async function getyt(link) {
         stopLoading(true);
         button.innerText = "ent";
 
-        const song = JSON.parse(await res.json());
-        userdata.loadSong(song);
+        acceptSongResponse(res);
     }
 
+}
 
+/** add to data.songs, add to current playlist, open settings */
+async function acceptSongResponse(fetchResponse) {
+    const song = JSON.parse(await fetchResponse.json());
+    data.songs[song.id] = song;
+
+    song.playlistIDs = new Set();
+    const songElems = addToPlaylist(song, data.playlists[data.currentPlaylistID]);
+    
+    songSettings.openSongSettings(song, songElems[1], songElems[2]);
 }
 
 function showErrorMsg(msg) {
@@ -141,10 +150,6 @@ function getYTID(link) { return link.slice(-11); }
 
 
 document.getElementById("song-upload").addEventListener("click", async () => {
-    const res = await fetch(`http://localhost:5000/upload/${userdata.data.currentPlaylistID}/`, {method: "POST"});
-    if (res.status === 200) {
-        const song = JSON.parse(await res.json());
-
-        userdata.loadSong(song);
-    }
+    const res = await fetch(`http://localhost:5000/upload/`, {method: "POST"});
+    if (res.status === 200) acceptSongResponse(res);
 });

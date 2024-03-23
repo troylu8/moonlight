@@ -1,6 +1,6 @@
 import * as sidebar from "./sidebar.js";
 import { currentlyPlaying, titleElem as playingTitleElem, artistElem as playingArtistElem } from "./play.js";
-
+import { data } from "./userdata.js";
 
 
 export const songSettings = document.getElementById("song-settings");
@@ -15,7 +15,6 @@ export let currentlyEditing;
 let allEntriesUpdated = true; 
 
 export function openSongSettings(song, song__title, song__artist) {
-    if (song === currentlyEditing) return sidebar.toggleSidebar();
 
     currentlyEditing = song;
 
@@ -25,9 +24,9 @@ export function openSongSettings(song, song__title, song__artist) {
     artistInput.value = song.artist;
     for (const checkboxDiv of playlistCheckboxes.childNodes) {
         const checkbox = checkboxDiv.firstChild;
-        checkbox.checked = song.playlistIDs.has( checkbox.playlistID );
+        console.log(currentlyEditing);
+        checkbox.checked = currentlyEditing.playlistIDs.has( checkbox.playlistID );
     }
-
 
     // using oninput instead of addEventListener to override past event handlers
     titleInput.oninput = () => {

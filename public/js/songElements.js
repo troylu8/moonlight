@@ -2,10 +2,8 @@ import * as songSettings from "./songSettings.js"
 import * as play from "./play.js"
 import * as userdata from "./userdata.js"
 
-export const playlistGroupElems = new Map();
 
-export function createSongEntry(song, playlistID) {
-    const playlistGroupElem = playlistGroupElems.get(playlistID);
+export function createSongEntry(song, playlist) {
     
     const songEntry = createElement("div", null, "song " + song.id);
     songEntry.innerHTML = 
@@ -32,14 +30,13 @@ export function createSongEntry(song, playlistID) {
         songSettings.openSongSettings(song, song__title, song__artist)
     )
 
-    playlistGroupElem.appendChild(songEntry);
+    playlist.groupElem.appendChild(songEntry);
 
     return [songEntry, song__title, song__artist];
 }
 
-export function deleteSongEntry(song, playlistID) {
-    const playlistGroupElem = playlistGroupElems.get(playlistID);
-    playlistGroupElem.querySelector("." + song.id).remove();
+export function deleteSongEntry(song, playlist) {
+    playlist.groupElem.querySelector("." + song.id).remove();
 }
 
 const mainDiv = document.getElementById("main-div");
@@ -47,41 +44,42 @@ const playlistsNav = document.getElementById("playlists-nav");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
 
 /** adds entry to playlist nav, create playlist__group, create song settings playlist option */
-export function createPlaylistElems(playlistID, playlistName) {
+export function createPlaylistElems(playlist) {
 
     // PLAYLIST ENTRY IN LEFT NAV ===
-    const playlist = createElement("div", "li " + playlistID, "playlist");
-    playlist.innerHTML = `<div class="playlist__title"> ${playlistName} </div>`;
-    playlist.addEventListener("click", () => setActivePlaylist(playlistID));
+    const playlistElem = createElement("div", "li " + playlist.id, "playlist");
+    playlistElem.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
+    playlistElem.addEventListener("click", () => setActivePlaylist(playlist));
     
     const playlist__options = createElement("button", null, "playlist__options", "...");
     // add event listener
-    playlist.appendChild(playlist__options);
+    playlistElem.appendChild(playlist__options);
 
-    playlistsNav.appendChild(playlist);
+    playlistsNav.appendChild(playlistElem);
 
 
     // PLAYLIST GROUP ===
-    const playlist__group = createElement("nav", "group " + playlistID, "playlist__group");
+    const playlist__group = createElement("nav", "group " + playlist.id, "playlist__group");
     mainDiv.appendChild(playlist__group);
+    playlist.groupElem = playlist__group;
 
 
     // PLAYLIST OPTION IN SONG SETTINGS ===
     const option = createElement("div", null, "song-settings__playlists__option");
 
-    const checkbox = createElement("input", "song-settings__playlist-" + playlistID);
+    const checkbox = createElement("input", "song-settings__playlist-" + playlist.id);
     checkbox.type = "checkbox";
-    checkbox.playlistID = playlistID;
+    checkbox.playlistID = playlist.id;
     checkbox.addEventListener("change", () => {
         if (checkbox.checked)
-            userdata.addToPlaylist(songSettings.currentlyEditing, playlistID);
+            userdata.addToPlaylist(songSettings.currentlyEditing, playlist);
         else
-            userdata.removeFromPlaylist(songSettings.currentlyEditing, playlistID);
+            userdata.removeFromPlaylist(songSettings.currentlyEditing, playlist);
     })
     option.appendChild(checkbox);
     
-    const label = createElement("label", null, null, playlistName);
-    label.setAttribute("for", "song-settings__playlist-" + playlistID);
+    const label = createElement("label", null, null, playlist.title);
+    label.setAttribute("for", "song-settings__playlist-" + playlist.id);
     option.appendChild(label);
 
     playlistCheckboxes.appendChild(option);
@@ -90,15 +88,15 @@ export function createPlaylistElems(playlistID, playlistName) {
 let activePlaylistGroup;
 const playlistHeader = document.getElementById("playlist-header");
 
-export function setActivePlaylist(playlistID, init) {
-    if (userdata.data.currentPlaylistID === playlistID && !init) return;
+export function setActivePlaylist(playlist, init) {
+    if (userdata.data.currentPlaylistID === playlist.id && !init) return;
 
-    userdata.data.currentPlaylistID = playlistID;
-    playlistHeader.innerText = userdata.data.playlistNames[playlistID];
+    userdata.data.currentPlaylistID = playlist.id;
+    playlistHeader.innerText = playlist.title;
     songSettings.updateSongEntries();
 
     if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
-    activePlaylistGroup = playlistGroupElems.get(playlistID);
+    activePlaylistGroup = playlist.groupElem;
     activePlaylistGroup.style.display = "flex";
 }
 

@@ -24,13 +24,7 @@ const tracker = {
     }
 };
 
-let dpCount = 0;
-
 class DownloadProcess {
-
-    constructor (id) {
-        this.dpID = id;
-    }
 
     async download(id, cb) {
         if (this.destroy) return cb(500); // destroy request comes in before getyt request
@@ -39,7 +33,7 @@ class DownloadProcess {
 
         if (this.destroy) return cb(500);  // destroy request comes in while getting info 
         
-        const filename = `${cleanFileName(info.videoDetails.title)} ${this.dpID}.mp3`
+        const filename = `${cleanFileName(info.videoDetails.title)}.mp3`
         const path = "./public/resources/songs/" + filename;
         
         const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
@@ -79,23 +73,20 @@ router.get("/ready", (req, res) => {
 
     console.log(`${req.method} at ${req.url}`);
 
-    currentDP = new DownloadProcess(dpCount++);
+    currentDP = new DownloadProcess();
 
     res.status(200).end("new download process ready");
 })
 
 // shouldnt continue unless after a destroy request
-router.get("/ytid/:playlistID/:id", async (req, res) => {
+router.get("/ytid/:id", async (req, res) => {
     
     console.log(`${req.method} at ${req.url}`);
 
     currentDP.download(req.params["id"], async (status, song) => {
         if (status !== 200) return res.status(status).end();
-
-        song.playlistIDs = [ Number(req.params["playlistID"]) ];
         
-        res.status(200).json(JSON.stringify(song));
-        
+        res.status(200).json(JSON.stringify(song));        
     });
 })
 
