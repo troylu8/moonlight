@@ -38,8 +38,6 @@ h2 {
     cursor: pointer;
 }
 
-.playlist__title {
-}
 .playlist__options {
     visibility: hidden;
 }

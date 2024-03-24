@@ -28,8 +28,10 @@ async function fetchUserdata() {
         
     }
 
-    setSong(data.songs[data.currentSongID]);
     songElements.setActivePlaylist(data.playlists[data.currentPlaylistID], true);
+    data.currentlyPlaying = data.songs[data.currentSongID];
+    delete data.currentSongID;
+    setSong(data.currentlyPlaying);
 }
 fetchUserdata();
 
@@ -57,10 +59,11 @@ export async function deleteSong(id) {
 }
 
 export async function saveData(cb) {
-    
+    data.currentSongID = data.currentlyPlaying.id;
+
     const stringified = JSON.stringify(data, 
         (key, value) => {
-            if (["id", "playlistIDs", "groupElem", "optionElem"].includes(key)) return undefined;
+            if (["id", "playlistIDs", "groupElem", "optionElem", "songNode", "currentlyPlaying"].includes(key)) return undefined;
             if (value instanceof Set) return Array.from(value)
             return value;
         }, 4

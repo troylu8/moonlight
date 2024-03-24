@@ -1,6 +1,6 @@
 import * as userdata from "./userdata.js";
 
-document.getElementById("next").onclick = () => {
+document.getElementById("info__title").onclick = () => {
     console.log("saving data");
     userdata.saveData();
 }

@@ -1,33 +1,34 @@
 {
-    "currentPlaylistID": 1,
+    "currentPlaylistID": 3,
     "playlists": {
         "1": {
             "title": "another start again??????",
-            "songIDs": [
-                "ytigS9v4r0NiA"
-            ],
+            "songIDs": [],
             "checkboxDiv": {}
         },
         "2": {
             "title": "i wish i could go",
-            "songIDs": [],
+            "songIDs": [
+                "ytAqI97zHMoQw"
+            ],
             "checkboxDiv": {}
         },
         "3": {
             "title": "this whole time.",
             "songIDs": [
-                "ytigS9v4r0NiA"
+                "ytAqI97zHMoQw"
             ],
             "checkboxDiv": {}
         }
     },
     "songs": {
-        "ytigS9v4r0NiA": {
-            "filename": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】.mp3",
-            "title": "Morality Lesson - Will Stetson [MV] 【HSR Fansong】",
-            "artist": "Will Stetson",
-            "size": 2963880,
-            "duration": 187
+        "ytAqI97zHMoQw": {
+            "filename": "椎名もた(siinamota) - Young Girl A - 少女A.mp3",
+            "title": "椎名もた(siinamota) - Young Girl A / 少女A",
+            "artist": "U/M/A/A Inc.",
+            "size": 4060420,
+            "duration": 243
         }
-    }
+    },
+    "currentSongID": "ytAqI97zHMoQw"
 }

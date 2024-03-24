@@ -2,7 +2,7 @@ import * as dropdown from "./toggleDropdown.js"
 import * as songSettings from "./songSettings.js"
 import { data, addToPlaylist} from "./userdata.js";
 
-console.log("ORofRTMg-iY");
+console.log("ORofRTMg-iY", "NRQRC_0ZQ00", "AqI97zHMoQw", "DXZPtndQw8U", "nmix0phrCVU");
 
 const input = document.getElementById("paste-link__input");
 const button = document.getElementById("paste-link__btn");
@@ -111,6 +111,8 @@ async function destroy() {
 
 button.onclick = () => {
     if (!enabled) return console.log("can't click now!");
+
+    input.value = input.value.trim();
 
     if (tracking) destroy();
     else          getyt(input.value);

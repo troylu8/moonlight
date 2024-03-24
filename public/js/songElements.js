@@ -1,6 +1,6 @@
-import * as songSettings from "./songSettings.js"
-import * as play from "./play.js"
-import * as userdata from "./userdata.js"
+import * as songSettings from "./songSettings.js";
+import { togglePlay } from "./play.js";
+import * as userdata from "./userdata.js";
 
 export function createSongEntry(song, playlist) {
     
@@ -12,10 +12,10 @@ export function createSongEntry(song, playlist) {
             <div class="song__duration"> ${getTimeDisplay(song.duration)} </div>
         </div>`
     
-    const song__title = createElement("span", null, "song__title:" + song.id, song.title);
+    const song__title = createElement("span", null, "song__title song__title:" + song.id, song.title);
     songEntry.firstChild.appendChild(song__title);
 
-    const song__artist = createElement("span", null, "song__artist:" + song.id, song.artist);
+    const song__artist = createElement("span", null, "song__artist song__artist:" + song.id, song.artist);
     songEntry.firstChild.appendChild(song__artist);
 
     const song__options = createElement("button", null, "song__options", "...");
@@ -24,7 +24,11 @@ export function createSongEntry(song, playlist) {
     const song__play = createElement("button", null, "song__play", "p");    
     songEntry.firstChild.insertBefore(song__play, song__title);
 
-    song__play.addEventListener("click", () => play.togglePlay(song));
+    song__play.addEventListener("click", () => {
+        togglePlay(song)
+        userdata.data.currentPlaylistID = activePlaylistGroup.playlist.id;
+        console.log(userdata.data.currentPlaylistID);
+    });
     song__options.addEventListener("click", () => 
         songSettings.openSongSettings(song, song__title, song__artist)
     )
@@ -61,6 +65,7 @@ export function createPlaylistElems(playlist) {
     const playlist__group = createElement("nav", "group:" + playlist.id, "playlist__group");
     mainDiv.appendChild(playlist__group);
     playlist.groupElem = playlist__group;
+    playlist__group.playlist = playlist;
 
 
     // PLAYLIST OPTION IN SONG SETTINGS ===
@@ -85,13 +90,12 @@ export function createPlaylistElems(playlist) {
     playlistCheckboxes.appendChild(option);
 }
 
-let activePlaylistGroup;
+export let activePlaylistGroup;
 const playlistHeader = document.getElementById("playlist-header");
 
 export function setActivePlaylist(playlist, init) {
-    if (userdata.data.currentPlaylistID === playlist.id && !init) return;
+    if (playlist.groupElem === activePlaylistGroup && !init) return;
 
-    userdata.data.currentPlaylistID = playlist.id;
     playlistHeader.innerText = playlist.title;
     songSettings.updateSongEntries();
 
@@ -99,7 +103,6 @@ export function setActivePlaylist(playlist, init) {
     activePlaylistGroup = playlist.groupElem;
     activePlaylistGroup.style.display = "flex";
 
-    
 }
 
 function createElement(tag, id, classes, text) {

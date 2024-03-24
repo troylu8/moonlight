@@ -1,5 +1,5 @@
 import * as sidebar from "./sidebar.js";
-import { currentlyPlaying, titleElem as playingTitleElem, artistElem as playingArtistElem, setSong } from "./play.js";
+import { titleElem as playingTitleElem, artistElem as playingArtistElem, setSong } from "./play.js";
 import { data, removeFromPlaylist } from "./userdata.js";
 
 
@@ -49,7 +49,7 @@ export function openSongSettings(song, song__title, song__artist) {
     
         currentlyEditing.title = titleInput.value;
     
-        if (currentlyPlaying === currentlyEditing) 
+        if (data.currentlyPlaying === currentlyEditing) 
             playingTitleElem.innerText = titleInput.value;
         song__title.innerText = titleInput.value;
     }
@@ -58,7 +58,7 @@ export function openSongSettings(song, song__title, song__artist) {
     
         currentlyEditing.artist = artistInput.value;
     
-        if (currentlyPlaying === currentlyEditing) 
+        if (data.currentlyPlaying === currentlyEditing) 
             playingArtistElem.innerText = artistInput.value;
         song__artist.innerText = artistInput.value;
     }
@@ -70,11 +70,11 @@ deleteBtn.addEventListener("click", () => {
     for (const pid of currentlyEditing.playlistIDs) {
         removeFromPlaylist(currentlyEditing, data.playlists[pid]);
     }
-    delete data.songs[currentlyEditing.id];
+    data.songs[currentlyEditing.id] = undefined;
 
     fetch("http://localhost:5000/files/" + currentlyEditing.filename, {method: "DELETE"});
 
-    if (currentlyPlaying === currentlyEditing) setSong("none");
+    if (data.currentlyPlaying === currentlyEditing) setSong("none");
     currentlyEditing = null;
 
     sidebar.setSidebarOpen(false);
