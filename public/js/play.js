@@ -1,6 +1,7 @@
 import { addSliderDragEvent } from "./sliders.js";
 import { getTimeDisplay } from "./songElements.js";
 import { data } from "./userdata.js";
+import Heap from "./heap.js";
 
 const audio = new Audio();
 

@@ -13,7 +13,7 @@ app.post("/create-account-dir/:username", (req, res) => {
 
 app.post("/set-hash/:username/:pass", async (req, res) => {
 
-    bcrypt.hash(req.params["pass"], 10, (err, hash) => {
+    bcrypt.hash(req.params["pass"], 11, (err, hash) => {
         fs.writeFile(
             join(__dirname, "users", req.params["username"], "hash.txt"), 
             hash, 

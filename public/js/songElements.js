@@ -2,7 +2,6 @@ import * as songSettings from "./songSettings.js"
 import * as play from "./play.js"
 import * as userdata from "./userdata.js"
 
-
 export function createSongEntry(song, playlist) {
     
     const songEntry = createElement("div", null, "song " + song.id);
@@ -99,6 +98,8 @@ export function setActivePlaylist(playlist, init) {
     if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
     activePlaylistGroup = playlist.groupElem;
     activePlaylistGroup.style.display = "flex";
+
+    
 }
 
 function createElement(tag, id, classes, text) {
