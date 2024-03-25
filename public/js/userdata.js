@@ -103,12 +103,26 @@ export const data = {
     },
 
     async saveData(cb) {
-        json.currentSongID = json.currentlyPlaying.id;
     
-        const stringified = JSON.stringify(json, 
+        const stringified = JSON.stringify(data, 
             (key, value) => {
-                if (["id", "playlistIDs", "groupElem", "optionElem", "SongNode", "currentlyPlaying"].includes(key)) return undefined;
-                if (value instanceof Set) return Array.from(value)
+                if (value instanceof Function) return undefined;
+
+                const ignore = [
+                    "id",
+                    "groupElem",
+                    "songElems",
+                    "playlistElem",
+                    "checkboxDiv",
+                    "songNode",
+                    "viewPlaylist"
+                ]
+                if (ignore.includes(key)) return undefined;
+                
+                if (value instanceof Set) return (key === "songs")? Array.from(value).map(v => v.id) : undefined;
+                if (key === "song" || key === "listenPlaylist") return value.id;
+                if (value instanceof Map) return Object.fromEntries(value);
+                
                 return value;
             }, 4
         )
@@ -132,16 +146,16 @@ async function fetchUserdata() {
 
     for (let pid in json.playlists) {
         const playlistJSON = json.playlists[pid];
-        const playlist = new Playlist(pid, playlistJSON.title, playlistJSON.songIDs.map(sid => data.songs.get(sid)));
+        const playlist = new Playlist(pid, playlistJSON.title, playlistJSON.songs.map(sid => data.songs.get(sid)));
         
         for (const song of playlist.songs) 
             song.addToPlaylist(playlist); 
     }
 
-    data.curr.song = data.songs.get(json.curr.songID);
+    data.curr.song = data.songs.get(json.curr.song);
     setSong(data.curr.song);
 
-    songElements.setViewPlaylist(data.playlists.get(json.curr.playlistID), true);
+    songElements.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);
     data.updateListenPlaylist();
 }
 fetchUserdata();

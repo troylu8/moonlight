@@ -15,7 +15,7 @@ export let tracking = false;
 let updateLoadingBarID;
 
 async function getyt(link) {
-    input.value = input.value.trim();
+    link = link.trim();
     
     if (!isValidLink(link)) 
         return showErrorMsg("invalid link");

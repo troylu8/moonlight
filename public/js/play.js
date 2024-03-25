@@ -176,8 +176,7 @@ export class SongNode {
         data.curr.listenPlaylist = playlist;
 
         const songNodes = Array.from(playlist.songs).map(s => new SongNode(s));
-        if (shuffle) randomizeN(songNodes, Math.ceil(songNodes.length/4));
-        console.log("n " + Math.ceil(songNodes.length/4));
+        if (shuffle) randomize(songNodes);
         console.log(songNodes.map(n => n.song.title));
         
         SongNode.last = songNodes[songNodes.length-1];
@@ -221,15 +220,9 @@ function swap(arr, i, j) {
     arr[j] = temp;
 }
 
-/** randomize array - the last n terms of original array cannot be in the first n terms of new array */
-function randomizeN(arr, n) {
-    let i = 0;
-    for (; i < n; i++) {
-        swap(arr, i, rand(i, arr.length-n-1));
-    }
-    for (; i < arr.length; i++) {
+function randomize(arr) {
+    for (let i = 0; i < arr.length; i++) 
         swap(arr, i, rand(i, arr.length-1));
-    }
     return arr;
 }
 
@@ -240,7 +233,7 @@ document.getElementById("next").addEventListener("click", () => {
      
     // if not at the top of history stack, play next in stack
     console.log(data.curr.song === SongNode.last);
-    if (data.curr.song === SongNode.last) {
+    if (data.curr.song.songNode === SongNode.last) {
         SongNode.updatePlaylistCycle(data.curr.listenPlaylist, data.settings.shuffle);
     }
 
