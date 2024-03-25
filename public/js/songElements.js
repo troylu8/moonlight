@@ -1,6 +1,6 @@
 import * as songSettings from "./songSettings.js";
-import { togglePlay } from "./play.js";
-import * as userdata from "./userdata.js";
+import { togglePlay, SongNode } from "./play.js";
+import { data } from "./userdata.js";
 
 export function createSongEntry(song, playlist) {
     
@@ -26,8 +26,13 @@ export function createSongEntry(song, playlist) {
 
     song__play.addEventListener("click", () => {
         togglePlay(song)
-        userdata.data.currentPlaylistID = activePlaylistGroup.playlist.id;
-        console.log(userdata.data.currentPlaylistID);
+
+        // if currently viewing playlist  !== currently playing playlist
+        if (data.curr.viewPlaylist !== SongNode.playlistAttachedTo) {
+            data.curr.listenPlaylist = data.curr.viewPlaylist;
+            SongNode.updatePlaylistCycle();
+        }
+        
     });
     song__options.addEventListener("click", () => 
         songSettings.openSongSettings(song, song__title, song__artist)
@@ -52,7 +57,7 @@ export function createPlaylistElems(playlist) {
     // PLAYLIST ENTRY IN LEFT NAV ===
     const playlistElem = createElement("div", "li:" + playlist.id, "playlist");
     playlistElem.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
-    playlistElem.addEventListener("click", () => setActivePlaylist(playlist));
+    playlistElem.addEventListener("click", () => setViewPlaylist(playlist));
     
     const playlist__options = createElement("button", null, "playlist__options", "...");
     // add event listener
@@ -74,12 +79,12 @@ export function createPlaylistElems(playlist) {
 
     const checkbox = createElement("input", "song-settings__playlist:" + playlist.id);
     checkbox.type = "checkbox";
-    checkbox.playlistID = playlist.id;
+    checkbox.playlist = playlist;
     checkbox.addEventListener("change", () => {
         if (checkbox.checked)
-            userdata.addToPlaylist(songSettings.currentlyEditing, playlist);
+            data.addToPlaylist(songSettings.currentlyEditing, playlist);
         else
-            userdata.removeFromPlaylist(songSettings.currentlyEditing, playlist);
+            data.removeFromPlaylist(songSettings.currentlyEditing, playlist);
     })
     option.appendChild(checkbox);
     
@@ -90,11 +95,13 @@ export function createPlaylistElems(playlist) {
     playlistCheckboxes.appendChild(option);
 }
 
-export let activePlaylistGroup;
+let activePlaylistGroup;
 const playlistHeader = document.getElementById("playlist-header");
 
-export function setActivePlaylist(playlist, init) {
-    if (playlist.groupElem === activePlaylistGroup && !init) return;
+export function setViewPlaylist(playlist, init) {
+    if (playlist === data.curr.viewPlaylist && !init) return;
+
+    data.curr.viewPlaylist = playlist;
 
     playlistHeader.innerText = playlist.title;
     songSettings.updateSongEntries();
@@ -102,7 +109,6 @@ export function setActivePlaylist(playlist, init) {
     if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
     activePlaylistGroup = playlist.groupElem;
     activePlaylistGroup.style.display = "flex";
-
 }
 
 function createElement(tag, id, classes, text) {

@@ -1,6 +1,6 @@
 import * as sidebar from "./sidebar.js";
 import { titleElem as playingTitleElem, artistElem as playingArtistElem, setSong } from "./play.js";
-import { data, removeFromPlaylist } from "./userdata.js";
+import { data, Song } from "./userdata.js";
 
 
 export const songSettings = document.getElementById("song-settings");
@@ -12,6 +12,7 @@ const artistInput = document.getElementById("song-settings__artist");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
 const deleteBtn = document.getElementById("song-settings__delete");
 
+/** @type {Song} */
 export let currentlyEditing;
 let allEntriesUpdated = true; 
 
@@ -29,14 +30,12 @@ export function openSongSettings(song, song__title, song__artist) {
     for (const checkboxDiv of playlistCheckboxes.childNodes) 
         checkboxDiv.remove();
     
-    for (const pid of Object.keys(data.playlists)) {
-        const checkboxDiv = data.playlists[pid].checkboxDiv;
-        checkboxDiv.firstChild.checked = currentlyEditing.playlistIDs.has( Number(pid) );
+    for (const playlist of data.playlists.values()) {
+        const hasCurrentlyEditing = currentlyEditing.playlists.has(playlist);
+        playlist.checkboxDiv.firstChild.checked = hasCurrentlyEditing;
 
-        if (checkboxDiv.firstChild.checked) 
-            playlistCheckboxes.appendChild(checkboxDiv);
-        else 
-            notchecked.push(checkboxDiv);
+        if (hasCurrentlyEditing)    playlistCheckboxes.appendChild(playlist.checkboxDiv);
+        else                        notchecked.push(playlist.checkboxDiv);
         
     }
     for (const checkboxDiv of notchecked) 
@@ -49,7 +48,7 @@ export function openSongSettings(song, song__title, song__artist) {
     
         currentlyEditing.title = titleInput.value;
     
-        if (data.currentlyPlaying === currentlyEditing) 
+        if (data.curr.song === currentlyEditing) 
             playingTitleElem.innerText = titleInput.value;
         song__title.innerText = titleInput.value;
     }
@@ -58,7 +57,7 @@ export function openSongSettings(song, song__title, song__artist) {
     
         currentlyEditing.artist = artistInput.value;
     
-        if (data.currentlyPlaying === currentlyEditing) 
+        if (data.curr.song === currentlyEditing) 
             playingArtistElem.innerText = artistInput.value;
         song__artist.innerText = artistInput.value;
     }
@@ -74,7 +73,7 @@ deleteBtn.addEventListener("click", () => {
 
     fetch("http://localhost:5000/files/" + currentlyEditing.filename, {method: "DELETE"});
 
-    if (data.currentlyPlaying === currentlyEditing) setSong("none");
+    if (data.curr.song === currentlyEditing) setSong("none");
     currentlyEditing = null;
 
     sidebar.setSidebarOpen(false);

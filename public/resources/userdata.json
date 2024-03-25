@@ -1,24 +1,21 @@
 {
-    "currentPlaylistID": 3,
+    "curr": {
+        "songID": "ytAqI97zHMoQw",
+        "playlistID": "pid1",
+        "seek": 123
+    },
     "playlists": {
-        "1": {
+        "pid1": {
             "title": "another start again??????",
-            "songIDs": [],
-            "checkboxDiv": {}
+            "songIDs": ["ytAqI97zHMoQw"]
         },
-        "2": {
+        "pid2": {
             "title": "i wish i could go",
-            "songIDs": [
-                "ytAqI97zHMoQw"
-            ],
-            "checkboxDiv": {}
+            "songIDs": []
         },
-        "3": {
-            "title": "this whole time.",
-            "songIDs": [
-                "ytAqI97zHMoQw"
-            ],
-            "checkboxDiv": {}
+        "pid3": {
+            "title": "this whole time",
+            "songIDs": ["ytAqI97zHMoQw"]
         }
     },
     "songs": {
@@ -29,6 +26,5 @@
             "size": 4060420,
             "duration": 243
         }
-    },
-    "currentSongID": "ytAqI97zHMoQw"
+    }
 }

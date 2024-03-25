@@ -1,51 +1,47 @@
 import { addSliderDragEvent } from "./sliders.js";
-import { getTimeDisplay, activePlaylistGroup } from "./songElements.js";
-import { data } from "./userdata.js";
+import { getTimeDisplay } from "./songElements.js";
+import { data, Song } from "./userdata.js";
 
 const audio = new Audio();
-
 
 export const titleElem = document.getElementById("info__title");
 export const artistElem = document.getElementById("info__artist");
 
-/** set a new currently playing song, will reset seek to beginning */
+/** set a new currently playing song, will reset seek to beginning*/
 export function setSong(song) {
     if (!song) return;
     if (song === "none") {
         audio.src = "";
-        data.currentlyPlaying = null;``
+        data.curr.song = null;
 
         titleElem.innerText = "-";
         artistElem.innerText = "-";
-        data.currentSongID = undefined;
+        data.curr.song = undefined
         return;
     };
 
-    
-
     //TODO: WHEN USING ELECTRON, USE ./ INSTEAD OF ../
     audio.src = "../resources/songs/" + encodeURIComponent(song.filename);
-    data.currentlyPlaying = song;
+    data.curr.song = song;
 
     titleElem.innerText = song.title;
     artistElem.innerText = song.artist;
-    
-    data.currentSongID = song.id;
-    console.log("set currentsongid to " + data.currentSongID);
-
-    updatePlaylistCycle();
 }
 
 export function togglePlay(song) {
-    if (song === undefined || song === data.currentlyPlaying) {
-        if (data.currentlyPlaying === null) return;
+    // same song
+    if (song === undefined || song === data.curr.song) {
+        if (data.curr.song == null) return;
         if (audio.paused)   audio.play();
         else                audio.pause();
     }
+    
+    // new song
     else {
         setSong(song);
         audio.play();
-    }   
+    }
+
 }
 
 document.getElementById("play").onclick = () => togglePlay();
@@ -91,40 +87,87 @@ addSliderDragEvent(seek, () => {
 
 seek.addEventListener("mouseup", () => { audio.currentTime = seek.value / 5; });
 
-/** @type {SongNode} currently playing song, use playlist cycle when shuffle is off */
-let currentSongNode;
 
-document.getElementById("next").addEventListener("click", () => {
-    if (data.playlists[data.currentPlaylistID].songIDs.length <= 1) return;
-     
-    currentSongNode = currentSongNode.next;
-    setSong(currentSongNode.song);
-    audio.play();
-})
+export class SongNode {
 
+    /** @type {Playlist} the playlist the current `SongNode` cycle is attached to  */
+    static playlistAttachedTo;
+    
+    /** @type {SongNode} `SongNode` of first song in current playlist */
+    static first;
+    /** @type {SongNode} `SongNode` of last song in current playlist */
+    static last;
 
-class SongNode {
     constructor(song, prev, next) {
+        /** @type {SongNode} */
         this.next = next;
+        if (next) next.prev = this;
+
+        /** @type {SongNode} */
         this.prev = prev;
+        if (prev) prev.next = this;
+
+        /** @type {Song} */
         this.song = song;
 
         song.songNode = this;
     }
-}
 
-function createPlaylistCycle(playlist) {
-
-    const songNodes = Array.from(playlist.songIDs).map(sid => new SongNode(data.songs[sid]));
-    
-    for (let i = 0; i < songNodes.length; i++) {
-        songNodes[i].prev = songNodes[i === 0 ? songNodes.length-1 : i-1 ];
-        songNodes[i].next = songNodes[(i+1) % songNodes.length];
+    /**
+     * @param {Song} song
+     * @param {SongNode} ref the `SongNode` to insert `song.songNode` after
+     */ 
+    static addNodeAfter(song, ref) {
+        song.songNode = new SongNode(song, ref, ref.next);
+        if (ref === SongNode.last) SongNode.last = song.songNode;
     }
-    console.log(songNodes);
 
-    return data.currentlyPlaying.songNode;
+    static addNodeToEnd(song) {
+        SongNode.addNodeAfter(song, SongNode.last);
+    }
+
+    static createCycle(playlist) {
+        if (SongNode.playlistAttachedTo === playlist) return data.curr.song.songNode;
+        SongNode.playlistAttachedTo = playlist;
+
+        const songNodes = Array.from(playlist.songs).map(s => new SongNode(s));
+        SongNode.first = songNodes[0];
+        SongNode.last = songNodes[songNodes.length-1];
+        
+        for (let i = 0; i < songNodes.length; i++) {
+            songNodes[i].prev = songNodes[i === 0 ? songNodes.length-1 : i-1 ];
+            songNodes[i].next = songNodes[(i+1) % songNodes.length];
+        }
+    
+        return data.curr.song.songNode;
+    }
+    static updatePlaylistCycle() {
+        data.curr.song.songNode = SongNode.createCycle(data.curr.viewPlaylist);
+    }
+
+    static print() {
+        for (let p = SongNode.first; p !== SongNode.last; p = p.next) {
+            console.log(p.song.title);
+        }
+        // console.log("first", SongNode.first.song.title);
+        console.log("last", SongNode.last.song.title);
+        console.log(SongNode.first);
+    }
 }
-function updatePlaylistCycle() {
-    currentSongNode = createPlaylistCycle(data.playlists[data.currentPlaylistID]);
-}
+
+document.getElementById("next").addEventListener("click", () => {
+    if (data.curr.listenPlaylist.songs.size <= 1) return;
+     
+    // if not at the top of history stack, play next in stack
+
+    // if no next song
+    
+    setSong(data.curr.song.songNode.next.song);
+
+    audio.play();
+})
+
+
+document.getElementById("prev").addEventListener("click", () => {
+
+})
