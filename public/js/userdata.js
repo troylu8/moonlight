@@ -14,7 +14,7 @@ export class Song {
         this.playlists = new Set(playlists);
         /** @type {Set<HTMLElement>} */
         this.songElems = null;
-        /** @type {SongNode} */s
+        /** @type {SongNode} */
         this.songNode = null;
 
         data.songs.set(this.id, this);
@@ -25,7 +25,7 @@ export class Song {
         this.playlists.add(playlist);
 
         if (playlist === data.curr.listenPlaylist) {
-            SongNode.addNodeToEnd(this);
+            SongNode.addNode(this, data.settings.shuffle);
         }
 
         return songElements.createSongEntry(this, playlist);
@@ -39,7 +39,7 @@ export class Song {
 
     delete() {
 
-        // if song in curr playlist, delete songNode. 
+        // if song in curr playlist, delete SongNode. 
         // if it isnt, no need to delete as future updatePlaylistCycle() wont include this song
         if (this.playlists.has(data.curr.listenPlaylist)) {
             this.songNode.delete();
@@ -78,6 +78,10 @@ export const data = {
     Song: Song,
     Playlist: Playlist,
 
+    settings: {
+        shuffle: true
+    },
+
     curr: {
         /** @type {Song} */
         song: null,
@@ -95,7 +99,7 @@ export const data = {
 
     updateListenPlaylist() {
         this.curr.listenPlaylist = this.curr.viewPlaylist;
-        if (!nextSongShuffle) SongNode.updatePlaylistCycle();
+        SongNode.updatePlaylistCycle(this.curr.listenPlaylist, data.settings.shuffle);
     },
 
     async saveData(cb) {
@@ -103,7 +107,7 @@ export const data = {
     
         const stringified = JSON.stringify(json, 
             (key, value) => {
-                if (["id", "playlistIDs", "groupElem", "optionElem", "songNode", "currentlyPlaying"].includes(key)) return undefined;
+                if (["id", "playlistIDs", "groupElem", "optionElem", "SongNode", "currentlyPlaying"].includes(key)) return undefined;
                 if (value instanceof Set) return Array.from(value)
                 return value;
             }, 4

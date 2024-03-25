@@ -15,6 +15,8 @@ export let tracking = false;
 let updateLoadingBarID;
 
 async function getyt(link) {
+    input.value = input.value.trim();
+    
     if (!isValidLink(link)) 
         return showErrorMsg("invalid link");
 
@@ -110,8 +112,6 @@ async function destroy() {
 
 button.onclick = () => {
     if (!enabled) return console.log("can't click now!");
-
-    input.value = input.value.trim();
 
     if (tracking) destroy();
     else          getyt(input.value);

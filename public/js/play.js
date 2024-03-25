@@ -76,29 +76,38 @@ const seekTotal = document.getElementById("seek__total");
 audio.addEventListener("loadedmetadata", () => { 
     seek.value = 0;
     seek.updateSliderColors(); 
-    seek.max = Math.floor(audio.duration * 5);
+    seek.max = Math.floor(audio.duration);
     seekTotal.innerText = getTimeDisplay(audio.duration);
 });
 
 audio.addEventListener("timeupdate", () => {
     if (seek.dragging) return;
 
-    seek.value = audio.currentTime * 5;
+    seek.value = audio.currentTime;
     seek.updateSliderColors(); 
     seekPassed.innerText = getTimeDisplay(audio.currentTime);
 })
 
 addSliderDragEvent(seek, () => {
-    seekPassed.innerText = getTimeDisplay(seek.value / 5);
+    seekPassed.innerText = getTimeDisplay(seek.value);
 }); 
 
-seek.addEventListener("mouseup", () => { audio.currentTime = seek.value / 5; });
+seek.addEventListener("mouseup", () => { audio.currentTime = seek.value; });
 
 
 export class SongNode {
     
-    /** @type {SongNode} `SongNode` of last song in current playlist */
+    /** @type {SongNode} `SongNode` of last song in current playlist order */
     static last;
+
+    /**
+     * sole purpose is to be used to generate random SongNodes in O(1) amortized
+     * 
+     * NOT NECESSARILY IN ORDER!!!
+     * 
+     * `SongNode.last` ISNT ALWAYS THE LAST ELEMENT IN THIS ARR
+     * @type {Array<SongNode>} `null` when shuffle is off */
+    static all;
 
     constructor(song, prev, next) {
         /** @type {SongNode} */
@@ -112,77 +121,134 @@ export class SongNode {
         /** @type {Song} */
         this.song = song;
 
+        this.index = (prev)? prev.index + 1 : 0;
+
         song.songNode = this;
     }
 
     delete() {
         if (SongNode.last.next === SongNode.last.next.next) {
             SongNode.last = null;
+            if (SongNode.all) SongNode.all = [];
             console.log("deleted sole node");
             return;
         };
+
+        if (SongNode.all) {
+            const lastInArr = SongNode.all[SongNode.all.length-1];
+            swap(SongNode.all, this.index, SongNode.all.length-1);
+            lastInArr.index = this.index;
+        }
+
+        if (this === SongNode.last) {
+            SongNode.last = this.prev;
+
+            if (SongNode.all) SongNode.all.pop();
+        }
 
         this.prev.next = this.next;
         this.next.prev = this.prev;
     }
 
-    /**
-     * @param {Song} song
-     * @param {SongNode} ref the `SongNode` to insert `song.songNode` after
-     */ 
-    static addNodeAfter(song, ref) {
-        song.songNode = new SongNode(song, ref, ref.next);
-        if (ref === SongNode.last) SongNode.last = song.songNode;
-    }
-
     static addNodeToEnd(song) {
-        SongNode.addNodeAfter(song, SongNode.last);
+        const newNode = new SongNode(song, SongNode.last, SongNode.last.next);
+        SongNode.last = newNode;
+        if (SongNode.all) SongNode.all.push(newNode);
+        return newNode;
     }
 
-    static createCycle(playlist) {
+    static addNode(song, shuffle) {
+        if (shuffle) {
+            
+            const other = SongNode.all[Math.floor(Math.random() * SongNode.all.length)];
+            console.log("other ", other);
+            // add a copy of the other node to the end...
+            SongNode.addNodeToEnd(other.song);
+
+            // ...then edit the original other node to feature new song
+            other.song = song;
+            song.songNode = other;
+        }
+        else this.addNodeToEnd(song);
+    }
+
+    static createCycle(playlist, shuffle) {
         data.curr.listenPlaylist = playlist;
 
         const songNodes = Array.from(playlist.songs).map(s => new SongNode(s));
-        SongNode.first = songNodes[0];
+        if (shuffle) randomizeN(songNodes, Math.ceil(songNodes.length/4));
+        console.log("n " + Math.ceil(songNodes.length/4));
+        console.log(songNodes.map(n => n.song.title));
+        
         SongNode.last = songNodes[songNodes.length-1];
         
         for (let i = 0; i < songNodes.length; i++) {
             songNodes[i].prev = songNodes[i === 0 ? songNodes.length-1 : i-1 ];
             songNodes[i].next = songNodes[(i+1) % songNodes.length];
         }
+
+        SongNode.all = shuffle? songNodes : null;
     
         return data.curr.song.songNode;
     }
-    static updatePlaylistCycle() {
-        data.curr.song.songNode = SongNode.createCycle(data.curr.viewPlaylist);
+    static updatePlaylistCycle(playlist, shuffle) {
+        console.log("starting", playlist.songs);
+        data.curr.song.songNode = SongNode.createCycle(playlist, shuffle);
+        console.log("updated");
     }
 
     static print() {
+
         if (SongNode.last == null) return console.log("no song nodes");
+
+        console.log("SongNode.all", SongNode.all? SongNode.all.map(n => n.song.title) : "null" );
+        
         for (let p = SongNode.last.next; p !== SongNode.last; p = p.next) {
             console.log(p.song.title);
         }
         console.log("last", SongNode.last.song.title);
+        console.log(SongNode.last.next);
     }
 }
+
+function rand(min, max) {
+    return min + Math.floor(Math.random() * ((max - min) + 1));
+}
+function swap(arr, i, j) {
+    console.log("swapping", i, j);
+    const temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+}
+
+/** randomize array - the last n terms of original array cannot be in the first n terms of new array */
+function randomizeN(arr, n) {
+    let i = 0;
+    for (; i < n; i++) {
+        swap(arr, i, rand(i, arr.length-n-1));
+    }
+    for (; i < arr.length; i++) {
+        swap(arr, i, rand(i, arr.length-1));
+    }
+    return arr;
+}
+
+
 
 document.getElementById("next").addEventListener("click", () => {
     if (data.curr.listenPlaylist.songs.size <= 1) return;
      
     // if not at the top of history stack, play next in stack
-    
-    // if shuffle is on, use shuffle algo. otherwise get next `SongNode` 
-    togglePlay(nextSongShuffle? nextSongShuffle() : data.curr.song.songNode.next.song);
+    console.log(data.curr.song === SongNode.last);
+    if (data.curr.song === SongNode.last) {
+        SongNode.updatePlaylistCycle(data.curr.listenPlaylist, data.settings.shuffle);
+    }
+
+    togglePlay(data.curr.song.songNode.next.song);
 })
 
 document.getElementById("prev").addEventListener("click", () => {
     if (data.curr.listenPlaylist.songs.size <= 1) return;
 
-    if (nextSongShuffle && songHistory.length === 0) {
-        console.log("song history empty");
-        return;
-    }
-
-    // if shuffle is on, take from `songHistory`. otherwise get prev `SongNode` 
-    togglePlay(nextSongShuffle? songHistory.pop() : data.curr.song.songNode.prev.song)
+    togglePlay(data.curr.song.songNode.prev.song);
 })
