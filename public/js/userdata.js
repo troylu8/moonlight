@@ -1,5 +1,5 @@
 import * as songElements from "./songElements.js";
-import { setSong, SongNode } from "./play.js";
+import {setSong, SongNode, nextSongShuffle } from "./play.js";
 
 export class Song {
     constructor(id, options, playlists) {
@@ -14,7 +14,7 @@ export class Song {
         this.playlists = new Set(playlists);
         /** @type {Set<HTMLElement>} */
         this.songElems = null;
-        /** @type {SongNode} */
+        /** @type {SongNode} */s
         this.songNode = null;
 
         data.songs.set(this.id, this);
@@ -24,7 +24,7 @@ export class Song {
         playlist.songs.add(this);
         this.playlists.add(playlist);
 
-        if (playlist === SongNode.playlistAttachedTo) {
+        if (playlist === data.curr.listenPlaylist) {
             SongNode.addNodeToEnd(this);
         }
 
@@ -38,12 +38,19 @@ export class Song {
     }
 
     delete() {
+
+        // if song in curr playlist, delete songNode. 
+        // if it isnt, no need to delete as future updatePlaylistCycle() wont include this song
+        if (this.playlists.has(data.curr.listenPlaylist)) {
+            this.songNode.delete();
+        }
+
         for (const playlist of this.playlists) 
             this.removeFromPlaylist(playlist);
         
         data.songs.delete(this);
 
-        fetch("http://localhost:5000/files/" + this.filename)
+        fetch("http://localhost:5000/files/" + this.filename, {method: "DELETE"});
     }
 }
 
@@ -86,6 +93,11 @@ export const data = {
     /** sid -> song @type {Map<string, Song>} */
     songs: new Map(),
 
+    updateListenPlaylist() {
+        this.curr.listenPlaylist = this.curr.viewPlaylist;
+        if (!nextSongShuffle) SongNode.updatePlaylistCycle();
+    },
+
     async saveData(cb) {
         json.currentSongID = json.currentlyPlaying.id;
     
@@ -123,12 +135,9 @@ async function fetchUserdata() {
     }
 
     data.curr.song = data.songs.get(json.curr.songID);
-    data.curr.listenPlaylist = data.playlists.get(json.curr.playlistID);
-
-    songElements.setViewPlaylist(data.curr.listenPlaylist, true);
     setSong(data.curr.song);
-    SongNode.updatePlaylistCycle();
+
+    songElements.setViewPlaylist(data.playlists.get(json.curr.playlistID), true);
+    data.updateListenPlaylist();
 }
 fetchUserdata();
-
-

@@ -3,7 +3,7 @@ import * as play from "./play.js";
 
 document.getElementById("info__title").onclick = () => {
     console.log("saving data");
-    userdata.saveData();
+    userdata.data.saveData();
 }
 
 document.body.addEventListener("keydown", (e) => {

@@ -7,6 +7,11 @@ const audio = new Audio();
 export const titleElem = document.getElementById("info__title");
 export const artistElem = document.getElementById("info__artist");
 
+/** @type {function} get next song, `null` when shuffle is off */
+export let nextSongShuffle = null;
+/** @type {Array<Song>} song history, `null` when shuffle is off */
+const songHistory = null;
+
 /** set a new currently playing song, will reset seek to beginning*/
 export function setSong(song) {
     if (!song) return;
@@ -26,6 +31,8 @@ export function setSong(song) {
 
     titleElem.innerText = song.title;
     artistElem.innerText = song.artist;
+
+    if (songHistory) songHistory.push(song);
 }
 
 export function togglePlay(song) {
@@ -89,12 +96,7 @@ seek.addEventListener("mouseup", () => { audio.currentTime = seek.value / 5; });
 
 
 export class SongNode {
-
-    /** @type {Playlist} the playlist the current `SongNode` cycle is attached to  */
-    static playlistAttachedTo;
     
-    /** @type {SongNode} `SongNode` of first song in current playlist */
-    static first;
     /** @type {SongNode} `SongNode` of last song in current playlist */
     static last;
 
@@ -113,6 +115,17 @@ export class SongNode {
         song.songNode = this;
     }
 
+    delete() {
+        if (SongNode.last.next === SongNode.last.next.next) {
+            SongNode.last = null;
+            console.log("deleted sole node");
+            return;
+        };
+
+        this.prev.next = this.next;
+        this.next.prev = this.prev;
+    }
+
     /**
      * @param {Song} song
      * @param {SongNode} ref the `SongNode` to insert `song.songNode` after
@@ -127,8 +140,7 @@ export class SongNode {
     }
 
     static createCycle(playlist) {
-        if (SongNode.playlistAttachedTo === playlist) return data.curr.song.songNode;
-        SongNode.playlistAttachedTo = playlist;
+        data.curr.listenPlaylist = playlist;
 
         const songNodes = Array.from(playlist.songs).map(s => new SongNode(s));
         SongNode.first = songNodes[0];
@@ -146,12 +158,11 @@ export class SongNode {
     }
 
     static print() {
-        for (let p = SongNode.first; p !== SongNode.last; p = p.next) {
+        if (SongNode.last == null) return console.log("no song nodes");
+        for (let p = SongNode.last.next; p !== SongNode.last; p = p.next) {
             console.log(p.song.title);
         }
-        // console.log("first", SongNode.first.song.title);
         console.log("last", SongNode.last.song.title);
-        console.log(SongNode.first);
     }
 }
 
@@ -159,15 +170,19 @@ document.getElementById("next").addEventListener("click", () => {
     if (data.curr.listenPlaylist.songs.size <= 1) return;
      
     // if not at the top of history stack, play next in stack
-
-    // if no next song
     
-    setSong(data.curr.song.songNode.next.song);
-
-    audio.play();
+    // if shuffle is on, use shuffle algo. otherwise get next `SongNode` 
+    togglePlay(nextSongShuffle? nextSongShuffle() : data.curr.song.songNode.next.song);
 })
 
-
 document.getElementById("prev").addEventListener("click", () => {
+    if (data.curr.listenPlaylist.songs.size <= 1) return;
 
+    if (nextSongShuffle && songHistory.length === 0) {
+        console.log("song history empty");
+        return;
+    }
+
+    // if shuffle is on, take from `songHistory`. otherwise get prev `SongNode` 
+    togglePlay(nextSongShuffle? songHistory.pop() : data.curr.song.songNode.prev.song)
 })

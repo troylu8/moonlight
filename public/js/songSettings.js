@@ -66,12 +66,8 @@ export function openSongSettings(song, song__title, song__artist) {
 }
 
 deleteBtn.addEventListener("click", () => {
-    for (const pid of currentlyEditing.playlistIDs) {
-        removeFromPlaylist(currentlyEditing, data.playlists[pid]);
-    }
-    data.songs[currentlyEditing.id] = undefined;
 
-    fetch("http://localhost:5000/files/" + currentlyEditing.filename, {method: "DELETE"});
+    currentlyEditing.delete();
 
     if (data.curr.song === currentlyEditing) setSong("none");
     currentlyEditing = null;

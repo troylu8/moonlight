@@ -28,9 +28,8 @@ export function createSongEntry(song, playlist) {
         togglePlay(song)
 
         // if currently viewing playlist  !== currently playing playlist
-        if (data.curr.viewPlaylist !== SongNode.playlistAttachedTo) {
-            data.curr.listenPlaylist = data.curr.viewPlaylist;
-            SongNode.updatePlaylistCycle();
+        if (data.curr.viewPlaylist !== data.curr.listenPlaylist) {
+            data.updateListenPlaylist();
         }
         
     });
@@ -82,9 +81,9 @@ export function createPlaylistElems(playlist) {
     checkbox.playlist = playlist;
     checkbox.addEventListener("change", () => {
         if (checkbox.checked)
-            data.addToPlaylist(songSettings.currentlyEditing, playlist);
+            songSettings.currentlyEditing.addToPlaylist(playlist);
         else
-            data.removeFromPlaylist(songSettings.currentlyEditing, playlist);
+            songSettings.currentlyEditing.removeFromPlaylist(playlist);
     })
     option.appendChild(checkbox);
     
