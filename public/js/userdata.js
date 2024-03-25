@@ -13,7 +13,7 @@ export class Song {
         /** @type {Set<Playlist>} */
         this.playlists = new Set(playlists);
         /** @type {Set<HTMLElement>} */
-        this.songElems = null;
+        this.songElems = new Set();
         /** @type {SongNode} */
         this.songNode = null;
 
@@ -99,7 +99,7 @@ export const data = {
 
     updateListenPlaylist() {
         this.curr.listenPlaylist = this.curr.viewPlaylist;
-        SongNode.updatePlaylistCycle(this.curr.listenPlaylist, data.settings.shuffle);
+        SongNode.updatePlaylistCycle(false);
     },
 
     async saveData(cb) {
@@ -152,7 +152,9 @@ async function fetchUserdata() {
             song.addToPlaylist(playlist); 
     }
 
+    console.log(data.songs);
     data.curr.song = data.songs.get(json.curr.song);
+    console.log(data.curr.song);
     setSong(data.curr.song);
 
     songElements.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);

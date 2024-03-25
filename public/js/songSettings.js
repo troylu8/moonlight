@@ -17,6 +17,7 @@ export let currentlyEditing;
 let allEntriesUpdated = true; 
 
 export function openSongSettings(song, song__title, song__artist) {
+    updateSongEntries(); // update old song entries before we start editing a new song
 
     currentlyEditing = song;
 
@@ -75,19 +76,20 @@ deleteBtn.addEventListener("click", () => {
     sidebar.setSidebarOpen(false);
 })
 
-const playlistsNav = document.getElementById("playlists-nav");
-
 /** updates all song entries to match currentlyEditing's title and artist */
 export function updateSongEntries() {
     if (allEntriesUpdated) return;
 
-    for (const song__title of playlistsNav.querySelectorAll(".song__title:" + currentlyEditing.id)) {
-        song__title.innerText = currentlyEditing.title;
+    for (const songElem of currentlyEditing.songElems) {
+        setTitleArtistText(songElem, currentlyEditing.title, currentlyEditing.artist);
     }
-    for (const song__artist of playlistsNav.querySelectorAll(".song__artist:" + currentlyEditing.id)) {
-        song__artist.innerText = currentlyEditing.artist;
-    }
+
     console.log("all entries updated");
 
     allEntriesUpdated = true;
+}
+
+function setTitleArtistText(songElem, title, artist) {
+    songElem.firstElementChild.lastElementChild.previousElementSibling.innerText = title;
+    songElem.firstElementChild.lastElementChild.innerText = artist;
 }

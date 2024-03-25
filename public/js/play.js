@@ -57,7 +57,6 @@ const volume = document.getElementById("volume__slider");
 
 addSliderDragEvent(volume, () => {
     audio.volume = volume.value / 100;
-    console.log(audio.volume);
 })
 
 
@@ -172,27 +171,53 @@ export class SongNode {
         else this.addNodeToEnd(song);
     }
 
-    static createCycle(playlist, shuffle) {
+    static createCycle(playlist, shuffle, randomizeCurrentSong) {
         data.curr.listenPlaylist = playlist;
 
-        const songNodes = Array.from(playlist.songs).map(s => new SongNode(s));
-        if (shuffle) randomize(songNodes);
-        console.log(songNodes.map(n => n.song.title));
+        const songNodes = Array.from(playlist.songs).map(s => s.songNode ?? new SongNode(s));
+        const currentIndex = data.curr.song.songNode.index;
         
-        SongNode.last = songNodes[songNodes.length-1];
-        
+        // if SongNode.all == null (shuffle was off previously) then shuffle evenly
+        if (shuffle) {
+            randomize(songNodes);
+            // if previous round was shuffled, kick away recently played songs so they arent played again soon
+            if (SongNode.all != null) {
+                const recentlyPlayed = new Set();
+                let p = data.curr.song.songNode;
+                console.log(p);
+                for (let i = 0; i < songNodes.length/4; i++) {
+                    recentlyPlayed.add(p);
+                    p = p.prev;
+                }
+                console.log("recently played", Array.from(recentlyPlayed).map(n => n.song.title));
+
+                kickAway(songNodes, currentIndex, recentlyPlayed);
+                console.log("kicked away from", currentIndex);
+            
+                if (randomizeCurrentSong) {
+                    swap(
+                        songNodes, currentIndex, 
+                        rand(currentIndex, currentIndex + recentlyPlayed.size-1) % songNodes.length
+                    );
+                    setSong(songNodes[currentIndex].song);
+                }
+            }
+        }
+                        
         for (let i = 0; i < songNodes.length; i++) {
             songNodes[i].prev = songNodes[i === 0 ? songNodes.length-1 : i-1 ];
             songNodes[i].next = songNodes[(i+1) % songNodes.length];
         }
 
-        SongNode.all = shuffle? songNodes : null;
-    
-        return data.curr.song.songNode;
+        SongNode.all = shuffle? songNodes : null;        
+        
+        // last is the previous of the current song upon creating cycle
+        SongNode.last = data.curr.song.songNode.prev;
+
+        SongNode.print();
     }
-    static updatePlaylistCycle(playlist, shuffle) {
-        console.log("starting", playlist.songs);
-        data.curr.song.songNode = SongNode.createCycle(playlist, shuffle);
+    static updatePlaylistCycle(randomizeCurrentSong) {
+        SongNode.createCycle(data.curr.listenPlaylist, data.settings.shuffle, randomizeCurrentSong);
         console.log("updated");
     }
 
@@ -202,11 +227,10 @@ export class SongNode {
 
         console.log("SongNode.all", SongNode.all? SongNode.all.map(n => n.song.title) : "null" );
         
-        for (let p = SongNode.last.next; p !== SongNode.last; p = p.next) {
+        for (let p = data.curr.song.songNode; p !== SongNode.last; p = p.next) {
             console.log(p.song.title);
         }
-        console.log("last", SongNode.last.song.title);
-        console.log(SongNode.last.next);
+        console.log("last: ", SongNode.last.song.title);
     }
 }
 
@@ -214,7 +238,6 @@ function rand(min, max) {
     return min + Math.floor(Math.random() * ((max - min) + 1));
 }
 function swap(arr, i, j) {
-    console.log("swapping", i, j);
     const temp = arr[i];
     arr[i] = arr[j];
     arr[j] = temp;
@@ -226,18 +249,46 @@ function randomize(arr) {
     return arr;
 }
 
+/**
+ * any items in `banned` are not allowed to be within `banned.size` spaces in front of `start`
+ * @param {Array<T>} arr
+ * @param {number} start starting index
+ * @param {Set<T>} banned 
+ */
+function kickAway(arr, start, banned) {
+    const n = banned.size;
+
+    let space = arr.length - n;
+
+    let door = (start + n) % arr.length;
+
+    for (let c = 0; c < n; c++) {
+        const i = (start + c) % arr.length;
+        while (banned.has(arr[i])) {
+            let out = i;
+            while (banned.has(arr[out])) {
+                out = rand(door, door + space-1) % arr.length;
+            }
+            swap(arr, i, out);
+        }
+    }
+
+    return arr;
+}
+
 
 
 document.getElementById("next").addEventListener("click", () => {
     if (data.curr.listenPlaylist.songs.size <= 1) return;
      
     // if not at the top of history stack, play next in stack
-    console.log(data.curr.song === SongNode.last);
-    if (data.curr.song.songNode === SongNode.last) {
-        SongNode.updatePlaylistCycle(data.curr.listenPlaylist, data.settings.shuffle);
-    }
 
-    togglePlay(data.curr.song.songNode.next.song);
+
+    if (data.settings.shuffle && data.curr.song.songNode === SongNode.last) {
+        SongNode.updatePlaylistCycle(true);
+        audio.play();
+    }
+    else togglePlay(data.curr.song.songNode.next.song);
 })
 
 document.getElementById("prev").addEventListener("click", () => {

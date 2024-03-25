@@ -14,7 +14,7 @@ document.body.addEventListener("keydown", (e) => {
         console.log(userdata.data.curr.song);
     }
     if (e.key === "l") {
-        console.log(play.SongNode.last.song.title);
+        console.log(play.SongNode.last.song);
     }
     if (e.key === "q") {
         console.log(userdata.data);

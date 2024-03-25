@@ -2,6 +2,7 @@ import * as songSettings from "./songSettings.js";
 import { togglePlay, SongNode } from "./play.js";
 import { data } from "./userdata.js";
 
+
 export function createSongEntry(song, playlist) {
     
     const songEntry = createElement("div", null, "song " + song.id);
@@ -39,11 +40,14 @@ export function createSongEntry(song, playlist) {
 
     playlist.groupElem.appendChild(songEntry);
 
+    song.songElems.add(songEntry);
     return [songEntry, song__title, song__artist];
 }
 
 export function deleteSongEntry(song, playlist) {
-    playlist.groupElem.querySelector("." + song.id).remove();
+    const entry = playlist.groupElem.querySelector("." + song.id)
+    entry.remove();
+    song.songElems.delete(entry);
 }
 
 const mainDiv = document.getElementById("main-div");
