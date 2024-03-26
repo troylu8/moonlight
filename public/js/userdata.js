@@ -1,5 +1,6 @@
 import * as songElements from "./songElements.js";
-import {setSong, SongNode } from "./play.js";
+import * as play from "./play.js";
+import { SongNode } from "./play.js";
 
 export class Song {
     constructor(id, options, playlists) {
@@ -98,8 +99,7 @@ export const data = {
     songs: new Map(),
 
     updateListenPlaylist() {
-        this.curr.listenPlaylist = this.curr.viewPlaylist;
-        SongNode.updatePlaylistCycle(false);
+        SongNode.updatePlaylistCycle();
     },
 
     async saveData(cb) {
@@ -140,8 +140,6 @@ async function fetchUserdata() {
     const res = await fetch("http://localhost:5000/files/read-userdata");
     const json = await res.json();
 
-    data.settings = json.settings;
-
     for (const sid in json.songs)         
         new Song(sid, json.songs[sid]);
 
@@ -153,12 +151,13 @@ async function fetchUserdata() {
             song.addToPlaylist(playlist); 
     }
 
-    console.log(data.songs);
-    data.curr.song = data.songs.get(json.curr.song);
-    console.log(data.curr.song);
-    setSong(data.curr.song);
+    play.setSong( data.songs.get(json.curr.song) );
 
     songElements.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);
+    
     data.updateListenPlaylist();
+    play.setShuffle(json.settings.shuffle);
+    
+    data.settings = json.settings;
 }
 fetchUserdata();
