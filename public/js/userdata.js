@@ -29,13 +29,13 @@ export class Song {
             SongNode.addNode(this, data.settings.shuffle);
         }
 
-        return songElements.createSongEntry(this, playlist);
+        songElements.createSongEntry(this, playlist);
     }
 
     removeFromPlaylist(playlist) {
         playlist.songs.delete(this);
         this.playlists.delete(playlist);
-        songElements.deleteSongEntry(this, playlist);
+        if (playlist.groupElem) songElements.deleteSongEntry(this, playlist);
     }
 
     delete() {
@@ -69,8 +69,13 @@ export class Playlist {
         /** @type {HTMLElement} */
         this.checkboxDiv = null;
 
+        this.songCycle
+
         data.playlists.set(pid, this);
-        songElements.createPlaylistElems(this);
+
+        songElements.createPlaylistEntries(this);
+        songElements.createPlaylistCheckboxDivs(this);
+    
     }
 }
 

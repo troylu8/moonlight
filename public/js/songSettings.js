@@ -19,6 +19,8 @@ let allEntriesUpdated = true;
 let song__titleLive;
 let song__artistLive;
 
+export function clearCurrentlyEditing() { currentlyEditing = null; }
+
 /** @param {HTMLElement} playlistGroup */
 export function setLiveElements(playlistGroup) {
     song__titleLive = playlistGroup.querySelector(".song__title\\\:" + currentlyEditing.id);
@@ -83,7 +85,7 @@ deleteBtn.addEventListener("click", () => {
     currentlyEditing.delete();
 
     if (data.curr.song === currentlyEditing) setSong("none");
-    currentlyEditing = null;
+    clearCurrentlyEditing();
 
     sidebar.setSidebarOpen(false);
 })

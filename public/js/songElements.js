@@ -1,9 +1,10 @@
 import * as songSettings from "./songSettings.js";
-import { togglePlay, SongNode } from "./play.js";
-import { data } from "./userdata.js";
+import { togglePlay } from "./play.js";
+import { data, Playlist } from "./userdata.js";
 
 
 export function createSongEntry(song, playlist) {
+    if (!playlist.groupElem) return;
     
     const songEntry = createElement("div", null, "song " + song.id);
     songEntry.innerHTML = 
@@ -43,6 +44,8 @@ export function createSongEntry(song, playlist) {
 }
 
 export function deleteSongEntry(song, playlist) {
+    if (!playlist.groupElem) return;
+    
     const entry = playlist.groupElem.querySelector("." + song.id)
     entry.remove();
     song.songElems.delete(entry);
@@ -52,29 +55,8 @@ const mainDiv = document.getElementById("main-div");
 const playlistsNav = document.getElementById("playlists-nav");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
 
-/** adds entry to playlist nav, create playlist__group, create song settings playlist option */
-export function createPlaylistElems(playlist) {
-
-    // PLAYLIST ENTRY IN LEFT NAV ===
-    const playlistElem = createElement("div", "li:" + playlist.id, "playlist");
-    playlistElem.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
-    playlistElem.addEventListener("click", () => setViewPlaylist(playlist));
-    
-    const playlist__options = createElement("button", null, "playlist__options", "...");
-    // add event listener
-    playlistElem.appendChild(playlist__options);
-
-    playlistsNav.appendChild(playlistElem);
-
-
-    // PLAYLIST GROUP ===
-    const playlist__group = createElement("nav", "group:" + playlist.id, "playlist__group");
-    mainDiv.appendChild(playlist__group);
-    playlist.groupElem = playlist__group;
-    playlist__group.playlist = playlist;
-
-
-    // PLAYLIST OPTION IN SONG SETTINGS ===
+/** PLAYLIST OPTION IN SONG SETTINGS */
+export function createPlaylistCheckboxDivs(playlist) {
     const option = createElement("div", null, "song-settings__playlists__option");
     playlist.checkboxDiv = option;
 
@@ -96,11 +78,45 @@ export function createPlaylistElems(playlist) {
     playlistCheckboxes.appendChild(option);
 }
 
+/** PLAYLIST ENTRY IN LEFT NAV  */
+export function createPlaylistEntries(playlist) {
+    
+    const playlistElem = createElement("div", "li:" + playlist.id, "playlist");
+    playlistElem.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
+    playlistElem.addEventListener("click", () => setViewPlaylist(playlist));
+    
+    const playlist__options = createElement("button", null, "playlist__options", "...");
+    playlistElem.appendChild(playlist__options);
+
+    playlistsNav.appendChild(playlistElem);
+}
+
+/** PLAYLIST GROUP IN MAIN DIV */
+/** @param {Playlist} playlist */
+function createPlaylistGroup(playlist) {
+    const playlist__group = createElement("nav", "group:" + playlist.id, "playlist__group");
+    mainDiv.appendChild(playlist__group);
+    playlist.groupElem = playlist__group;
+    playlist__group.playlist = playlist;
+
+    for (const song of playlist.songs) {
+        createSongEntry(song, playlist);
+    }
+
+    return playlist__group;
+}
+
+/** @type {HTMLElement} */
 let activePlaylistGroup;
 const playlistHeader = document.getElementById("playlist-header");
 
-export function setViewPlaylist(playlist, init) {
-    if (playlist === data.curr.viewPlaylist && !init) return;
+/** @param {Playlist} playlist */
+export function setViewPlaylist(playlist) {
+
+    if (!playlist.groupElem) 
+        playlist.groupElem = createPlaylistGroup(playlist);
+    
+    if (playlist === data.curr.viewPlaylist) return;
 
     data.curr.viewPlaylist = playlist;
 

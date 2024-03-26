@@ -112,7 +112,7 @@ export class SongNode {
     /**
      * sole purpose is to be used to generate random SongNodes in O(1) amortized
      * 
-     * NOT NECESSARILY IN ORDER!!!
+     * IF SONGS ARE ADDED OR REMOVED, THIS WON'T BE IN ORDER!
      * 
      * `SongNode.last` ISNT ALWAYS THE LAST ELEMENT IN THIS ARR
      * @type {Array<SongNode>} `null` when shuffle is off */
@@ -249,6 +249,15 @@ export class SongNode {
         console.log("all nodes: ", arr);
     }
 }
+
+class PlaylistCycle {
+    constructor(playlist, shuffle) {
+        
+    }
+}
+
+
+
 
 function rand(min, max) {
     return min + Math.floor(Math.random() * ((max - min) + 1));

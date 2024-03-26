@@ -1,4 +1,4 @@
-import { updateSongEntries, songSettings, currentlyEditing } from "./songSettings.js";
+import { updateSongEntries, songSettings, clearCurrentlyEditing } from "./songSettings.js";
 
 export let open = false;
 
@@ -25,7 +25,7 @@ export function setSidebarContent(elem) {
 }
 
 document.getElementById("sidebar__collapse").onclick = () => {
-    currentlyEditing = null;
+    clearCurrentlyEditing();
     setSidebarOpen(false)
 };
 
