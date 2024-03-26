@@ -34,7 +34,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px
+    gap: 10px;
 }
 
 #main-control__buttons {
@@ -72,12 +72,13 @@ input[type='range']::-webkit-slider-thumb {
     border-radius: 2px;
 }
 
-#volume {
+#play-right {
     display: flex;
     justify-content: end;
     align-items: center;
+    gap: 10px;
 }
 
-#volume__slider {
+#volume-slider {
     width: 100px;
 }

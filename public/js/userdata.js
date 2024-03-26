@@ -1,5 +1,5 @@
 import * as songElements from "./songElements.js";
-import {setSong, SongNode, nextSongShuffle } from "./play.js";
+import {setSong, SongNode } from "./play.js";
 
 export class Song {
     constructor(id, options, playlists) {
@@ -79,7 +79,7 @@ export const data = {
     Playlist: Playlist,
 
     settings: {
-        shuffle: true
+        shuffle: false
     },
 
     curr: {
@@ -140,9 +140,10 @@ async function fetchUserdata() {
     const res = await fetch("http://localhost:5000/files/read-userdata");
     const json = await res.json();
 
+    data.settings = json.settings;
+
     for (const sid in json.songs)         
         new Song(sid, json.songs[sid]);
-    
 
     for (let pid in json.playlists) {
         const playlistJSON = json.playlists[pid];

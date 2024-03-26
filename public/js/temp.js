@@ -7,16 +7,23 @@ document.getElementById("info__title").onclick = () => {
 }
 
 document.body.addEventListener("keydown", (e) => {
-    if (e.key === "a") {
-        play.SongNode.print();
+    switch (e.key) {
+        case "a":
+            play.SongNode.print();
+            break;
+        case "c":
+            console.log(userdata.data.curr.song);
+            break;
+        case "l":
+            console.log(play.SongNode.last.song);
+            break;
+        case "q":
+            console.log(userdata.data);
+            break;
+        case "h":
+            if (!play.history) return console.log(" history is null ");
+            console.log(play.historyIndex, play.history.map(id => userdata.data.songs.get(id).title));
+            break;
     }
-    if (e.key === "c") {
-        console.log(userdata.data.curr.song);
-    }
-    if (e.key === "l") {
-        console.log(play.SongNode.last.song);
-    }
-    if (e.key === "q") {
-        console.log(userdata.data);
-    }
+    
 })

@@ -7,13 +7,15 @@ const audio = new Audio();
 export const titleElem = document.getElementById("info__title");
 export const artistElem = document.getElementById("info__artist");
 
-/** @type {function} get next song, `null` when shuffle is off */
-export let nextSongShuffle = null;
-/** @type {Array<Song>} song history, `null` when shuffle is off */
-const songHistory = null;
+/** `null` when shuffle is off 
+ * @type {Array<string>} song history, contains ids instead of object references so that deleted songs can be garbage collected */
+export let history = data.settings.shuffle? [] : null;
+console.log(data.settings.shuffle, "shuffle");
+/** @type {number} points to current song */
+export let historyIndex = -1;
 
 /** set a new currently playing song, will reset seek to beginning*/
-export function setSong(song) {
+export function setSong(song, withHoldFromHistory) {
     if (!song) return;
     if (song === "none") {
         audio.src = "";
@@ -32,7 +34,10 @@ export function setSong(song) {
     titleElem.innerText = song.title;
     artistElem.innerText = song.artist;
 
-    if (songHistory) songHistory.push(song);
+    if (!withHoldFromHistory && history) {
+        history.push(song.id);
+        historyIndex = history.length-1;
+    }
 }
 
 export function togglePlay(song) {
@@ -53,7 +58,7 @@ export function togglePlay(song) {
 
 document.getElementById("play").onclick = () => togglePlay();
 
-const volume = document.getElementById("volume__slider");
+const volume = document.getElementById("volume-slider");
 
 addSliderDragEvent(volume, () => {
     audio.volume = volume.value / 100;
@@ -189,10 +194,10 @@ export class SongNode {
                     recentlyPlayed.add(p);
                     p = p.prev;
                 }
-                console.log("recently played", Array.from(recentlyPlayed).map(n => n.song.title));
+                // console.log("recently played", Array.from(recentlyPlayed).map(n => n.song.title));
 
                 kickAway(songNodes, currentIndex, recentlyPlayed);
-                console.log("kicked away from", currentIndex);
+                // console.log("kicked away from", currentIndex);
             
                 if (randomizeCurrentSong) {
                     swap(
@@ -214,7 +219,7 @@ export class SongNode {
         // last is the previous of the current song upon creating cycle
         SongNode.last = data.curr.song.songNode.prev;
 
-        SongNode.print();
+        // SongNode.print();
     }
     static updatePlaylistCycle(randomizeCurrentSong) {
         SongNode.createCycle(data.curr.listenPlaylist, data.settings.shuffle, randomizeCurrentSong);
@@ -280,19 +285,51 @@ function kickAway(arr, start, banned) {
 
 document.getElementById("next").addEventListener("click", () => {
     if (data.curr.listenPlaylist.songs.size <= 1) return;
-     
+
+    if (!data.settings.shuffle) 
+        return togglePlay(data.curr.song.songNode.next.song);
+
+    
     // if not at the top of history stack, play next in stack
+    if (historyIndex < history.length-1) {
+        console.log("not at top of history yet");
+        console.log(historyIndex, history.map(id => data.songs.get(id).title));
 
+        setSong( data.songs.get(history[++historyIndex], true) );
+        return;
+    }
 
-    if (data.settings.shuffle && data.curr.song.songNode === SongNode.last) {
+    if (data.curr.song.songNode === SongNode.last) {
         SongNode.updatePlaylistCycle(true);
         audio.play();
     }
-    else togglePlay(data.curr.song.songNode.next.song);
+
+    togglePlay(data.curr.song.songNode.next.song);
+
+    console.log("added to history");
+    console.log(historyIndex, history.map(id => data.songs.get(id).title));
 })
 
 document.getElementById("prev").addEventListener("click", () => {
     if (data.curr.listenPlaylist.songs.size <= 1) return;
 
-    togglePlay(data.curr.song.songNode.prev.song);
+    if (!data.settings.shuffle) 
+        togglePlay(data.curr.song.songNode.prev.song);
+    
+    else {
+        togglePlay( data.songs.get(history[historyIndex--]) );
+    }
+        
+})
+
+const shuffleBtn = document.getElementById("shuffle")
+shuffleBtn.addEventListener("click", () => {
+    data.settings.shuffle = !data.settings.shuffle;
+    SongNode.updatePlaylistCycle(false);
+
+    history = data.settings.shuffle? [] : null;
+    historyIndex = -1;
+
+    console.log("shuffle ", data.settings.shuffle);
+    shuffleBtn.innerText = data.settings.shuffle? "sh" : "__";
 })
