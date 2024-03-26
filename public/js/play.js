@@ -7,12 +7,15 @@ const audio = new Audio();
 export const titleElem = document.getElementById("info__title");
 export const artistElem = document.getElementById("info__artist");
 
-/** `null` when shuffle is off 
+/** 
  * @type {Array<string>} song history, contains ids instead of object references so that deleted songs can be garbage collected */
-export let history = null;
-console.log(data.settings.shuffle, "shuffle");
+export const history = [];
 /** @type {number} points to current song */
 export let historyIndex = -1;
+
+function inThePresent() {
+    return historyIndex === history.length-1;
+}
 
 /** set a new currently playing song, will reset seek to beginning*/
 export function setSong(song) {
@@ -51,9 +54,9 @@ export function togglePlay(song) {
         audio.play();
     }
 
-    if (history && history[historyIndex] != song.id ) {
+    if (inThePresent() && history[historyIndex] != song.id) {
         history.push(song.id);
-        historyIndex = history.length-1;
+        historyIndex++;
     }
 
 }
@@ -298,7 +301,7 @@ document.getElementById("next").addEventListener("click", () => {
         return togglePlay(data.curr.song.songNode.next.song);
 
     // if not at the top of history stack, play next in stack
-    if (historyIndex < history.length-1) {
+    if (!inThePresent()) {
         console.log("not at top of history yet");
         console.log(historyIndex, history.map(id => data.songs.get(id).title));
 
@@ -310,7 +313,7 @@ document.getElementById("next").addEventListener("click", () => {
     if (data.curr.song.songNode.prev === SongNode.last) 
         SongNode.updatePlaylistCycle(true);
 
-    audio.play();
+    togglePlay();
     
 })
 
@@ -320,9 +323,17 @@ document.getElementById("prev").addEventListener("click", () => {
     if (!data.settings.shuffle) 
         togglePlay(data.curr.song.songNode.prev.song);
     
-    else {
-        togglePlay( data.songs.get(history[historyIndex--]) );
+    else if (historyIndex > 0) {
+        togglePlay( data.songs.get(history[--historyIndex]) );
+        console.log("going bakc");
     }
+
+    else {
+        setSong(data.curr.song);
+        audio.play();
+        console.log("no more history");
+    }
+        
         
 })
 
@@ -331,9 +342,6 @@ export function setShuffle(shuffle) {
 
     data.settings.shuffle = shuffle;
     SongNode.updatePlaylistCycle();
-
-    history = data.settings.shuffle? [] : null;
-    historyIndex = -1;
 
     console.log("shuffle ", data.settings.shuffle);
     shuffleBtn.innerText = data.settings.shuffle? "sh" : "__";
