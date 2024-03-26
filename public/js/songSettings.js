@@ -14,10 +14,23 @@ const deleteBtn = document.getElementById("song-settings__delete");
 
 /** @type {Song} */
 export let currentlyEditing;
-let allEntriesUpdated = true; 
+let allEntriesUpdated = true;
+
+let song__titleLive;
+let song__artistLive;
+
+/** @param {HTMLElement} playlistGroup */
+export function setLiveElements(playlistGroup) {
+    song__titleLive = playlistGroup.querySelector(".song__title\\\:" + currentlyEditing.id);
+    song__artistLive = playlistGroup.querySelector(".song__artist\\\:" + currentlyEditing.id);
+    console.log("set live elements");
+}
 
 export function openSongSettings(song, song__title, song__artist) {
     updateSongEntries(); // update old song entries before we start editing a new song
+
+    song__titleLive = song__title;
+    song__artistLive = song__artist;
 
     currentlyEditing = song;
 
@@ -41,30 +54,29 @@ export function openSongSettings(song, song__title, song__artist) {
     }
     for (const checkboxDiv of notchecked) 
         playlistCheckboxes.appendChild(checkboxDiv);
-    
-
-    // using oninput instead of addEventListener to override past event handlers
-    titleInput.oninput = () => {
-        allEntriesUpdated = false;
-    
-        currentlyEditing.title = titleInput.value;
-    
-        if (data.curr.song === currentlyEditing) 
-            playingTitleElem.innerText = titleInput.value;
-        song__title.innerText = titleInput.value;
-    }
-    artistInput.oninput = () => {
-        allEntriesUpdated = false;
-    
-        currentlyEditing.artist = artistInput.value;
-    
-        if (data.curr.song === currentlyEditing) 
-            playingArtistElem.innerText = artistInput.value;
-        song__artist.innerText = artistInput.value;
-    }
 
     sidebar.setSidebarContent(songSettings);
 }
+
+titleInput.addEventListener("input", () => {
+    allEntriesUpdated = false;
+
+    currentlyEditing.title = titleInput.value;
+
+    if (data.curr.song === currentlyEditing) 
+        playingTitleElem.innerText = titleInput.value;
+    
+    song__titleLive.innerText = titleInput.value;
+})
+artistInput.addEventListener("input", () => {
+    allEntriesUpdated = false;
+
+    currentlyEditing.artist = artistInput.value;
+
+    if (data.curr.song === currentlyEditing) 
+        playingArtistElem.innerText = artistInput.value;
+    song__artistLive.innerText = artistInput.value;
+})
 
 deleteBtn.addEventListener("click", () => {
 

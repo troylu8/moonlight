@@ -110,6 +110,9 @@ export function setViewPlaylist(playlist, init) {
     if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
     activePlaylistGroup = playlist.groupElem;
     activePlaylistGroup.style.display = "flex";
+
+    if (songSettings.currentlyEditing) 
+        songSettings.setLiveElements(activePlaylistGroup);
 }
 
 function createElement(tag, id, classes, text) {
