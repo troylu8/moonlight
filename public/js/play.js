@@ -133,6 +133,7 @@ export class SongNode {
     }
 
     delete() {
+        // if there is only 1 node
         if (SongNode.last.next === SongNode.last.next.next) {
             SongNode.last = null;
             if (SongNode.all) SongNode.all = [];
@@ -140,7 +141,8 @@ export class SongNode {
             return;
         };
 
-        if (SongNode.all) {
+        // if shuffle
+        if (data.settings.shuffle) {
             const lastInArr = SongNode.all[SongNode.all.length-1];
             swap(SongNode.all, this.index, SongNode.all.length-1);
             lastInArr.index = this.index;
@@ -148,8 +150,6 @@ export class SongNode {
 
         if (this === SongNode.last) {
             SongNode.last = this.prev;
-
-            if (SongNode.all) SongNode.all.pop();
         }
 
         this.prev.next = this.next;
@@ -157,54 +157,55 @@ export class SongNode {
     }
 
     static addNodeToEnd(song) {
-        const newNode = new SongNode(song, SongNode.last, SongNode.last.next);
+        let newNode;
+
+        // if no nodes, create sole node (points to itself)
+        if (!SongNode.last) {
+            newNode = new SongNode(song);
+            newNode.next = newNode;
+            newNode.prev = newNode;
+        }
+        else newNode = new SongNode(song, SongNode.last, SongNode.last.next);
+
         SongNode.last = newNode;
         if (SongNode.all) SongNode.all.push(newNode);
-        return newNode;
     }
 
     static addNode(song, shuffle) {
-        if (shuffle) {
-            
-            const other = SongNode.all[Math.floor(Math.random() * SongNode.all.length)];
-            console.log("other ", other);
-            // add a copy of the other node to the end...
-            SongNode.addNodeToEnd(other.song);
+        if (!SongNode.last || !shuffle) return this.addNodeToEnd(song);
 
-            // ...then edit the original other node to feature new song
-            other.song = song;
-            song.songNode = other;
-        }
-        else this.addNodeToEnd(song);
+        // add a copy of the other node to the end...
+        const other = SongNode.all[Math.floor(Math.random() * SongNode.all.length)];
+        SongNode.addNodeToEnd(other.song);
+
+        // ...then edit the original other node to feature new song
+        other.song = song;
+        song.songNode = other;
     }
 
-    static createCycle(playlist, shuffle) {
-        data.curr.listenPlaylist = playlist;
+    static createCycle(playlist, shuffle, loopShuffledPlaylist) {
 
         const songNodes = Array.from(playlist.songs).map(s => s.songNode ?? new SongNode(s));
         
         // if SongNode.all == null (shuffle was off previously) then shuffle evenly
-        if (shuffle) {
+        if (shuffle && songNodes.length > 3) {
 
             randomize(songNodes);
             for (const i in songNodes) songNodes[i].index = Number(i);
             
-            // if previous round was shuffled
-            // - kick away recently played songs so they arent played again soon
-            // - randomimze current song
-            if (SongNode.all != null) {
+            if (loopShuffledPlaylist) {
                 const currentIndex = data.curr.song.songNode.index;
 
+                // kick away recently played songs so they arent played again soon
                 const recentlyPlayed = new Set();
                 let p = data.curr.song.songNode;
-                
                 for (let i = 0; i < songNodes.length/4; i++) {
                     p = p.prev;
                     recentlyPlayed.add(p);
                 }
-
                 kickAway(songNodes, currentIndex, recentlyPlayed);
 
+                // randomimze current song
                 swap(
                     songNodes, currentIndex, 
                     rand(currentIndex, currentIndex + recentlyPlayed.size-1) % songNodes.length
@@ -222,23 +223,27 @@ export class SongNode {
 
         // last is the previous of the current song upon creating cycle
         SongNode.last = data.curr.song.songNode.prev;
+
+        data.curr.listenPlaylist = playlist;
     }
 
-    static updatePlaylistCycle() {
-        SongNode.createCycle(data.curr.viewPlaylist, data.settings.shuffle);
-        console.log("updated");
+    static updatePlaylistCycle(loopShuffledPlaylist) {
+        SongNode.createCycle(data.curr.viewPlaylist, data.settings.shuffle, loopShuffledPlaylist);
+        console.log("updated cycle");
     }
 
     static print() {
 
         if (SongNode.last == null) return console.log("no song nodes");
 
-        console.log("SongNode.all", SongNode.all? SongNode.all.map(n => n.song.title) : "null" );
+        const arr = [];
         
-        for (let p = data.curr.song.songNode; p !== SongNode.last; p = p.next) {
-            console.log(p.song.title);
+        for (let p = SongNode.last.next; p !== SongNode.last; p = p.next) {
+            arr.push(p.song.title);
         }
-        console.log("last: ", SongNode.last.song.title);
+        arr.push(SongNode.last.song.title);
+
+        console.log("all nodes: ", arr);
     }
 }
 
@@ -303,7 +308,7 @@ document.getElementById("next").addEventListener("click", () => {
     setSong(data.curr.song.songNode.next.song);
 
     if (data.curr.song.songNode.prev === SongNode.last) 
-        SongNode.updatePlaylistCycle();
+        SongNode.updatePlaylistCycle(true);
 
     audio.play();
     

@@ -26,13 +26,11 @@ export function createSongEntry(song, playlist) {
     songEntry.firstChild.insertBefore(song__play, song__title);
 
     song__play.addEventListener("click", () => {
+
         togglePlay(song)
 
-        // if currently viewing playlist  !== currently playing playlist
-        if (data.curr.viewPlaylist !== data.curr.listenPlaylist) {
+        if (data.curr.viewPlaylist !== data.curr.listenPlaylist) 
             data.updateListenPlaylist();
-        }
-        
     });
     song__options.addEventListener("click", () => 
         songSettings.openSongSettings(song, song__title, song__artist)
