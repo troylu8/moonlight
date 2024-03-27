@@ -4,7 +4,6 @@ const fs = require('fs');
 const { basename } = require('path');
 const mm = require('music-metadata');
 
-
 const router = express.Router();
 
 router.post('/', async (req, res) => {
@@ -23,7 +22,7 @@ router.post('/', async (req, res) => {
     const writeStream = fs.createWriteStream("./public/resources/songs/" + filename);
 
     const song = {
-        id: new Date().getTime(),
+        id: Date.now(),
         filename: filename,
         title: filename.replace(/\.[^\/.]+$/, ""), // regex to remove extensions
         artist: "uploaded by you",

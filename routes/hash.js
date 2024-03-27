@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.get("/:input", async (req, res) => {
 
+    console.log(req.params["input"]);
     hash(req.params["input"], 11, (err, hash) => {
         if (err) res.status(500).end();
         res.status(200).end(hash);

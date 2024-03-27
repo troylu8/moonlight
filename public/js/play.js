@@ -244,8 +244,8 @@ export class PlaylistCycle {
         // last is the previous of the current song upon creating cycle
         this.last = currentSongNode.prev;
 
-        console.log("updated cycle");
-        this.print();
+        // console.log("updated cycle");
+        // this.print();
     }
 
     print() {

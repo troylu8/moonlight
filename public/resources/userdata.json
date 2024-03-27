@@ -9,11 +9,7 @@
     "playlists": {
         "pid1": {
             "title": "another start again??????",
-            "songs": [
-                "ytXzqwvYT_Rmw",
-                "ytORofRTMg-iY",
-                "ytNRQRC_0ZQ00"
-            ]
+            "songs": ["ytXzqwvYT_Rmw", "ytORofRTMg-iY", "ytNRQRC_0ZQ00"]
         },
         "pid2": {
             "title": "i wish i could go",
@@ -28,10 +24,7 @@
         },
         "pid3": {
             "title": "this whole time",
-            "songs": [
-                "ytDXZPtndQw8U",
-                "ytXzqwvYT_Rmw"
-            ]
+            "songs": ["ytDXZPtndQw8U", "ytXzqwvYT_Rmw"]
         }
     },
     "songs": {

@@ -38,3 +38,13 @@
 
     border: solid 2px white;
 }
+
+#create-account, #sign-in, #account-info {
+    display: none;
+    flex-direction: column;
+}
+
+h5 {
+    padding: 15px;
+    margin: 0;
+}

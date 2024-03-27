@@ -2,7 +2,7 @@
 
 <html>
     <head>
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://localhost:5000 https://www.youtube.com https://172.115.50.238:5001" />
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://localhost:5000 https://localhost:5001 https://www.youtube.com https://192.168.1.120:5001" />
         
         <link rel="stylesheet" href="css/vars.css">
         <link rel="stylesheet" href="css/play.css">
@@ -98,12 +98,25 @@
 
                 <div id="settings">
                     <div id="create-account">
-                        <button id="create-account__btn"> create account </button>
-                        <input id="create-account__username" type="text" placeholder="username">
-                        <input id="create-account__password" type="text" placeholder="password">
+                        <h5> create account </h5>
+                        <input id="create-account__username" type="text" placeholder="username"> 
+                        <input id="create-account__password" type="text" placeholder="password"> 
                         <input id="create-account__repeat-password" type="text" placeholder="repeat password">
-                        <button id="create-account__submit"> submit </button>
+                        <button id="create-account__submit"> create </button>
+                        <button id="create-account__already-have"> already have account </button>
                     </div>
+                    <div id="sign-in">
+                        <h5> sign in </h5>
+                        <input id="sign-in__username" type="text" placeholder="username">
+                        <input id="sign-in__password" type="text" placeholder="password">
+                        <button id="sign-in__submit"> sign in </button>
+                        <button id="sign-in__create-account"> create new account </button>
+                    </div>
+                    <div id="account-info">
+                        <h5 id="signed-in-as"> signed in as username </h5>
+                        <button id="sign-out"> sign out </button>
+                    </div>
+
                     <div>
                         <input type="checkbox" id="show-logo">
                         <label for="show-logo"> show logo </label>
@@ -119,6 +132,10 @@
                     <div>
                         <input type="checkbox" id="sort-playlist-options">
                         <label for="sort-playlist-options"> sort playlist options </label>    
+                    </div>
+                    <div>
+                        <input type="checkbox" id="stay-signed-in" checked>
+                        <label for="stay-signed-in"> stay signed in </label>    
                     </div>
                     <p> total space used: <span>456 mb</span> </p>
                 </div>
@@ -137,7 +154,7 @@
     <script src="js/userdata.js" type="module"></script>
     <script src="js/play.js" type="module"></script>
     <script src="js/songElements.js" type="module"></script>
-    <script src="js/heap.js" type="module"></script>
+    <script src="js/sync.js" type="module"></script>
     
     <script src="js/temp.js" type="module"></script>
 
