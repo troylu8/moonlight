@@ -1,6 +1,6 @@
 import * as songElements from "./songElements.js";
 import * as play from "./play.js";
-import { SongNode } from "./play.js";
+import { PlaylistCycle } from "./play.js";
 
 export class Song {
     constructor(id, options, playlists) {
@@ -14,37 +14,31 @@ export class Song {
         /** @type {Set<Playlist>} */
         this.playlists = new Set(playlists);
         /** @type {Set<HTMLElement>} */
-        this.songElems = new Set();
-        /** @type {SongNode} */
-        this.songNode = null;
+        this.songEntries = new Set();
 
         data.songs.set(this.id, this);
     }
 
+    /** @param {Playlist} playlist */
     addToPlaylist(playlist) {
         playlist.songs.add(this);
         this.playlists.add(playlist);
 
-        if (playlist === data.curr.listenPlaylist) {
-            SongNode.addNode(this, data.settings.shuffle);
-        }
-
         songElements.createSongEntry(this, playlist);
+
+        if (playlist.cycle)
+            playlist.cycle.addNode(this, data.settings.shuffle);
     }
 
+    /** @param {Playlist} playlist */
     removeFromPlaylist(playlist) {
         playlist.songs.delete(this);
         this.playlists.delete(playlist);
         if (playlist.groupElem) songElements.deleteSongEntry(this, playlist);
+        if (playlist.cycle) playlist.cycle.nodes.get(this).delete();
     }
 
-    delete() {
-
-        // if song in curr playlist, delete SongNode. 
-        // if it isnt, no need to delete as future updatePlaylistCycle() wont include this song
-        if (this.playlists.has(data.curr.listenPlaylist)) {
-            this.songNode.delete();
-        }
+    delete() {        
 
         for (const playlist of this.playlists) 
             this.removeFromPlaylist(playlist);
@@ -69,7 +63,8 @@ export class Playlist {
         /** @type {HTMLElement} */
         this.checkboxDiv = null;
 
-        this.songCycle
+        /** @type {PlaylistCycle} */
+        this.cycle = null;
 
         data.playlists.set(pid, this);
 
@@ -104,7 +99,12 @@ export const data = {
     songs: new Map(),
 
     updateListenPlaylist() {
-        SongNode.updatePlaylistCycle();
+        data.curr.listenPlaylist = data.curr.viewPlaylist;
+        
+        if (!data.curr.listenPlaylist.cycle)
+            data.curr.listenPlaylist.cycle = new PlaylistCycle(data.curr.listenPlaylist);
+
+        data.curr.listenPlaylist.cycle.update(data.settings.shuffle);
     },
 
     async saveData(cb) {
@@ -116,7 +116,7 @@ export const data = {
                 const ignore = [
                     "id",
                     "groupElem",
-                    "songElems",
+                    "songEntries",
                     "playlistElem",
                     "checkboxDiv",
                     "songNode",

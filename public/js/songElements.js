@@ -39,7 +39,7 @@ export function createSongEntry(song, playlist) {
 
     playlist.groupElem.appendChild(songEntry);
 
-    song.songElems.add(songEntry);
+    song.songEntries.add(songEntry);
     return [songEntry, song__title, song__artist];
 }
 
@@ -48,7 +48,7 @@ export function deleteSongEntry(song, playlist) {
     
     const entry = playlist.groupElem.querySelector("." + song.id)
     entry.remove();
-    song.songElems.delete(entry);
+    song.songEntries.delete(entry);
 }
 
 const mainDiv = document.getElementById("main-div");

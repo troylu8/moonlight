@@ -94,7 +94,7 @@ deleteBtn.addEventListener("click", () => {
 export function updateSongEntries() {
     if (allEntriesUpdated) return;
 
-    for (const songElem of currentlyEditing.songElems) {
+    for (const songElem of currentlyEditing.songEntries) {
         setTitleArtistText(songElem, currentlyEditing.title, currentlyEditing.artist);
     }
 

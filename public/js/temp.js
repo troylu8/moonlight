@@ -9,13 +9,13 @@ document.getElementById("info__title").onclick = () => {
 document.body.addEventListener("keydown", (e) => {
     switch (e.key) {
         case "a":
-            play.SongNode.print();
+            userdata.data.curr.listenPlaylist.cycle.print();
             break;
         case "c":
             console.log(userdata.data.curr.song);
             break;
         case "l":
-            console.log(play.SongNode.last.song);
+            console.log(userdata.data.curr.listenPlaylist.cycle.last);
             break;
         case "q":
             console.log(userdata.data);

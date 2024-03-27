@@ -73,8 +73,8 @@ async function acceptSongResponse(fetchResponse) {
 
     const song = new data.Song(songJSON.id, songJSON)
 
-    const songElems = song.addToPlaylist(data.curr.viewPlaylist); 
-    songSettings.openSongSettings(song, songElems[1], songElems[2]);
+    const songEntries = song.addToPlaylist(data.curr.viewPlaylist); 
+    songSettings.openSongSettings(song, songEntries[1], songEntries[2]);
 }
 
 function showErrorMsg(msg) {
