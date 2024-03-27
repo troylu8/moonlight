@@ -123,8 +123,6 @@ export class SongNode {
         cycle.nodes.set(song, this);
 
         this.index = (prev)? prev.index + 1 : 0;
-
-        song.songNode = this;
     }
 
     delete() {
@@ -201,12 +199,13 @@ export class PlaylistCycle {
 
         // ...then edit the original other node to feature new song
         other.song = song;
-        song.songNode = other;
     }
 
     update(shuffle, loopingShuffledPlaylist) {
         const nodesArr = Array.from(this.playlist.songs).map(s => this.nodes.get(s));
         
+        let currentSongNode = this.nodes.get(data.curr.song);
+
         // if cycle.all == null (shuffle was off previously) then shuffle evenly
         if (shuffle && nodesArr.length > 3) {
 
@@ -214,11 +213,11 @@ export class PlaylistCycle {
             for (const i in nodesArr) nodesArr[i].index = Number(i);
             
             if (loopingShuffledPlaylist) {
-                const currentIndex = data.curr.song.songNode.index;
+                const currentIndex = currentSongNode.index;
 
                 // kick away recently played songs so they arent played again soon
                 const recentlyPlayed = new Set();
-                let p = data.curr.song.songNode;
+                let p = currentSongNode;
                 for (let i = 0; i < nodesArr.length/4; i++) {
                     p = p.prev;
                     recentlyPlayed.add(p);
@@ -231,6 +230,7 @@ export class PlaylistCycle {
                     rand(currentIndex, currentIndex + recentlyPlayed.size-1) % nodesArr.length
                 );
                 setSong(nodesArr[currentIndex].song);
+                currentSongNode = this.nodes.get(data.curr.song);
             }
         }
                         
@@ -239,13 +239,12 @@ export class PlaylistCycle {
             nodesArr[i].next = nodesArr[(i+1) % nodesArr.length];
         }
 
-        this.all = shuffle? nodesArr : null;        
+        this.all = shuffle? nodesArr : null;
 
         // last is the previous of the current song upon creating cycle
-        this.last = data.curr.song.songNode.prev;
+        this.last = currentSongNode.prev;
 
         console.log("updated cycle");
-        console.log(this.playlist.title);
         this.print();
     }
 
@@ -254,13 +253,14 @@ export class PlaylistCycle {
         if (this.last == null) return console.log("no song nodes");
 
         const arr = [];
-        
+        console.log(this.last.cycle === this);
         for (let p = this.last.next; p !== this.last; p = p.next) {
             arr.push(p.song.title);
         }
         arr.push(this.last.song.title);
 
-        console.log("all nodes: ", arr);
+        console.log(this.playlist.title, "all nodes: ", arr);
+        console.log(this.last);
     }
 }
 
@@ -313,9 +313,11 @@ function kickAway(arr, start, banned) {
 document.getElementById("next").addEventListener("click", () => {
     if (data.curr.listenPlaylist.songs.size <= 1) return;
 
+    const nextSongNode = data.curr.listenPlaylist.cycle.nodes.get(data.curr.song).next;
+    
     // if not shuffling, play next song
     if (!data.settings.shuffle)
-        return togglePlay(data.curr.song.songNode.next.song);
+        return togglePlay(nextSongNode.song);
 
     // if not at the top of history stack, play next in stack
     if (!inThePresent()) {
@@ -325,9 +327,9 @@ document.getElementById("next").addEventListener("click", () => {
         return togglePlay( data.songs.get(history[++historyIndex]) );
     }
     
-    setSong(data.curr.song.songNode.next.song);
+    setSong(nextSongNode.song);
 
-    if (data.curr.song.songNode.prev === data.curr.listenPlaylist.cycle.last) {
+    if (nextSongNode.prev === data.curr.listenPlaylist.cycle.last) {
         data.curr.listenPlaylist.cycle.update(true, true);
     }
 
@@ -338,8 +340,11 @@ document.getElementById("next").addEventListener("click", () => {
 document.getElementById("prev").addEventListener("click", () => {
     if (data.curr.listenPlaylist.songs.size <= 1) return;
 
-    if (!data.settings.shuffle) 
-        togglePlay(data.curr.song.songNode.prev.song);
+    
+    if (!data.settings.shuffle) {
+        const nextSong = data.curr.listenPlaylist.cycle.nodes.get(data.curr.song).prev.song;
+        togglePlay(nextSong);
+    }
     
     else if (historyIndex > 0) {
         togglePlay( data.songs.get(history[--historyIndex]) );

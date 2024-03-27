@@ -3,8 +3,8 @@
         "shuffle": true
     },
     "curr": {
-        "song": "ytNRQRC_0ZQ00",
-        "listenPlaylist": "pid1"
+        "song": "ytDXZPtndQw8U",
+        "listenPlaylist": "pid3"
     },
     "playlists": {
         "pid1": {
@@ -28,7 +28,10 @@
         },
         "pid3": {
             "title": "this whole time",
-            "songs": []
+            "songs": [
+                "ytDXZPtndQw8U",
+                "ytXzqwvYT_Rmw"
+            ]
         }
     },
     "songs": {

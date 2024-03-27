@@ -24,10 +24,12 @@ export class Song {
         playlist.songs.add(this);
         this.playlists.add(playlist);
 
-        songElements.createSongEntry(this, playlist);
+        const songElems = songElements.createSongEntry(this, playlist);
 
         if (playlist.cycle)
             playlist.cycle.addNode(this, data.settings.shuffle);
+
+        return songElems;
     }
 
     /** @param {Playlist} playlist */
@@ -45,7 +47,7 @@ export class Song {
         
         data.songs.delete(this);
 
-        fetch("http://localhost:5000/files/" + this.filename, {method: "DELETE"});
+        // fetch("http://localhost:5000/files/" + this.filename, {method: "DELETE"});
     }
 }
 
@@ -56,8 +58,6 @@ export class Playlist {
 
         /** @type {Set<Song>} */
         this.songs = new Set(songs);
-        /** @type {HTMLElement} */
-        this.playlistElem = null;
         /** @type {HTMLElement} */
         this.groupElem = null;
         /** @type {HTMLElement} */
@@ -114,13 +114,12 @@ export const data = {
                 if (value instanceof Function) return undefined;
 
                 const ignore = [
+                    "viewPlaylist",
                     "id",
                     "groupElem",
                     "songEntries",
-                    "playlistElem",
                     "checkboxDiv",
-                    "songNode",
-                    "viewPlaylist"
+                    "cycle"
                 ]
                 if (ignore.includes(key)) return undefined;
                 
