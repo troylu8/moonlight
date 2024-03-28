@@ -42,6 +42,11 @@
 #create-account, #sign-in, #account-info {
     display: none;
     flex-direction: column;
+    align-items: center;
+}
+
+a {
+    cursor: pointer;
 }
 
 h5 {

@@ -1,4 +1,6 @@
 import { setSidebarContent } from "./sidebar.js";
+import { data } from "./userdata.js";
+import * as sync from "./sync.js";
 
 const settings = document.getElementById("settings");
 document.getElementById("settings-btn").onclick = () => setSidebarContent(settings);
@@ -24,32 +26,52 @@ const signedInAs = document.getElementById("signed-in-as");
 
 document.getElementById("create-account__submit")
     .addEventListener("click", async () => {
-        if (!isSafeFilename(create__username.value)) return console.log("username forbidden characters");
+        const error = usernameErrors(create__username);
+        if (error) return console.log(error);
         if (create__password.value !== repeatPassword.value) return console.log("passwords dont match");
 
         //TODO: change to actual ip!
         const createReq = await fetch(`https://localhost:5001/create-account-dir/${create__username.value}`, {method: "POST"});
         if (createReq.status === 409) return console.log("username taken!");
 
-        const hashReq = await fetch(`http://localhost:5000/hash/${create__password.value}`);
-        const hash = await hashReq.text();
-        
-        const setHashReq = await fetch(`https://localhost:5001/set-hash/${create__username.value}`, 
-            {
-                method: "POST",
-                body: hash
-            }
-        );
-        if (setHashReq.ok) {
-            console.log("successfully created account");
-            signedInAs.innerText = "signed in as " + create__username.value;
-            setAccountElem(accountInfo);
-        }
-    }) 
+        await sync.setCredentials(create__username.value, create__password.value, true);
+        await sync.uploadData();
 
-function isSafeFilename(str) {
-    return ! (/[/\\?%*:|"<>]/g.test(str));
+        signedInAs.innerText = "signed in as " + create__username.value;
+        setAccountElem(accountInfo);
+}) 
+
+const signIn__username = document.getElementById("sign-in__username");
+const signIn__password = document.getElementById("sign-in__password");
+
+document.getElementById("sign-in__submit")
+    .addEventListener("click", async () => {
+        if (usernameErrors(signIn__username.value)) 
+            return console.log("username not found");
+        
+        sync.setCredentials(signIn__username.value, signIn__password.value);
+        const data = await sync.getData();
+
+        if (data === 401) return console.log("unauthorized!");
+        if (data === 404) return console.log("no user named ", signIn__username.value);
+        console.log(data);
+        console.log("sign in success");
+})
+
+async function hash(input) {
+    const res = await fetch("http://localhost:5000/hash", {
+        method: "POST",    
+        body: input
+    });
+    return await res.text();
 }
+
+function usernameErrors(username) {
+    if (!isSafeFilename(username)) return "forbidden characters";
+    if (username === "") return "empty";
+}
+
+const isSafeFilename = (str) => ! (/[/\\?%*:|"<>]/g.test(str));
 
 document.getElementById("create-account__already-have")
     .addEventListener("click", () => setAccountElem(signIn));

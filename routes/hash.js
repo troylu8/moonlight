@@ -3,14 +3,13 @@ const { hash } = require("bcrypt");
 
 const router = express.Router();
 
-router.get("/:input", async (req, res) => {
+router.use(express.text());
+router.post("/", (req, res) => {
 
-    console.log(req.params["input"]);
-    hash(req.params["input"], 11, (err, hash) => {
+    hash(req.body, 11, (err, hash) => {
         if (err) res.status(500).end();
         res.status(200).end(hash);
     })
-    
 })
 
 module.exports = router;

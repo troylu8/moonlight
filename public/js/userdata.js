@@ -107,9 +107,9 @@ export const data = {
         data.curr.listenPlaylist.cycle.update(data.settings.shuffle);
     },
 
-    async saveData(cb) {
-    
-        const stringified = JSON.stringify(data, 
+    stringify(obj) {
+        obj = obj ?? this;
+        return JSON.stringify(obj, 
             (key, value) => {
                 if (value instanceof Function) return undefined;
 
@@ -130,15 +130,17 @@ export const data = {
                 return value;
             }, 4
         )
+    },
     
+    async saveDataLocal() {    
         await fetch("http://localhost:5000/files/save-userdata", {
             method: "PUT",
-            body: stringified
+            body: this.stringify()
         })
-    
-        if (cb) cb();
     }
 };
+
+
 
 async function fetchUserdata() {
     const res = await fetch("http://localhost:5000/files/read-userdata");
