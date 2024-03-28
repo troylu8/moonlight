@@ -191,7 +191,7 @@ export class PlaylistCycle {
     
     addNode(song, shuffle) {
         console.log("adding ", song.title, "to", this.playlist.title);
-        if (!this.last || !shuffle) return this.addNodeToEnd(song);
+        if (!this.last || !shuffle || !this.all) return this.addNodeToEnd(song);
 
         // add a copy of the other node to the end...
         const other = this.all[Math.floor(Math.random() * this.all.length)];

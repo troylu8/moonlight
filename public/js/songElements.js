@@ -85,20 +85,27 @@ export function createPlaylistEntries(playlist) {
     
     const playlistElem = createElement("div", "li:" + playlist.id, "playlist");
     playlistElem.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
-    playlistElem.addEventListener("click", () => setViewPlaylist(playlist));
+    playlistElem.addEventListener("click", () => {
+        setViewPlaylist(playlist)
+    });
     playlist.playlistEntry = playlistElem;
 
     const playlist__options = createElement("button", null, "playlist__options", "...");
-    playlist__options.addEventListener("click", () => {
+    playlist__options.addEventListener("click", (e) => {
         playlist.delete();
+        e.stopPropagation();
     })
+
     playlistElem.appendChild(playlist__options);
+    // playlistElem.parentNode.appendChild(playlist__options)
 
     playlistsNav.appendChild(playlistElem);
 }
 
-/** PLAYLIST GROUP IN MAIN DIV */
-/** @param {Playlist} playlist */
+/** 
+ * PLAYLIST GROUP IN MAIN DIV
+ * @param {Playlist} playlist
+ */
 function createPlaylistGroup(playlist) {
     const playlist__group = createElement("nav", "group:" + playlist.id, "playlist__group");
     mainDiv.appendChild(playlist__group);
@@ -118,24 +125,20 @@ const playlistHeader = document.getElementById("playlist-header");
 
 /** @param {Playlist} playlist */
 export function setViewPlaylist(playlist) {
-    console.log("set");
 
     if (playlist === data.curr.viewPlaylist) return;
 
     data.curr.viewPlaylist = playlist;
 
-    if (playlist === null) {
-        playlistHeader.innerText = "???????";
-        console.log("aAA");
+    if (playlist === "none") {
+        playlistHeader.innerText = "-";
         if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
         return;
-        
     }
 
     if (!playlist.groupElem) 
         playlist.groupElem = createPlaylistGroup(playlist);
 
-        console.log("setting text", playlist);
     playlistHeader.innerText = playlist.title;
     songSettings.updateSongEntries();
 
@@ -147,6 +150,7 @@ export function setViewPlaylist(playlist) {
         songSettings.setLiveElements(activePlaylistGroup);
 }
 
+/**  @returns {HTMLElement} */
 function createElement(tag, id, classes, text) {
     const elem = document.createElement(tag);
     if (id) elem.id = id;

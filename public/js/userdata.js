@@ -85,7 +85,6 @@ export class Playlist {
 
         /** @type {Set<Song>} */
         this.songs = new Set(songs);
-        console.log(songs);
         if (songs) {
             for (const song of songs) 
                 song.addToPlaylist(this);
@@ -95,16 +94,23 @@ export class Playlist {
 
 
     delete() {
+        
+
+        if (this === data.curr.listenPlaylist && this.songs.has(data.curr.song)) 
+            play.setSong("none");
+        
+
+        const prevID = this.playlistEntry.previousElementSibling.id.substring(3);
+        songElements.setViewPlaylist(data.playlists.get(prevID));
+
         for (const song of this.songs) 
             song.removeFromPlaylist(this);
         
+        data.playlists.delete(this.id);
+
         this.playlistEntry.remove();
         if (this.groupElem) this.groupElem.remove();
         this.checkboxDiv.remove();
-        
-        data.playlists.delete(this.id);
-
-        songElements.setViewPlaylist(null);
 
         console.log("deleted playlist " + this.title);
     }
@@ -163,7 +169,6 @@ export const data = {
             "cycle",
             "edited"
         );
-        console.log(ignore);
 
         return JSON.stringify(obj, 
             (key, value) => {
@@ -199,8 +204,6 @@ async function fetchUserdata() {
 
     for (let pid in json.playlists) {
         const playlistJSON = json.playlists[pid];
-        console.log(playlistJSON.songs);
-        console.log(data.songs);
         new Playlist(pid, playlistJSON.title, playlistJSON.songs.map(sid => data.songs.get(sid)));
     }
 
