@@ -35,7 +35,7 @@ app.post("/get-data/:username", async (req, res) => {
 
     if (passMatches === "success") {
         const json = await fs.promises.readFile(join(userDir, "data.json"),"utf-8");
-        res.status(200).json(json);
+        res.status(200).json(JSON.parse(json));
     }
     else res.status(401).end();
 });

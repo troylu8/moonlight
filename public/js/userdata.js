@@ -4,19 +4,29 @@ import { PlaylistCycle } from "./play.js";
 
 export class Song {
     constructor(id, options, playlists) {
+        data.songs.set(id, this);
         this.id = id;
-        this.filename = options.filename;
         this.title = options.title;
         this.artist = options.artist;
+        this.filename = options.filename;
         this.size = options.size;
         this.duration = options.duration;
+
+        /** @type {Set<HTMLElement>} */
+        this.songEntries = new Set();
         
         /** @type {Set<Playlist>} */
         this.playlists = new Set(playlists);
-        /** @type {Set<HTMLElement>} */
-        this.songEntries = new Set();
+        if (playlists) {
+            for (const playlist of playlists) 
+                this.addToPlaylist(playlist);
+        }
+        
+    }
 
-        data.songs.set(this.id, this);
+    update(options) {
+        this.title = options.title;
+        this.artist = options.artist;
     }
 
     /** @param {Playlist} playlist */
@@ -45,19 +55,23 @@ export class Song {
         for (const playlist of this.playlists) 
             this.removeFromPlaylist(playlist);
         
-        data.songs.delete(this);
+        data.songs.delete(this.id);
 
+        console.log("deleted " + this.title);
+        //TODO: enable file delete
         // fetch("http://localhost:5000/files/" + this.filename, {method: "DELETE"});
     }
 }
 
 export class Playlist {
+    
     constructor(pid, title, songs) {
+        data.playlists.set(pid, this);
         this.id = pid;
         this.title = title;
-
-        /** @type {Set<Song>} */
-        this.songs = new Set(songs);
+        
+        /** @type {HTMLElement} */
+        this.playlistEntry = null;
         /** @type {HTMLElement} */
         this.groupElem = null;
         /** @type {HTMLElement} */
@@ -66,11 +80,41 @@ export class Playlist {
         /** @type {PlaylistCycle} */
         this.cycle = null;
 
-        data.playlists.set(pid, this);
-
         songElements.createPlaylistEntries(this);
         songElements.createPlaylistCheckboxDivs(this);
-    
+
+        /** @type {Set<Song>} */
+        this.songs = new Set(songs);
+        console.log(songs);
+        if (songs) {
+            for (const song of songs) 
+                song.addToPlaylist(this);
+        }
+        
+    }
+
+
+    delete() {
+        for (const song of this.songs) 
+            song.removeFromPlaylist(this);
+        
+        this.playlistEntry.remove();
+        if (this.groupElem) this.groupElem.remove();
+        this.checkboxDiv.remove();
+        
+        data.playlists.delete(this.id);
+
+        songElements.setViewPlaylist(null);
+
+        console.log("deleted playlist " + this.title);
+    }
+
+    update(options) {
+        this.title = options.title;
+
+        this.songs = new Set();
+        for (const sid of options.songs) 
+            data.songs.get(sid).addToPlaylist(this);
     }
 }
 
@@ -107,20 +151,24 @@ export const data = {
         data.curr.listenPlaylist.cycle.update(data.settings.shuffle);
     },
 
-    stringify(obj) {
+    stringify(obj, ignore) {
         obj = obj ?? this;
+        ignore = ignore ?? [];
+        ignore.push(
+            "viewPlaylist",
+            "id",
+            "groupElem",
+            "songEntries",
+            "checkboxDiv",
+            "cycle",
+            "edited"
+        );
+        console.log(ignore);
+
         return JSON.stringify(obj, 
             (key, value) => {
                 if (value instanceof Function) return undefined;
 
-                const ignore = [
-                    "viewPlaylist",
-                    "id",
-                    "groupElem",
-                    "songEntries",
-                    "checkboxDiv",
-                    "cycle"
-                ]
                 if (ignore.includes(key)) return undefined;
                 
                 if (value instanceof Set) return (key === "songs")? Array.from(value).map(v => v.id) : undefined;
@@ -151,10 +199,9 @@ async function fetchUserdata() {
 
     for (let pid in json.playlists) {
         const playlistJSON = json.playlists[pid];
-        const playlist = new Playlist(pid, playlistJSON.title, playlistJSON.songs.map(sid => data.songs.get(sid)));
-        
-        for (const song of playlist.songs) 
-            song.addToPlaylist(playlist); 
+        console.log(playlistJSON.songs);
+        console.log(data.songs);
+        new Playlist(pid, playlistJSON.title, playlistJSON.songs.map(sid => data.songs.get(sid)));
     }
 
     play.setSong( data.songs.get(json.curr.song) );

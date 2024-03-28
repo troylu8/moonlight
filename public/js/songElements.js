@@ -78,14 +78,20 @@ export function createPlaylistCheckboxDivs(playlist) {
     playlistCheckboxes.appendChild(option);
 }
 
-/** PLAYLIST ENTRY IN LEFT NAV  */
+/** PLAYLIST ENTRY IN LEFT NAV 
+ * @param {Playlist} playlist
+ */
 export function createPlaylistEntries(playlist) {
     
     const playlistElem = createElement("div", "li:" + playlist.id, "playlist");
     playlistElem.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
     playlistElem.addEventListener("click", () => setViewPlaylist(playlist));
-    
+    playlist.playlistEntry = playlistElem;
+
     const playlist__options = createElement("button", null, "playlist__options", "...");
+    playlist__options.addEventListener("click", () => {
+        playlist.delete();
+    })
     playlistElem.appendChild(playlist__options);
 
     playlistsNav.appendChild(playlistElem);
@@ -112,14 +118,24 @@ const playlistHeader = document.getElementById("playlist-header");
 
 /** @param {Playlist} playlist */
 export function setViewPlaylist(playlist) {
+    console.log("set");
 
-    if (!playlist.groupElem) 
-        playlist.groupElem = createPlaylistGroup(playlist);
-    
     if (playlist === data.curr.viewPlaylist) return;
 
     data.curr.viewPlaylist = playlist;
 
+    if (playlist === null) {
+        playlistHeader.innerText = "???????";
+        console.log("aAA");
+        if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
+        return;
+        
+    }
+
+    if (!playlist.groupElem) 
+        playlist.groupElem = createPlaylistGroup(playlist);
+
+        console.log("setting text", playlist);
     playlistHeader.innerText = playlist.title;
     songSettings.updateSongEntries();
 

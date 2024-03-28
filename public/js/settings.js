@@ -26,7 +26,7 @@ const signedInAs = document.getElementById("signed-in-as");
 
 document.getElementById("create-account__submit")
     .addEventListener("click", async () => {
-        const error = usernameErrors(create__username);
+        const error = usernameErrors(create__username.value);
         if (error) return console.log(error);
         if (create__password.value !== repeatPassword.value) return console.log("passwords dont match");
 
@@ -54,8 +54,9 @@ document.getElementById("sign-in__submit")
 
         if (data === 401) return console.log("unauthorized!");
         if (data === 404) return console.log("no user named ", signIn__username.value);
-        console.log(data);
-        console.log("sign in success");
+
+        signedInAs.innerText = "signed in as " + signIn__username.value;
+        setAccountElem(accountInfo);
 })
 
 async function hash(input) {
