@@ -11,42 +11,83 @@ export async function syncData() {
         return console.log("not signed in!");
     }
     const json = await getData();
-    console.log(json);
+    
+    console.log("server", Object.values(json.songs).map(s => s.filename ));
+    console.log("client", Array.from(data.songs).map(s => { return {edited: s[1].edited, filename: s[1].filename} } ));
 
-    console.log(data);
+    const client = { wants: [], /*trash: []*/};
+    const server = { wants: [], trash: [] };
+
+    // SERVER.TRASH - client's trash queue
+    server.trash = Array.from(data.trashqueue);
 
     for (const sid of Object.keys(json.songs)) {
         const songData = json.songs[sid];
         const song = data.songs.get(sid);
 
-        if (!song) 
-            new Song(sid, songData);
+        // CLIENT.WANTS - if client doesnt have this song && not in trash queue
+        if (!song) {
+            if (!data.trashqueue.has(songData.filename)) {
+                // new Song(sid, songData);
+                client.wants.push(songData.filename);
+            }
+        }
 
-        else if (!song.edited) 
+        // if client has song, but it hasnt been synced to latest changes 
+        else if (song.edited) 
             song.update(songData);
     }
 
-    for (const pid of Object.keys(json.playlists)) {
-        const playlistData = json.songs[pid];
-        const playlist = data.playlists.get(pid);
-
-        if (!playlist) {
-            new Playlist(pid, playlistData.title, playlistData.songs.map(sid => data.songs.get(sid)));
-        }
-
-        else if (!playlist.edited) 
-            playlist.update(songData);
-    }
+    data.trashqueue.clear();
 
     for (const song of data.songs.values()) {
-        // if song not in json && song wasnt edited, delete
-        if (!json.songs[song.id] && !song.edited) song.delete();
-    }
+        
+        if (!json.songs[song.id]) {
+            
+            // SERVER.WANTS - edited songs that client has but server doesnt
+            if (song.edited) {
+                server.wants.push(song.filename);
+            }
 
-    for (const playlist of data.playlists.values()) {
-        // if playlist not in json && playlist wasnt edited, delete
-        if (!json.playlists[playlist.id] && !playlist.edited) playlist.delete();
+            // CLIENT.TRASH - unedited songs that client has but server doesnt
+            else {
+                // client.trash.push(song.filename); 
+                song.delete();
+            }
+        }
+        
     }
+    
+
+    console.log("client ", client);
+    console.log("server ", server);
+
+    fetch("http://localhost:5000/sync/upload/" + username, {
+        method: "POST",
+        body: JSON.stringify(server),
+        headers: {
+            "Content-Type": "application/json"
+        },
+    })
+
+    // for (const pid of Object.keys(json.playlists)) {
+    //     const playlistData = json.songs[pid];
+    //     const playlist = data.playlists.get(pid);
+
+    //     if (!playlist) {
+    //         new Playlist(pid, playlistData.title, playlistData.songs.map(sid => data.songs.get(sid)));
+    //     }
+
+    //     else if (!playlist.edited) 
+    //         playlist.update(songData);
+    // }
+
+    
+
+    // for (const playlist of data.playlists.values()) {
+    //     // if playlist not in json && playlist wasnt edited, delete
+    //     if (!json.playlists[playlist.id] && !playlist.edited) playlist.delete();
+    // }
 } 
 
 export async function setCredentials(u, p, newAccount) {
@@ -76,7 +117,7 @@ export async function uploadData() {
         body: data.stringify({
             "pass": pass,
             "userdata": data
-        }, ["curr", "settings"])
+        }, ["curr", "settings", "trashqueue"])
     });
 }
 

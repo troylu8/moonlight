@@ -31,10 +31,10 @@ export function setLiveElements(playlistGroup) {
 export function openSongSettings(song, song__title, song__artist) {
     updateSongEntries(); // update old song entries before we start editing a new song
 
+    currentlyEditing = song;
+
     song__titleLive = song__title;
     song__artistLive = song__artist;
-
-    currentlyEditing = song;
 
     filename.innerText = song.filename;
     size.innerText = (song.size / (1024 * 1000)).toFixed(2) + " MB";
@@ -61,6 +61,8 @@ export function openSongSettings(song, song__title, song__artist) {
 }
 
 titleInput.addEventListener("input", () => {
+    currentlyEditing.edited = true;
+
     allEntriesUpdated = false;
 
     currentlyEditing.title = titleInput.value;
@@ -71,6 +73,8 @@ titleInput.addEventListener("input", () => {
     song__titleLive.innerText = titleInput.value;
 })
 artistInput.addEventListener("input", () => {
+    currentlyEditing.edited = true;
+    
     allEntriesUpdated = false;
 
     currentlyEditing.artist = artistInput.value;
@@ -92,7 +96,7 @@ deleteBtn.addEventListener("click", () => {
 
 /** updates all song entries to match currentlyEditing's title and artist */
 export function updateSongEntries() {
-    if (allEntriesUpdated) return;
+    if (allEntriesUpdated || !currentlyEditing) return;
 
     for (const songElem of currentlyEditing.songEntries) {
         setTitleArtistText(songElem, currentlyEditing.title, currentlyEditing.artist);

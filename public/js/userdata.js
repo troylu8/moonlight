@@ -12,6 +12,8 @@ export class Song {
         this.size = options.size;
         this.duration = options.duration;
 
+        this.edited = true;
+
         /** @type {Set<HTMLElement>} */
         this.songEntries = new Set();
         
@@ -25,12 +27,21 @@ export class Song {
     }
 
     update(options) {
+        this.edited = false;
+
         this.title = options.title;
         this.artist = options.artist;
+        this.playlists = new Set(options.playlists);
+        if (options.playlists) {
+            for (const playlist of options.playlists) 
+                this.addToPlaylist(playlist);
+        }
     }
 
     /** @param {Playlist} playlist */
     addToPlaylist(playlist) {
+        if (playlist.songs.has(this)) return;
+
         playlist.songs.add(this);
         this.playlists.add(playlist);
 
@@ -44,13 +55,16 @@ export class Song {
 
     /** @param {Playlist} playlist */
     removeFromPlaylist(playlist) {
+        if (!playlist.songs.has(this)) return;
+
         playlist.songs.delete(this);
         this.playlists.delete(playlist);
         if (playlist.groupElem) songElements.deleteSongEntry(this, playlist);
         if (playlist.cycle) playlist.cycle.nodes.get(this).delete();
     }
 
-    delete() {        
+    delete() {
+        data.trashqueue.add(this.filename);
 
         for (const playlist of this.playlists) 
             this.removeFromPlaylist(playlist);
@@ -99,7 +113,6 @@ export class Playlist {
         if (this === data.curr.listenPlaylist && this.songs.has(data.curr.song)) 
             play.setSong("none");
         
-
         const prevID = this.playlistEntry.previousElementSibling.id.substring(3);
         songElements.setViewPlaylist(data.playlists.get(prevID));
 
@@ -142,6 +155,9 @@ export const data = {
         viewPlaylist: null,
     },
 
+    /** @type {Set<string>} */
+    trashqueue: null,
+
     /** pid -> playlist @type {Map<string, Playlist>} */
     playlists: new Map(),
 
@@ -176,7 +192,11 @@ export const data = {
 
                 if (ignore.includes(key)) return undefined;
                 
-                if (value instanceof Set) return (key === "songs")? Array.from(value).map(v => v.id) : undefined;
+                if (value instanceof Set) {
+                    if (key === "songs" || key === "trashqueue")
+                        return Array.from(value).map(v => v.id);
+                    return undefined;
+                }
                 if (key === "song" || key === "listenPlaylist") return value.id;
                 if (value instanceof Map) return Object.fromEntries(value);
                 
@@ -198,6 +218,8 @@ export const data = {
 async function fetchUserdata() {
     const res = await fetch("http://localhost:5000/files/read-userdata");
     const json = await res.json();
+
+    data.trashqueue = new Set(json.trashqueue);
 
     for (const sid in json.songs)         
         new Song(sid, json.songs[sid]);
