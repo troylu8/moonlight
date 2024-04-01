@@ -1,6 +1,6 @@
 import { addSliderDragEvent } from "./sliders.js";
 import { getTimeDisplay } from "./songElements.js";
-import { setSpin } from "./fx.js";
+import { setSpin, setVolumeIcon, updateVolumeIcon } from "./fx.js";
 import { data, Playlist, Song } from "./userdata.js";
 
 class SpinningAudio extends Audio {
@@ -12,6 +12,22 @@ class SpinningAudio extends Audio {
         super.pause();
         setSpin(false);
     }
+
+    /** @param {boolean} muted */
+    set muted(muted) {
+        super.muted = muted;
+        if (muted) setVolumeIcon("muted");
+        else updateVolumeIcon(this.volume);
+    }
+
+    /** @param {number} val */
+    set volume(val) {
+        super.volume = val;
+        updateVolumeIcon(val);
+    }
+
+    get volume() { return super.volume; }
+    get muted() { return super.muted; }
 }
 export const audio = new SpinningAudio();
 

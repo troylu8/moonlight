@@ -1,6 +1,7 @@
 {
     "settings": {
-        "shuffle": true
+        "shuffle": true,
+        "volume": 0.13
     },
     "curr": {
         "song": "ytDXZPtndQw8U",
@@ -10,10 +11,16 @@
     "playlists": {
         "pid1": {
             "title": "another start again??????",
-            "songs": ["ytXzqwvYT_Rmw", "ytORofRTMg-iY", "ytNRQRC_0ZQ00"]
+            "playlistEntry": {},
+            "songs": [
+                "ytXzqwvYT_Rmw",
+                "ytORofRTMg-iY",
+                "ytNRQRC_0ZQ00"
+            ]
         },
         "pid2": {
             "title": "i wish i could go",
+            "playlistEntry": {},
             "songs": [
                 "ytXzqwvYT_Rmw",
                 "ytORofRTMg-iY",
@@ -25,49 +32,53 @@
         },
         "pid3": {
             "title": "this whole time",
-            "songs": ["ytDXZPtndQw8U", "ytXzqwvYT_Rmw"]
+            "playlistEntry": {},
+            "songs": [
+                "ytDXZPtndQw8U",
+                "ytXzqwvYT_Rmw"
+            ]
         }
     },
     "songs": {
         "ytAqI97zHMoQw": {
-            "filename": "椎名もた(siinamota) - Young Girl A - 少女A.mp3",
             "title": "4",
             "artist": "U/M/A/A Inc.",
+            "filename": "椎名もた(siinamota) - Young Girl A - 少女A.mp3",
             "size": 4060420,
             "duration": 243
         },
         "ytXzqwvYT_Rmw": {
-            "filename": "Kuzu no Honkai Ending Full『Sayuri - Heikousen』(ENG SUB).mp3",
             "title": "1",
             "artist": "Melodic Star",
+            "filename": "Kuzu no Honkai Ending Full『Sayuri - Heikousen』(ENG SUB).mp3",
             "size": 4902126,
             "duration": 299
         },
         "ytORofRTMg-iY": {
-            "filename": "Into The Night.mp3",
             "title": "2",
             "artist": "YOASOBI - Topic",
+            "filename": "Into The Night.mp3",
             "size": 4587375,
             "duration": 263
         },
         "ytNRQRC_0ZQ00": {
-            "filename": "稲葉曇『フロートプレイ』Vo. 歌愛ユキ.mp3",
             "title": "3",
             "artist": "稲葉曇",
+            "filename": "稲葉曇『フロートプレイ』Vo. 歌愛ユキ.mp3",
             "size": 3862399,
             "duration": 243
         },
         "ytDXZPtndQw8U": {
-            "filename": "Kamisato Ayato Theme but only the good part EXTENDED - Fathomless Swirls in the Forest (tnbee mix).mp3",
             "title": "5",
             "artist": "tnbee",
+            "filename": "Kamisato Ayato Theme but only the good part EXTENDED - Fathomless Swirls in the Forest (tnbee mix).mp3",
             "size": 10367092,
             "duration": 577
         },
         "ytnmix0phrCVU": {
-            "filename": "AnoHana OP Creditless.mp3",
             "title": "6",
             "artist": "Lillian Graham",
+            "filename": "AnoHana OP Creditless.mp3",
             "size": 1562889,
             "duration": 92
         }

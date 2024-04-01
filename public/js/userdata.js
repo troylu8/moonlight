@@ -237,8 +237,11 @@ async function fetchUserdata() {
     songElements.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);
     
     data.updateListenPlaylist();
-    play.setShuffle(json.settings.shuffle);
-    
+
     data.settings = json.settings;
+    play.setShuffle(json.settings.shuffle);
+    play.audio.volume = json.settings.volume;
+    
+    console.log("vol", data.settings.volume);
 }
 fetchUserdata();

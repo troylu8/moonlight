@@ -1,5 +1,6 @@
 import { audio } from "./play.js";
 import { addSliderDragEvent } from "./sliders.js";
+import { data } from "./userdata.js";
 
 const circle = document.getElementById("play__circle");
 const play = document.getElementById("play__play");
@@ -38,23 +39,31 @@ function setRPM(rpm) {
 }
 
 
-const volume = document.getElementById("volume-slider");
+const volumeSlider = document.getElementById("volume-slider");
 
-let lastVolume;
 
-addSliderDragEvent(volume, () => {
-    audio.volume = volume.value / 100;
-
-    if (audio.volume === 0) 
+addSliderDragEvent(volumeSlider, () => {
+    audio.volume = volumeSlider.value / 100;
 })
-volume.addEventListener("mouseup", () => {
-    lastVolume = audio.volume;
+volumeSlider.addEventListener("mousedown", () => { audio.muted = false; });
+volumeSlider.addEventListener("mouseup", () => {
+    if (volumeSlider.value != 0)
+        data.settings.volume = audio.volume;
 })
 
 const volumeBtn = document.getElementById("volume");
 volumeBtn.addEventListener("click", () => {
+
     audio.muted = !audio.muted;
-    volumeBtn.innerText = audio.muted? "unmute" : "mute";
+    
+    if (!audio.muted || audio.volume === 0) {
+        audio.muted = false;
+        audio.volume = data.settings.volume;
+        console.log("setting av to ", data.settings.volume);
+    }
+    else updateVolumeIcon(0);
+
+    
 });
 
 const volumeIcons = {
@@ -64,15 +73,24 @@ const volumeIcons = {
 }
 
 let activeVolumeIcon;
-function setVolumeIcon(type) {
+
+export function updateVolumeIcon(volume) {
+    let type;
+
+    if      (volume === 0)    type = "muted";
+    else if (volume < 0.5)    type = "low";
+    else                      type = "high";
+
+    setVolumeIcon(type);
+    
+    volumeSlider.value = volume * 100;
+    volumeSlider.updateSliderColors();
+}
+
+export function setVolumeIcon(type) {
     if (!volumeIcons[type] || activeVolumeIcon === volumeIcons[type]) return;
 
     if (activeVolumeIcon) activeVolumeIcon.style.display = "none";
     activeVolumeIcon = volumeIcons[type];
     activeVolumeIcon.style.display = "block";
-}
-
-
-function volumeToIcon(volume) {
-    if (volume === 0)
 }
