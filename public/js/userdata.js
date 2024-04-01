@@ -18,7 +18,7 @@ export class Song {
         this.songEntries = new Set();
         
         /** @type {Set<Playlist>} */
-        this.playlists = new Set(playlists);
+        this.playlists = new Set();
         if (playlists) {
             for (const playlist of playlists) 
                 this.addToPlaylist(playlist);
@@ -40,6 +40,8 @@ export class Song {
 
     /** @param {Playlist} playlist */
     addToPlaylist(playlist) {
+        console.log("adding this to playlist");
+
         if (playlist.songs.has(this)) return;
 
         playlist.songs.add(this);
@@ -59,7 +61,9 @@ export class Song {
         playlist.songs.delete(this);
         this.playlists.delete(playlist);
         if (playlist.groupElem) songElements.deleteSongEntry(this, playlist);
-        if (playlist.cycle) playlist.cycle.shuffleIndexes.get(this).delete();
+
+        console.log(playlist.title);
+        if (playlist.cycle) playlist.cycle.deleteSong(this);
     }
 
     delete() {
@@ -97,7 +101,7 @@ export class Playlist {
         songElements.createPlaylistCheckboxDivs(this);
 
         /** @type {Set<Song>} */
-        this.songs = new Set(songs);
+        this.songs = new Set();
         if (songs) {
             for (const song of songs) 
                 song.addToPlaylist(this);

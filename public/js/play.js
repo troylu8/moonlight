@@ -126,18 +126,11 @@ export class SongNode {
     }
 
     delete() {
-        this.cycle.shuffleIndexes.delete(this);
-
         // if this node is alone
         if (this.next === this) {
+            this.cycle.last = null;
             return console.log("deleted sole node");
         };
-
-        if (this.cycle.shuffleArr) {
-            const lastInArr = this.cycle.shuffleArr[this.cycle.shuffleArr.length-1];
-            swap(this.cycle.shuffleArr, this.index, this.cycle.shuffleArr.length-1);
-            lastInArr.index = this.index;
-        }
 
         if (this === this.cycle.last) {
             this.cycle.last = this.prev;
@@ -175,6 +168,18 @@ export class PlaylistCycle {
     addSong(song, afterCurrent) {
         this._appendNode(song);
         this._insertSongRandom(song, afterCurrent);
+    }
+
+    deleteSong(song) {
+        this.nodes.get(song).delete();
+        console.log("deleting??");
+
+        const i = this.songIndexes.get(song);
+        swap(this.shuffleArr, i, this.shuffleArr.length-1);
+        this.songIndexes.set(this.shuffleArr[i], i);
+        
+        this.shuffleArr.pop();
+        this.songIndexes.delete(song);
     }
 
     /** adds node to end */
