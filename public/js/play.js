@@ -1,6 +1,6 @@
 import { addSliderDragEvent } from "./sliders.js";
 import { getTimeDisplay } from "./songElements.js";
-import { setSpin } from "./spinning.js";
+import { setSpin } from "./fx.js";
 import { data, Playlist, Song } from "./userdata.js";
 
 class SpinningAudio extends Audio {
@@ -13,7 +13,7 @@ class SpinningAudio extends Audio {
         setSpin(false);
     }
 }
-const audio = new SpinningAudio();
+export const audio = new SpinningAudio();
 
 export const titleElem = document.getElementById("info__title");
 export const artistElem = document.getElementById("info__artist");
@@ -74,18 +74,7 @@ export function togglePlay(song) {
 
 document.getElementById("play").addEventListener("click", () => togglePlay());
 
-const volume = document.getElementById("volume-slider");
 
-addSliderDragEvent(volume, () => {
-    audio.volume = volume.value / 100;
-})
-
-
-const mute = document.getElementById("mute");
-mute.addEventListener("click", () => {
-    audio.muted = !audio.muted;
-    mute.innerText = audio.muted? "unmute" : "mute";
-});
 
 
 const seek = document.getElementById("seek__slider");

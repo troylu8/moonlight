@@ -49,6 +49,32 @@ h1 {
 .song:hover .song__play, .song:hover .song__options {
     visibility: visible;
 }
+.song__options:hover svg {
+    stroke: var(--color2);
+    fill: var(--color2);
+}
+
+.song__play {
+    width: 26px;
+    height: 20px;
+}
+.song__play svg {
+    width: 20px;
+    height: 20px;
+
+    margin-left: 0;
+    margin-right: 6px;
+
+    transition: margin 0.1s;
+}
+.song__play:hover svg {
+    margin-left: 3px;
+    margin-right: 3px;
+}
+.song__play:active svg {
+    margin-left: 6px;
+    margin-right: 0;
+}
 
 .song__title, .song__artist {
     overflow: hidden;

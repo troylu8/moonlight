@@ -4,7 +4,8 @@
     --options-div-height: 40px;
     --play-div-height: 90px;
 
-    --color1: black
+    --color1: black;
+    --color2: red;
 }
 
 button {
