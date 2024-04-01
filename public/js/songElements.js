@@ -28,10 +28,12 @@ export function createSongEntry(song, playlist) {
 
     song__play.addEventListener("click", () => {
 
-        togglePlay(song)
+        togglePlay(song);
 
         if (data.curr.viewPlaylist !== data.curr.listenPlaylist) 
             data.updateListenPlaylist();
+        
+        data.curr.listenPlaylist.cycle.updateCurrIndex();
     });
     song__options.addEventListener("click", () => 
         songSettings.openSongSettings(song, song__title, song__artist)

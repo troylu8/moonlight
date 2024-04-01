@@ -47,8 +47,7 @@ export class Song {
 
         const songElems = songElements.createSongEntry(this, playlist);
 
-        if (playlist.cycle)
-            playlist.cycle.addNode(this, data.settings.shuffle);
+        if (playlist.cycle) playlist.cycle.addSong(this, true);
 
         return songElems;
     }
@@ -60,7 +59,7 @@ export class Song {
         playlist.songs.delete(this);
         this.playlists.delete(playlist);
         if (playlist.groupElem) songElements.deleteSongEntry(this, playlist);
-        if (playlist.cycle) playlist.cycle.nodes.get(this).delete();
+        if (playlist.cycle) playlist.cycle.shuffleIndexes.get(this).delete();
     }
 
     delete() {
@@ -170,7 +169,7 @@ export const data = {
         if (!data.curr.listenPlaylist.cycle)
             data.curr.listenPlaylist.cycle = new PlaylistCycle(data.curr.listenPlaylist);
 
-        data.curr.listenPlaylist.cycle.update(data.settings.shuffle);
+        else data.curr.listenPlaylist.cycle._reshuffle(data.settings.shuffle);
     },
 
     stringify(obj, ignore) {
