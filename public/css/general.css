@@ -1,0 +1,17 @@
+:root {
+    --playlists-div-width: 200px;
+    --sidebar-div-width: 0px;
+    --options-div-height: 40px;
+    --play-div-height: 90px;
+
+    --color1: black
+}
+
+button {
+    background-color: #00000000;
+    border: none;
+    padding: 0;
+}
+button:focus {
+    outline: none;
+}

@@ -4,7 +4,7 @@
     <head>
         <meta http-equiv="Content-Security-Policy" content="default-src 'self' http://localhost:5000 https://localhost:5001 https://www.youtube.com https://192.168.1.120:5001" />
         
-        <link rel="stylesheet" href="css/vars.css">
+        <link rel="stylesheet" href="css/general.css">
         <link rel="stylesheet" href="css/play.css">
         <link rel="stylesheet" href="css/playlists.css">
         <link rel="stylesheet" href="css/options.css">
@@ -55,7 +55,22 @@
             <div id="main-control">
                 <div id="main-control__buttons">
                     <button id="prev">prev</button>
-                    <button id="play">play</button>
+                    <button id="play">
+                        <div class="svg-cont">
+                            <svg id="play__circle" class="svg-child" viewBox="0 0 24 24">
+                                <path fill="none" stroke="var(--color1)" stroke-width="1.5" stroke-linecap="round" d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C14.8273 3 17.35 4.30367 19 6.34267" />
+                            </svg>
+                            
+                            <svg id="play__play" class="svg-child" width="50%" height="50%" viewBox="0 0 24 24">
+                                <path fill="none" stroke="var(--color1)" stroke-width="3" stroke-linejoin="round" d="M16.6582,9.28638c1.4398.89982,2.1596,1.34972,2.4065,1.92582.2156.503.2156,1.0725,0,1.5756-.2469.576-.9667,1.0259-2.4065,1.9258L9.896,18.94c-1.59795.9987-2.39693,1.4981-3.05627,1.445-.57472-.0462-1.10155-.3381-1.44533-.801C5,19.053,5,18.1108,5,16.2264v-8.45283c0-1.88438,0-2.82656.3944-3.35759.34378-.46288.87061-.75487,1.44533-.80108.65934-.053,1.45832.44636,3.05627,1.44508l6.7622,4.2264Z" transform="translate(1.525263 0.000046)" />
+                            </svg>
+                
+                            <svg id="play__pause" class="svg-child" fill="none" stroke="var(--color1)"stroke-width="4" stroke-linecap="round" class="color" width="50%" height="50%" viewBox="0 0 24 24">
+                                <path d="M7.767398,4.63489v16.94911" transform="matrix(-.872901 0 0-.710855 14.242515 21.318915)" />
+                                <path d="M7.767398,4.63489v16.94911" transform="matrix(-.872901 0 0-.710854 23.317823 21.318901)" />
+                            </svg>
+                        </div>
+                    </button>
                     <button id="next">next</button>
                 </div>
 
@@ -155,6 +170,7 @@
     <script src="js/userdata.js" type="module"></script>
     <script src="js/play.js" type="module"></script>
     <script src="js/songElements.js" type="module"></script>
+    <script src="js/spinning.js" type="module"></script>
     <script src="js/sync.js" type="module"></script>
     
     <script src="js/temp.js" type="module"></script>
