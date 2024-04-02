@@ -177,7 +177,7 @@ input[type='range']::-webkit-slider-thumb {
     margin-right: 10%;
 }
 
-#volume {
+#volume, #shuffle {
     width: 30px;
     height: 30px;
 }

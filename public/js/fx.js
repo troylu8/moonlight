@@ -61,9 +61,6 @@ volumeBtn.addEventListener("click", () => {
         audio.volume = data.settings.volume;
         console.log("setting av to ", data.settings.volume);
     }
-    else updateVolumeIcon(0);
-
-    
 });
 
 const volumeIcons = {

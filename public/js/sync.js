@@ -16,7 +16,12 @@ export async function syncData() {
     console.log("client", Array.from(data.songs).map(s => { return {edited: s[1].edited, filename: s[1].filename} } ));
 
     const client = { wants: [], /*trash: []*/};
-    const server = { wants: [], trash: [] };
+    const server = { 
+        wants: {}, 
+
+        /** @type {Array<string>} filenames */
+        trash: [] 
+    };
 
     // SERVER.TRASH - client's trash queue
     server.trash = Array.from(data.trashqueue);
@@ -27,7 +32,7 @@ export async function syncData() {
 
         // CLIENT.WANTS - if client doesnt have this song && not in trash queue
         if (!song) {
-            if (!data.trashqueue.has(songData.filename)) {
+            if (!data.trashqueue.has(sid)) {
                 // new Song(sid, songData);
                 client.wants.push(songData.filename);
             }
@@ -38,15 +43,13 @@ export async function syncData() {
             song.update(songData);
     }
 
-    data.trashqueue.clear();
-
     for (const song of data.songs.values()) {
         
         if (!json.songs[song.id]) {
             
             // SERVER.WANTS - edited songs that client has but server doesnt
             if (song.edited) {
-                server.wants.push(song.filename);
+                server.wants[song.id] = song;
             }
 
             // CLIENT.TRASH - unedited songs that client has but server doesnt
@@ -62,14 +65,24 @@ export async function syncData() {
     console.log("client ", client);
     console.log("server ", server);
 
-    fetch("http://localhost:5000/sync/upload/" + username, {
+    const res = await fetch("http://localhost:5000/sync/upload/" + username, {
         method: "POST",
-        body: JSON.stringify(server),
+        body: JSON.stringify(server, (key, value) => {
+            if (["edited", "songEntries", "playlists", "id"].includes(key)) return undefined;
+            return value;
+        }),
         headers: {
             "Content-Type": "application/json"
         },
     })
 
+    if (!res.ok) return console.log(res.status);
+
+    for (const song of Object.values(server.wants)) {
+        song.edited = false;
+    }
+
+    data.trashqueue.clear();
     // for (const pid of Object.keys(json.playlists)) {
     //     const playlistData = json.songs[pid];
     //     const playlist = data.playlists.get(pid);
@@ -117,7 +130,7 @@ export async function uploadData() {
         body: data.stringify({
             "pass": pass,
             "userdata": data
-        }, ["curr", "settings", "trashqueue"])
+        }, ["curr", "settings", "trashqueue", "edited"])
     });
 }
 

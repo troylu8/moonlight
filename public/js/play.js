@@ -16,7 +16,7 @@ class SpinningAudio extends Audio {
     /** @param {boolean} muted */
     set muted(muted) {
         super.muted = muted;
-        if (muted) setVolumeIcon("muted");
+        if (muted) updateVolumeIcon(0);
         else updateVolumeIcon(this.volume);
     }
 
@@ -188,7 +188,6 @@ export class PlaylistCycle {
 
     deleteSong(song) {
         this.nodes.get(song).delete();
-        console.log("deleting??");
 
         const i = this.songIndexes.get(song);
         swap(this.shuffleArr, i, this.shuffleArr.length-1);
@@ -422,13 +421,15 @@ document.getElementById("prev").addEventListener("click", () => {
         
 })
 
+const shuffleSvg = document.getElementById("shuffle-svg");
+
 export function setShuffle(shuffle) {
     data.settings.shuffle = shuffle;
     
     if (shuffle) data.curr.listenPlaylist.cycle.updateCurrIndex();
     
     console.log("shuffle ", shuffle);
-    shuffleBtn.innerText = shuffle? "sh" : "__";
+    shuffleSvg.style.stroke = shuffle? "var(--color2)" : "var(--color1)";
 }
 
 const shuffleBtn = document.getElementById("shuffle")

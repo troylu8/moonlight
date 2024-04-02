@@ -16,7 +16,7 @@ export function setAccountElem(accountElem) {
     activeAccountElem = accountElem;
     activeAccountElem.style.display = "flex";
 }
-setAccountElem(createAccount);
+setAccountElem(signIn);
 
 const create__username = document.getElementById("create-account__username");
 const create__password = document.getElementById("create-account__password");
@@ -35,7 +35,8 @@ document.getElementById("create-account__submit")
         if (createReq.status === 409) return console.log("username taken!");
 
         await sync.setCredentials(create__username.value, create__password.value, true);
-        await sync.uploadData();
+        
+        await sync.uploadData(); //TODO: sync instead!!
 
         signedInAs.innerText = "signed in as " + create__username.value;
         setAccountElem(accountInfo);

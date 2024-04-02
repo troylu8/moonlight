@@ -6,25 +6,33 @@ const { join } = require("path");
 const router = express.Router();
 router.use(express.json());
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 // send server.wants
 router.post("/upload/:username", async (req, res) => {
-    console.log(req.body);
+    
     const outward = req.body.wants;
+    console.log("body", req.body);
 
     const zip = new Zip();
-    for (const filename of outward) {
-        zip.addLocalFile( join(__dirname, "../public/resources/songs", filename) );
+    zip.addFile("changes.json", Buffer.from(JSON.stringify(req.body)) );
+    for (const song of Object.values(outward)) {
+        zip.addLocalFile( join(__dirname, "../public/resources/songs", song.filename) );
     }
+
+    try {
+        await axios({
+            method: 'POST',
+            url: "https://localhost:5001/sync/upload/" + req.params["username"], 
+            data: zip.toBuffer(), 
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity
+        });
+    } catch (err) {console.log("error");}
     
-    const serverRes = await axios({
-        method: 'POST',
-        url: "https://localhost:5001/sync/upload/" + req.params["username"], 
-        data: await zip.toBufferPromise(), 
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity
-    });
     
-    res.status(serverRes.status).end();
+    res.end();
+    
 })
 
 // ask for client.wants and send server.trash

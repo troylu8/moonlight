@@ -12,7 +12,7 @@ export class Song {
         this.size = options.size;
         this.duration = options.duration;
 
-        this.edited = true;
+        this.edited = options.edited ?? true;
 
         /** @type {Set<HTMLElement>} */
         this.songEntries = new Set();
@@ -40,8 +40,6 @@ export class Song {
 
     /** @param {Playlist} playlist */
     addToPlaylist(playlist) {
-        console.log("adding this to playlist");
-
         if (playlist.songs.has(this)) return;
 
         playlist.songs.add(this);
@@ -62,12 +60,11 @@ export class Song {
         this.playlists.delete(playlist);
         if (playlist.groupElem) songElements.deleteSongEntry(this, playlist);
 
-        console.log(playlist.title);
         if (playlist.cycle) playlist.cycle.deleteSong(this);
     }
 
     delete() {
-        data.trashqueue.add(this.filename);
+        data.trashqueue.set(this.id, this.filename);
 
         for (const playlist of this.playlists) 
             this.removeFromPlaylist(playlist);
@@ -111,7 +108,6 @@ export class Playlist {
 
 
     delete() {
-        
 
         if (this === data.curr.listenPlaylist && this.songs.has(data.curr.song)) 
             play.setSong("none");
@@ -158,7 +154,7 @@ export const data = {
         viewPlaylist: null,
     },
 
-    /** @type {Set<string>} */
+    /** @type {Map<string, string>} songID -> filename */
     trashqueue: null,
 
     /** pid -> playlist @type {Map<string, Playlist>} */
@@ -184,9 +180,9 @@ export const data = {
             "id",
             "groupElem",
             "songEntries",
+            "playlistEntry",
             "checkboxDiv",
-            "cycle",
-            "edited"
+            "cycle"        
         );
 
         return JSON.stringify(obj, 
@@ -196,11 +192,11 @@ export const data = {
                 if (ignore.includes(key)) return undefined;
                 
                 if (value instanceof Set) {
-                    if (key === "songs" || key === "trashqueue")
-                        return Array.from(value).map(v => v.id);
-                    return undefined;
-                }
-                if (key === "song" || key === "listenPlaylist") return value.id;
+                    if (key === "songs") return Array.from(value).map(v => v.id);
+                    else return undefined;
+                } 
+                if (key === "song" || key === "listenPlaylist") return value? value.id : undefined;
+                if (key === "trashqueue") return Array.from(value);
                 if (value instanceof Map) return Object.fromEntries(value);
                 
                 return value;
@@ -222,7 +218,7 @@ async function fetchUserdata() {
     const res = await fetch("http://localhost:5000/files/read-userdata");
     const json = await res.json();
 
-    data.trashqueue = new Set(json.trashqueue);
+    data.trashqueue = new Map(json.trashqueue);
 
     for (const sid in json.songs)         
         new Song(sid, json.songs[sid]);
@@ -242,6 +238,5 @@ async function fetchUserdata() {
     play.setShuffle(json.settings.shuffle);
     play.audio.volume = json.settings.volume;
     
-    console.log("vol", data.settings.volume);
 }
 fetchUserdata();

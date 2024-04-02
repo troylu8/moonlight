@@ -1,7 +1,7 @@
 
 
 for (const s of document.getElementsByClassName("slider")) {
-    setSliderColors(s, "#FF0000", "#DEE2E6");
+    setSliderColors(s, "var(--color1)", "#DEE2E6");
 }
 
 function setSliderColors(slider, left, right) {
