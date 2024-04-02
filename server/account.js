@@ -6,8 +6,21 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 
 router.post("/create-account-dir/:username", (req, res) => {
-    fs.mkdir(join(__dirname, "users", req.params["username"]), (err) => {
-        res.status((err && err.code === "EEXIST")? 409 : 200).end();
+    const userDir = join(__dirname, "users", req.params["username"]);
+    fs.mkdir(userDir, async (err) => {
+        if (err && err.code === "EEXIST") return res.status(409).end();
+        
+        // initialize data.json
+        await fs.promises.writeFile( 
+            join(userDir, "data.json"),
+            JSON.stringify({
+                "playlists": {},
+                "songs": {}
+            }),
+            "utf8"
+        );
+
+        res.status(200).end();
     })
 })
 

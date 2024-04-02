@@ -65,18 +65,23 @@ export async function syncData() {
     console.log("client ", client);
     console.log("server ", server);
 
-    const res = await fetch("http://localhost:5000/sync/upload/" + username, {
-        method: "POST",
-        body: JSON.stringify(server, (key, value) => {
-            if (["edited", "songEntries", "playlists", "id"].includes(key)) return undefined;
-            return value;
-        }),
-        headers: {
-            "Content-Type": "application/json"
-        },
-    })
-
-    if (!res.ok) return console.log(res.status);
+    try {
+        await fetch("http://localhost:5000/sync/upload/" + username, {
+            method: "POST",
+            body: JSON.stringify({
+                client: client,
+                server: server
+            }, 
+            (key, value) => {
+                if (["edited", "songEntries", "playlists", "id"].includes(key)) return undefined;
+                return value;
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+        
+    } catch (err) {console.log(err)}
 
     for (const song of Object.values(server.wants)) {
         song.edited = false;

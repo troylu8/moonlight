@@ -28,7 +28,17 @@ function getDataReversed(entry, cb) {
 }
 const getDataPromise = promisify(getDataReversed);
 
-router.post('/upload/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req, res) => {
+/**
+ * @param {import('adm-zip')} zip 
+ * @param {string} targetfilename
+ * @param {function(err)} cb 
+ */
+function writeZip(zip, targetfilename, cb) {
+    zip.writeZip(targetfilename, cb);
+}
+const writeZipPromise = promisify(writeZip);
+
+router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req, res) => {
 
     const userDir = join(__dirname, "users", req.params["user"]);
     const zipPath = join(userDir, "songs.zip");
@@ -36,10 +46,10 @@ router.post('/upload/:user', express.raw( {type: "*/*", limit: Infinity} ), asyn
     const createdNewFile = await createFile(zipPath);
     
     const allSongs = new Zip(createdNewFile? undefined : zipPath);
-    const newSongs = new Zip(req.body);
+    const arrived = new Zip(req.body);
 
     // add songs to zip
-    for (const entry of newSongs.getEntries()) {
+    for (const entry of arrived.getEntries()) {
         if (entry.name === "changes.json") {
             console.log("ignore changes entry");
             continue;
@@ -55,26 +65,37 @@ router.post('/upload/:user', express.raw( {type: "*/*", limit: Infinity} ), asyn
     }
 
     const data =  JSON.parse( await fs.promises.readFile( join(userDir, "data.json"),  "utf8") );
-    const changes = JSON.parse( await getDataPromise(newSongs.getEntry("changes.json")) );
-
+    
+    const changes = JSON.parse( await getDataPromise(arrived.getEntry("changes.json")) );
+    
     console.log("changes", changes);
 
     // merge json data
-    for (const sid of Object.keys(changes.wants)) {
-        data.songs[sid] = changes.wants[sid];
-        console.log("setting ", changes.wants[sid].title);
+    for (const sid of Object.keys(changes.server.wants)) {
+        data.songs[sid] = changes.server.wants[sid];
+        console.log("setting ", changes.server.wants[sid].title);
     }
-    // changes.trash: [ [sid, filename], ... ]
-    for (const song of changes.trash) {
-        delete data[song[0]];
+    // changes.server.trash: [ [sid, filename], ... ]
+    for (const song of changes.server.trash) {
+        delete data.songs[song[0]];
         allSongs.deleteFile(song[1]);
         console.log("deleted", song[1]);
     }
 
     await fs.promises.writeFile( join(userDir, "data.json"), JSON.stringify(data), "utf8");
-    allSongs.writeZip(zipPath, {overwrite: true}, (err) => {
-        res.send("done");
-    });
+    console.log("finished writing json");
+    
+    await writeZipPromise(allSongs, zipPath);
+    console.log("finished writing zip");
+
+    const toClient = new Zip();
+
+    for (const song of changes.client.wants) {
+        const entry = allSongs.getEntry(song.filename);
+        toClient.addFile(entry.name, await getDataPromise(entry));
+    }
+
+    res.send(toClient.toBuffer())
 });
 
 module.exports = router;

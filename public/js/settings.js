@@ -36,10 +36,10 @@ document.getElementById("create-account__submit")
 
         await sync.setCredentials(create__username.value, create__password.value, true);
         
-        await sync.uploadData(); //TODO: sync instead!!
-
         signedInAs.innerText = "signed in as " + create__username.value;
         setAccountElem(accountInfo);
+
+        //TODO: sync!!
 }) 
 
 const signIn__username = document.getElementById("sign-in__username");
