@@ -66,7 +66,7 @@ export async function syncData() {
     console.log("server ", server);
 
     try {
-        await fetch("http://localhost:5000/sync/upload/" + username, {
+        await fetch("http://localhost:5000/sync/" + username, {
             method: "POST",
             body: JSON.stringify({
                 client: client,

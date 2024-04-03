@@ -10,6 +10,7 @@ const { promisify } = require('util');
  * @param {function(err)} cb 
  */
 function extractAllToAsync(zip, targetPath, cb) {
+    
     zip.extractAllToAsync(targetPath, true, false, cb);
 }
 const extractAllToPromise = promisify(extractAllToAsync);
@@ -20,36 +21,34 @@ router.use(express.json());
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // send server.wants
-router.post("/upload/:username", async (req, res) => {
+router.post("/:username", async (req, res) => {
     
     const songsDir = join(__dirname, "../public/resources/songs");
 
-    const outward = req.body.wants;
     console.log("body", req.body);
 
     const zip = new Zip();
     zip.addFile("changes.json", Buffer.from(JSON.stringify(req.body)) );
-    for (const song of Object.values(outward)) {
+    for (const song of Object.values(req.body.server.wants)) {
         zip.addLocalFile( join(songsDir, song.filename) );
     }
 
-    console.log("got here");
-
     try {
-        const newSongsBuffer = await axios({
+        const newSongs = await axios({
             method: 'POST',
             url: "https://localhost:5001/sync/" + req.params["username"], 
             data: zip.toBuffer(), 
             maxContentLength: Infinity,
-            maxBodyLength: Infinity
+            maxBodyLength: Infinity,
+            responseType: "arraybuffer"
         });
-
-        await extractAllToPromise(new Zip(newSongsBuffer), songsDir);
+        console.log("returned buffer", Buffer.from(newSongs.data));
+        // new Zip(res.data).extractAllTo(songsDir + "/", true);
+        await extractAllToPromise(new Zip(Buffer.from(newSongs.data)), songsDir);
         console.log("added new songs");
         res.status(200).end();
-
     } catch (err) {
-        console.log("error");
+        console.log("error!!", err);
         res.end();
     }
     

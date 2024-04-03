@@ -90,11 +90,12 @@ router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req,
 
     const toClient = new Zip();
 
-    for (const song of changes.client.wants) {
-        const entry = allSongs.getEntry(song.filename);
+    for (const filename of changes.client.wants) {
+        const entry = allSongs.getEntry(filename);
         toClient.addFile(entry.name, await getDataPromise(entry));
+        console.log("returning", entry.name);
     }
-
+    
     res.send(toClient.toBuffer())
 });
 
