@@ -114,7 +114,10 @@ button.onclick = () => {
     if (!enabled) return console.log("can't click now!");
 
     if (tracking) destroy();
-    else          getyt(input.value);
+    else {
+        if (data.playlists.size === 0) return console.log("no playlists to add song to!");
+        getyt(input.value);
+    } 
 }
 
 input.onkeydown = (e) => {
@@ -151,6 +154,8 @@ function getYTID(link) { return link.slice(-11); }
 
 
 document.getElementById("song-upload").addEventListener("click", async () => {
+    if (data.playlists.size === 0) return console.log("no playlists to add song to!");
+
     const res = await fetch(`http://localhost:5000/upload/`, {method: "POST"});
     if (res.status === 200) acceptSongResponse(res);
 });

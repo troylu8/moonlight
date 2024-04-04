@@ -56,7 +56,8 @@ router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req,
 
         try {
             const data = await getDataPromise(entry);
-            userfiles.addFile(entry.name, data);
+            userfiles.addFile(entry.entryName, data);
+            console.log("added file ", entry.entryName);
         } catch (err) {
             console.log(err);
         }
@@ -83,7 +84,6 @@ router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req,
         const objPath = info[0].split(".");
         delete data[ objPath[0] ][ objPath[1] ];
 
-        delete data[info[0]];
         userfiles.deleteFile(info[1]);
         console.log("deleted", info[0], info[1]);
     }
@@ -98,8 +98,8 @@ router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req,
 
     for (const filepath of changes.requestedFiles) {
         const entry = userfiles.getEntry(filepath);
-        toClient.addFile(entry.name, await getDataPromise(entry));
-        console.log("returning", entry.name);
+        toClient.addFile(entry.entryName, await getDataPromise(entry));
+        console.log("returning", entry.entryName);
     }
     
     res.send(toClient.toBuffer())

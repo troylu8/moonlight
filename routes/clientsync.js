@@ -4,6 +4,7 @@ const axios = require('axios');
 const { join } = require("path");
 const { promisify } = require('util');
 
+
 /**
  * @param {import('adm-zip')} zip 
  * @param {string} targetPath
@@ -16,7 +17,9 @@ function extractAllToAsync(zip, targetPath, cb) {
     
     if (total === 0) return cb();
 
-    zip.extractAllToAsync(targetPath, false, (err) => {
+    console.log("starting extracting");
+    
+    zip.extractAllToAsync(targetPath, true, (err) => {
         console.log("extracted", done+1);
         if (++done === total) cb();
     });
@@ -30,7 +33,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 router.post("/:username", async (req, res) => {
     
-    const resourcesDir = join(__dirname, "../public/resources/songs");
+    const resourcesDir = join(__dirname, "../public/resources");
 
     console.log("client backend got: ", req.body);
 
@@ -42,7 +45,7 @@ router.post("/:username", async (req, res) => {
 
     for (const song of req.body["unsynced-songs"]) {
         if (song.syncStatus === "new")
-            zip.addLocalFile( join(resourcesDir, "songs", song.filename) );
+            zip.addLocalFile( join(resourcesDir, "songs", song.filename), "songs/" );
     }
     //TODO: add playlist files here!!!!!  ! 
 

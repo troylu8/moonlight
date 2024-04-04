@@ -3,7 +3,7 @@ import * as play from "./play.js";
 import { PlaylistCycle } from "./play.js";
 
 export class Song {
-    constructor(id, options, playlists) {
+    constructor(id, options) {
         data.songs.set(id, this);
         this.id = id;
         this.title = options.title;
@@ -20,15 +20,14 @@ export class Song {
         
         /** @type {Set<Playlist>} */
         this.playlists = new Set();
-        if (playlists) {
-            for (const playlist of playlists) 
-                this.addToPlaylist(playlist);
+        if (options.playlists) {
+            for (const pid of options.playlists) 
+                this.addToPlaylist(data.playlists.get(pid));
         }
     }
 
     setSyncStatusEdited() {
         if (this.syncStatus !== "new") this.syncStatus = "edited";
-        console.log(this.syncStatus);
     }
     
     update(options) {
@@ -77,7 +76,7 @@ export class Song {
         //TODO: test this
         if (this === data.curr.song) play.playNextSong();
 
-        data.trashqueue.set("songs." + this.id, this.filename);
+        data.trashqueue.set("songs." + this.id, "songs/" + this.filename);
 
         for (const playlist of this.playlists) 
             this.removeFromPlaylist(playlist);
@@ -129,7 +128,7 @@ export class Playlist {
     delete() {
         
         //TODO: add playlist files!
-        data.trashqueue.set("playlists." + this.id, "dummy value");
+        data.trashqueue.set("playlists." + this.id, "playlists/ dummy value");
 
         // if only playlist, set view and listen playlists to none
         if (data.playlists.size === 1) songElements.setViewPlaylist("none", true);

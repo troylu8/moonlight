@@ -58,6 +58,7 @@ export async function syncData() {
             // WANTS - if client doesnt have this song/playlist && not in trash queue
             if (!item) {
                 if (!data.trashqueue.has(category + "." + id)) {
+                    itemData.id = id;
                     newItems[category].push(itemData);
 
                     //TODO: push playlist filepaths here!!!!
@@ -103,7 +104,7 @@ export async function syncData() {
         console.log("frontend received", response.status);
 
         if (!response.ok) return;
-            
+        
         for (const song of changes["unsynced-songs"]) 
             song.syncStatus = "synced";
         for (const playlists of changes["unsynced-playlists"]) 
@@ -111,6 +112,7 @@ export async function syncData() {
 
         for (const song of newItems.songs) {
             song.syncStatus = "synced";
+            console.log("newitems", newItems);
             new Song(song.id, song);
             console.log("created new song", song.title);
         }
