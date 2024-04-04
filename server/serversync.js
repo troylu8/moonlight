@@ -8,13 +8,12 @@ const router = express.Router();
 
 /** @returns {Promise<boolean>} true if new file was created */
 async function createFile(path) {
-    try { 
-        await fs.promises.open(path, "r");
-        return false;
-    }
-    catch (err) { 
-        await fs.promises.writeFile(path, ""); 
+    try {
+        await fs.promises.writeFile(path, "", {flag: "ax"});
         return true;
+    } catch (err) {
+        if (err.code === "EEXIST") return false;
+        throw err;
     }
 }
 
@@ -63,7 +62,7 @@ router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req,
         }
     }
 
-    const data =  JSON.parse( await fs.promises.readFile( join(userDir, "data.json"),  "utf8") );
+    const data =  JSON.parse( await fs.promises.readFile( join(userDir, "data.json"), {encoding: "utf8", }) );
     
     const changes = JSON.parse( await getDataPromise(arrived.getEntry("changes.json")) );
     
@@ -97,6 +96,8 @@ router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req,
     }
     
     res.send(toClient.toBuffer())
+    
+    
 });
 
 module.exports = router;
