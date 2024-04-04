@@ -1,6 +1,6 @@
 import { addSliderDragEvent } from "./sliders.js";
 import { getTimeDisplay } from "./songElements.js";
-import { setSpin, setVolumeIcon, updateVolumeIcon } from "./fx.js";
+import { setSpin, updateVolumeIcon } from "./fx.js";
 import { data, Playlist, Song } from "./userdata.js";
 
 class SpinningAudio extends Audio {
@@ -44,16 +44,21 @@ function inThePresent() {
     return historyIndex === history.length-1;
 }
 
-/** set a new currently playing song, will reset seek to beginning*/
+/** set a new currently playing song, will reset seek to beginning
+ * @param {Song | "none"} song 
+*/
 export function setSong(song) {
     if (!song) return;
     if (song === "none") {
+        console.log("set song to none");
         audio.src = "";
         data.curr.song = null;
 
         titleElem.innerText = "-";
         artistElem.innerText = "-";
         data.curr.song = undefined
+
+        setSpin(false);
         return;
     };
 
@@ -290,53 +295,6 @@ export class PlaylistCycle {
     }
 }
 
-// update(shuffle, loopingShuffledPlaylist) {
-//     const nodesArr = Array.from(this.playlist.songs).map(s => this.shuffleIndexes.get(s));
-    
-//     let currentSongNode = this.shuffleIndexes.get(data.curr.song);
-
-//     // if cycle.all == null (shuffle was off previously) then shuffle evenly
-//     if (shuffle && nodesArr.length > 3) {
-
-//         randomize(nodesArr);
-//         for (const i in nodesArr) nodesArr[i].index = Number(i);
-        
-//         if (loopingShuffledPlaylist) {
-//             const currentIndex = currentSongNode.index;
-
-//             // kick away recently played songs so they arent played again soon
-//             const recentlyPlayed = new Set();
-//             let p = currentSongNode;
-//             for (let i = 0; i < nodesArr.length/4; i++) {
-//                 p = p.prev;
-//                 recentlyPlayed.add(p);
-//             }
-//             kickAway(nodesArr, currentIndex, recentlyPlayed);
-
-//             // randomimze current song
-//             swap(
-//                 nodesArr, currentIndex, 
-//                 rand(currentIndex, currentIndex + recentlyPlayed.size-1) % nodesArr.length
-//             );
-//             setSong(nodesArr[currentIndex].song);
-//             currentSongNode = this.shuffleIndexes.get(data.curr.song);
-//         }
-//     }
-                    
-//     for (let i = 0; i < nodesArr.length; i++) {
-//         nodesArr[i].prev = nodesArr[i === 0 ? nodesArr.length-1 : i-1 ];
-//         nodesArr[i].next = nodesArr[(i+1) % nodesArr.length];
-//     }
-
-//     this.shuffleArr = shuffle? nodesArr : null;
-
-//     // last is the previous of the current song upon creating cycle
-//     this.last = currentSongNode.prev;
-
-//     // console.log("updated cycle");
-//     // this.print();
-// }
-
 
 function rand(min, max) {
     return min + Math.floor(Math.random() * ((max - min) + 1));
@@ -345,12 +303,6 @@ function swap(arr, i, j) {
     const temp = arr[i];
     arr[i] = arr[j];
     arr[j] = temp;
-}
-
-function randomize(arr) {
-    for (let i = 0; i < arr.length; i++) 
-        swap(arr, i, rand(i, arr.length-1));
-    return arr;
 }
 
 /**
@@ -380,11 +332,8 @@ function kickAway(arr, start, banned) {
     return arr;
 }
 
-
-
-document.getElementById("next").addEventListener("click", () => {
+export function playNextSong() {
     if (data.curr.listenPlaylist.songs.size <= 1) return;
-    
 
     // if not at the top of history stack, play next in stack
     if (!inThePresent()) {
@@ -395,12 +344,12 @@ document.getElementById("next").addEventListener("click", () => {
     }
 
     togglePlay( data.curr.listenPlaylist.cycle.nextSong() );
-    
-})
+}
+
+document.getElementById("next").addEventListener("click", playNextSong);
 
 document.getElementById("prev").addEventListener("click", () => {
     if (data.curr.listenPlaylist.songs.size <= 1) return;
-
     
     if (!data.settings.shuffle) {
         const nextSong = data.curr.listenPlaylist.cycle.shuffleIndexes.get(data.curr.song).prev.song;

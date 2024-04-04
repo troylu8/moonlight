@@ -1,5 +1,4 @@
 node_modules
-public/resources/songs
-_test
+public/resources
 server/users
 staring.ico

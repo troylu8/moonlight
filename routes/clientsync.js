@@ -28,10 +28,9 @@ router.use(express.json());
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-// send server.wants
 router.post("/:username", async (req, res) => {
     
-    const songsDir = join(__dirname, "../public/resources/songs");
+    const resourcesDir = join(__dirname, "../public/resources/songs");
 
     console.log("client backend got: ", req.body);
 
@@ -41,10 +40,11 @@ router.post("/:username", async (req, res) => {
         JSON.stringify(req.body, (key, value) => key === "syncStatus"? undefined : value)
     ));
 
-    for (const song of req.body.unsynced) {
+    for (const song of req.body["unsynced-songs"]) {
         if (song.syncStatus === "new")
-            zip.addLocalFile( join(songsDir, song.filename) );
+            zip.addLocalFile( join(resourcesDir, "songs", song.filename) );
     }
+    //TODO: add playlist files here!!!!!  ! 
 
     try {
         const newSongs = await axios({
@@ -57,7 +57,7 @@ router.post("/:username", async (req, res) => {
         });
         console.log("returned buffer", Buffer.from(newSongs.data));
 
-        await extractAllToPromise(new Zip(Buffer.from(newSongs.data)), songsDir);
+        await extractAllToPromise(new Zip(Buffer.from(newSongs.data)), resourcesDir);
         console.log("added new songs");
 
         res.status(200).end();

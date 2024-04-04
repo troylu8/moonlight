@@ -12,6 +12,7 @@ export class Song {
         this.size = options.size;
         this.duration = options.duration;
 
+        /** @type {"new" | "edited" | "synced"} */
         this.syncStatus = options.syncStatus ?? "new";
 
         /** @type {Set<HTMLElement>} */
@@ -31,8 +32,6 @@ export class Song {
     }
     
     update(options) {
-        this.setSyncStatusEdited();
-
         this.title = options.title;
         this.artist = options.artist;
         this.playlists = new Set(options.playlists);
@@ -44,9 +43,11 @@ export class Song {
 
     /** @param {Playlist} playlist */
     addToPlaylist(playlist) {
+        console.log("tried to add to", playlist);
         if (playlist.songs.has(this)) return;
         
         this.setSyncStatusEdited();
+        playlist.setSyncStatusEdited();
 
         playlist.songs.add(this);
         this.playlists.add(playlist);
@@ -63,6 +64,7 @@ export class Song {
         if (!playlist.songs.has(this)) return;
 
         this.setSyncStatusEdited();
+        playlist.setSyncStatusEdited();
 
         playlist.songs.delete(this);
         this.playlists.delete(playlist);
@@ -72,7 +74,10 @@ export class Song {
     }
 
     delete() {
-        data.trashqueue.set(this.id, this.filename);
+        //TODO: test this
+        if (this === data.curr.song) play.playNextSong();
+
+        data.trashqueue.set("songs." + this.id, this.filename);
 
         for (const playlist of this.playlists) 
             this.removeFromPlaylist(playlist);
@@ -87,10 +92,10 @@ export class Song {
 
 export class Playlist {
     
-    constructor(pid, title, songs) {
-        data.playlists.set(pid, this);
-        this.id = pid;
-        this.title = title;
+    constructor(id, options) {
+        data.playlists.set(id, this);
+        this.id = id;
+        this.title = options.title;
         
         /** @type {HTMLElement} */
         this.playlistEntry = null;
@@ -102,26 +107,41 @@ export class Playlist {
         /** @type {PlaylistCycle} */
         this.cycle = null;
 
+        /** @type {"new" | "edited" | "synced"} */
+        this.syncStatus = options.syncStatus ?? "new";
+
         songElements.createPlaylistEntries(this);
         songElements.createPlaylistCheckboxDivs(this);
 
         /** @type {Set<Song>} */
         this.songs = new Set();
-        if (songs) {
-            for (const song of songs) 
-                song.addToPlaylist(this);
-        }
+        if (options.songs) 
+            options.songs.forEach(sid => this.songs.add(sid));
+        
         
     }
 
+    setSyncStatusEdited() {
+        if (this.syncStatus !== "new") this.syncStatus = "edited";
+        console.log(this.syncStatus);
+    }
 
     delete() {
-
-        if (this === data.curr.listenPlaylist && this.songs.has(data.curr.song)) 
-            play.setSong("none");
         
-        const prevID = this.playlistEntry.previousElementSibling.id.substring(3);
-        songElements.setViewPlaylist(data.playlists.get(prevID));
+        //TODO: add playlist files!
+        data.trashqueue.set("playlists." + this.id, "dummy value");
+
+        // if only playlist, set view and listen playlists to none
+        if (data.playlists.size === 1) songElements.setViewPlaylist("none", true);
+
+        else if (this === data.curr.viewPlaylist) {
+            const prevID = this.playlistEntry.previousElementSibling.id.substring(3);
+            songElements.setViewPlaylist(data.playlists.get(prevID), true);
+        }
+        else if (this === data.curr.listenPlaylist && this.songs.has(data.curr.song)) {
+            play.setSong("none");
+            data.curr.listenPlaylist = "none";
+        }
 
         for (const song of this.songs) 
             song.removeFromPlaylist(this);
@@ -135,13 +155,14 @@ export class Playlist {
         console.log("deleted playlist " + this.title);
     }
 
-    update(options) {
+    update(options) {        
         this.title = options.title;
 
         this.songs = new Set();
         for (const sid of options.songs) 
             data.songs.get(sid).addToPlaylist(this);
     }
+    
 }
 
 export const data = {
@@ -172,6 +193,17 @@ export const data = {
     songs: new Map(),
 
     updateListenPlaylist() {
+        
+        if (data.curr.viewPlaylist === "none") {
+
+            // if current playlist has current song, set song to none
+            if (data.curr.listenPlaylist.songs.has(data.curr.song)) play.setSong("none");
+            data.curr.listenPlaylist = "none";
+            console.log("listenplaylist set to none");
+
+            return;
+        }
+
         data.curr.listenPlaylist = data.curr.viewPlaylist;
         
         if (!data.curr.listenPlaylist.cycle)
@@ -233,14 +265,12 @@ async function fetchUserdata() {
 
     for (let pid in json.playlists) {
         const playlistJSON = json.playlists[pid];
-        new Playlist(pid, playlistJSON.title, playlistJSON.songs.map(sid => data.songs.get(sid)));
+        new Playlist(pid, playlistJSON);
     }
 
     play.setSong( data.songs.get(json.curr.song) );
 
     songElements.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);
-    
-    data.updateListenPlaylist();
 
     data.settings = json.settings;
     play.setShuffle(json.settings.shuffle);

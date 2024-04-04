@@ -138,31 +138,34 @@ function createPlaylistGroup(playlist) {
 let activePlaylistGroup;
 const playlistHeader = document.getElementById("playlist-header");
 
-/** @param {Playlist} playlist */
-export function setViewPlaylist(playlist) {
+/** 
+ * @param {Playlist | "none"} playlist
+ * @param {boolean} setAsListenPlaylist
+ */
+export function setViewPlaylist(playlist, setAsListenPlaylist) {
 
     if (playlist === data.curr.viewPlaylist) return;
 
     data.curr.viewPlaylist = playlist;
 
-    if (playlist === "none") {
-        playlistHeader.innerText = "-";
-        if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
-        return;
+    if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
+
+    if (playlist === "none") playlistHeader.innerText = "-";
+    else {
+        if (!playlist.groupElem) 
+            playlist.groupElem = createPlaylistGroup(playlist);
+
+        playlistHeader.innerText = playlist.title;
+        songSettings.updateSongEntries();
+
+        activePlaylistGroup = playlist.groupElem;
+        activePlaylistGroup.style.display = "flex";
+
+        if (songSettings.currentlyEditing) 
+            songSettings.setLiveElements(activePlaylistGroup);
     }
 
-    if (!playlist.groupElem) 
-        playlist.groupElem = createPlaylistGroup(playlist);
-
-    playlistHeader.innerText = playlist.title;
-    songSettings.updateSongEntries();
-
-    if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
-    activePlaylistGroup = playlist.groupElem;
-    activePlaylistGroup.style.display = "flex";
-
-    if (songSettings.currentlyEditing) 
-        songSettings.setLiveElements(activePlaylistGroup);
+    if (setAsListenPlaylist) data.updateListenPlaylist();
 }
 
 /**  @returns {HTMLElement} */

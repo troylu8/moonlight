@@ -15,42 +15,65 @@ export async function syncData() {
     console.log("server", Object.values(serverJSON.songs).map(s => s.filename ));
     console.log("client", Array.from(data.songs).map(s => { return {syncStatus: s[1].syncStatus, filename: s[1].filename} } ));
 
-    const changes = { 
-        /** @type {Array<Song>} unsynced songs  */
-        unsynced: [],
+    /** if syncing is successful, these items will be created */
+    const newItems = {
+        /** @type {Array<Song>} new songs client will receive from server */
+        songs: [],
 
-        /** @type {Array<Song>} songs server has that client wants */
-        wants: [],
+        /** @type {Array<Playlist>} new playlists client will receive from server */
+        playlists: []
+    }
+    
+    /** sent to server */
+    const changes = {
+        /** @type {Array<Song>} songs to be merged with server's data.json*/
+        "unsynced-songs": [],
+
+        /** @type {Array<Playlist>} playlists to be merged with server's data.json  */
+        "unsynced-playlists": [],
+
+        /** @type {Array<string>} all files that client wants from server */
+        "requestedFiles": [],
 
         /** @type {Array<string>} files that the client deleted, so the server should too */
-        trash: Array.from(data.trashqueue),
+        "trash": Array.from(data.trashqueue),
     };
 
-    for (const song of data.songs.values()) {
-        if (song.syncStatus !== "synced") 
-            changes.unsynced.push(song);
+    /** @param {"songs" | "playlists"} category */
+    const addCategoryToChanges = (category) => {
 
-        // syncstatus === "synced" && song isnt in server
-        else if (!serverJSON.songs[song.id]) 
-            song.delete();
-    }
+        for (const item of data[category].values()) {
+            if (item.syncStatus !== "synced") 
+                changes["unsynced-" + category].push(item);
 
-    for (const sid of Object.keys(serverJSON.songs)) {
-        const songData = serverJSON.songs[sid];
-        const song = data.songs.get(sid);
-
-        // WANTS - if client doesnt have this song && not in trash queue
-        if (!song) {
-            if (!data.trashqueue.has(sid)) {
-                songData.id = sid;
-                changes.wants.push(songData);
-            }
+            // syncstatus === "synced" && song/playlist isnt in server
+            else if (!serverJSON[category][item.id]) 
+                item.delete();
         }
 
-        // if client has song, but it hasnt been synced to latest changes 
-        else if (song.syncStatus === "synced") 
-            song.update(songData);
+        for (const id of Object.keys(serverJSON[category])) {
+            const itemData = serverJSON[category][id];
+            const item = data[category].get(id);
+
+            // WANTS - if client doesnt have this song/playlist && not in trash queue
+            if (!item) {
+                if (!data.trashqueue.has(category + "." + id)) {
+                    newItems[category].push(itemData);
+
+                    //TODO: push playlist filepaths here!!!!
+                    if (category === "songs")
+                        changes.requestedFiles.push("songs/" + itemData.filename);
+                }
+            }
+
+            // if client has song/playlist, but it hasnt been synced to latest changes 
+            else if (item.syncStatus === "synced") 
+                item.update(itemData);
+        }
     }
+
+    addCategoryToChanges("songs");
+    addCategoryToChanges("playlists");
     
     console.log("changes ", changes);
 
@@ -59,8 +82,17 @@ export async function syncData() {
             method: "POST",
             body: JSON.stringify(changes, 
             (key, value) => {
-                if (["songEntries", "playlists"].includes(key)) return undefined;
-                if (key === "wants") return value.map(s => s.filename);
+                if ([
+                    "groupElem",
+                    "songEntries",
+                    "playlistEntry",
+                    "checkboxDiv",
+                    "playlists",
+                    "cycle"
+                ].includes(key)) return undefined;
+
+                if (key === "songs") return Array.from(value).map(s => s.id);
+
                 return value;
             }),
             headers: {
@@ -72,14 +104,22 @@ export async function syncData() {
 
         if (!response.ok) return;
             
-        for (const song of changes.unsynced) 
+        for (const song of changes["unsynced-songs"]) 
             song.syncStatus = "synced";
+        for (const playlists of changes["unsynced-playlists"]) 
+            playlists.syncStatus = "synced";
 
-        for (const song of changes.wants) {
+        for (const song of newItems.songs) {
             song.syncStatus = "synced";
             new Song(song.id, song);
             console.log("created new song", song.title);
         }
+        for (const playlist of newItems.playlists) {
+            playlist.syncStatus = "synced";
+            new Playlist(playlist.id, playlist);
+            console.log("created new playlist", playlist.title);
+        }
+        
         
         data.trashqueue.clear();
         
@@ -125,22 +165,3 @@ async function setPassword(p) {
     });
     pass = p;
 }
-
-
-// for (const song of data.songs.values()) {
-        
-//     if (!serverJSON.songs[song.id]) {
-        
-//         // SERVER.WANTS - edited songs that client has but server doesnt
-//         if (song.edited) {
-//             server.new[song.id] = song;
-//         }
-
-//         // CLIENT.TRASH - unedited songs that client has but server doesnt
-//         else {
-//             // client.trash.push(song.filename); 
-//             song.delete();
-//         }
-//     }
-    
-// }
