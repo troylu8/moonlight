@@ -77,9 +77,7 @@ export function createPlaylistCheckboxDivs(playlist) {
     const checkbox = createElement("input", "song-settings__playlist:" + playlist.id);
     checkbox.type = "checkbox";
     checkbox.playlist = playlist;
-    checkbox.addEventListener("change", () => {
-        songSettings.currentlyEditing.edited = true;
-        
+    checkbox.addEventListener("change", () => {        
         if (checkbox.checked)
             songSettings.currentlyEditing.addToPlaylist(playlist);
         else

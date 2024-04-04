@@ -12,7 +12,7 @@ export class Song {
         this.size = options.size;
         this.duration = options.duration;
 
-        this.edited = options.edited ?? true;
+        this.syncStatus = options.syncStatus ?? "new";
 
         /** @type {Set<HTMLElement>} */
         this.songEntries = new Set();
@@ -23,11 +23,15 @@ export class Song {
             for (const playlist of playlists) 
                 this.addToPlaylist(playlist);
         }
-        
     }
 
+    setSyncStatusEdited() {
+        if (this.syncStatus !== "new") this.syncStatus = "edited";
+        console.log(this.syncStatus);
+    }
+    
     update(options) {
-        this.edited = false;
+        this.setSyncStatusEdited();
 
         this.title = options.title;
         this.artist = options.artist;
@@ -41,6 +45,8 @@ export class Song {
     /** @param {Playlist} playlist */
     addToPlaylist(playlist) {
         if (playlist.songs.has(this)) return;
+        
+        this.setSyncStatusEdited();
 
         playlist.songs.add(this);
         this.playlists.add(playlist);
@@ -55,6 +61,8 @@ export class Song {
     /** @param {Playlist} playlist */
     removeFromPlaylist(playlist) {
         if (!playlist.songs.has(this)) return;
+
+        this.setSyncStatusEdited();
 
         playlist.songs.delete(this);
         this.playlists.delete(playlist);

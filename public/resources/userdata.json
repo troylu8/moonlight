@@ -10,46 +10,8 @@
     "playlists": {
         "p1": {
             "title": "blank?",
-            "songs": [
-                "ytORofRTMg-iY",
-                "ytNRQRC_0ZQ00",
-                "ytAqI97zHMoQw",
-                "ytnmix0phrCVU"
-            ]
+            "songs": []
         }
     },
-    "songs": {
-        "ytORofRTMg-iY": {
-            "title": "Into The Night",
-            "artist": "YOASOBI - Topic",
-            "filename": "Into The Night.mp3",
-            "size": 4587375,
-            "duration": 263,
-            "edited": false
-        },
-        "ytNRQRC_0ZQ00": {
-            "title": "稲葉曇『フロートプレイ』Vo. 歌愛ユキ",
-            "artist": "稲葉曇",
-            "filename": "稲葉曇『フロートプレイ』Vo. 歌愛ユキ.mp3",
-            "size": 3862399,
-            "duration": 243,
-            "edited": false
-        },
-        "ytAqI97zHMoQw": {
-            "title": "椎名もた(siinamota) - Young Girl A / 少女A",
-            "artist": "U/M/A/A Inc.",
-            "filename": "椎名もた(siinamota) - Young Girl A - 少女A.mp3",
-            "size": 4060420,
-            "duration": 243,
-            "edited": false
-        },
-        "ytnmix0phrCVU": {
-            "title": "AnoHana OP Creditless",
-            "artist": "Lillian Graham",
-            "filename": "AnoHana OP Creditless.mp3",
-            "size": 1562889,
-            "duration": 92,
-            "edited": false
-        }
-    }
+    "songs": {}
 }

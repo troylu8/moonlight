@@ -51,7 +51,7 @@ router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req,
     // add songs to zip
     for (const entry of arrived.getEntries()) {
         if (entry.name === "changes.json") {
-            console.log("ignore changes entry");
+            console.log("ignored changes entry");
             continue;
         }
 
@@ -61,28 +61,28 @@ router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req,
         } catch (err) {
             console.log(err);
         }
-        
     }
 
     const data =  JSON.parse( await fs.promises.readFile( join(userDir, "data.json"),  "utf8") );
     
     const changes = JSON.parse( await getDataPromise(arrived.getEntry("changes.json")) );
     
-    console.log("changes", changes);
+    console.log("server backend got: ", changes);
 
     // merge json data
-    for (const sid of Object.keys(changes.server.wants)) {
-        data.songs[sid] = changes.server.wants[sid];
-        console.log("setting ", changes.server.wants[sid].title);
+    for (const song of changes.unsynced) {
+        data.songs[song.id] = song;
+        console.log("added", song.title);
     }
-    // changes.server.trash: [ [sid, filename], ... ]
-    for (const song of changes.server.trash) {
-        delete data.songs[song[0]];
-        allSongs.deleteFile(song[1]);
-        console.log("deleted", song[1]);
+    // clear trash
+    for (const songInfo of changes.trash) {
+        //songInfo:  [sid, filename]
+        delete data.songs[songInfo[0]];
+        allSongs.deleteFile(songInfo[1]);
+        console.log("deleted", songInfo[1]);
     }
 
-    await fs.promises.writeFile( join(userDir, "data.json"), JSON.stringify(data), "utf8");
+    await fs.promises.writeFile( join(userDir, "data.json"), JSON.stringify(data, (key, value) => key === "id"? undefined : value), "utf8");
     console.log("finished writing json");
     
     await writeZipPromise(allSongs, zipPath);
@@ -90,7 +90,7 @@ router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req,
 
     const toClient = new Zip();
 
-    for (const filename of changes.client.wants) {
+    for (const filename of changes.wants) {
         const entry = allSongs.getEntry(filename);
         toClient.addFile(entry.name, await getDataPromise(entry));
         console.log("returning", entry.name);

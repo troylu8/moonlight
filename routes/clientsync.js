@@ -10,8 +10,16 @@ const { promisify } = require('util');
  * @param {function(err)} cb 
  */
 function extractAllToAsync(zip, targetPath, cb) {
+    const total = zip.getEntryCount();
+    console.log("total in buffer", total);
+    let done = 0;
     
-    zip.extractAllToAsync(targetPath, true, false, cb);
+    if (total === 0) return cb();
+
+    zip.extractAllToAsync(targetPath, false, (err) => {
+        console.log("extracted", done+1);
+        if (++done === total) cb();
+    });
 }
 const extractAllToPromise = promisify(extractAllToAsync);
 
@@ -25,12 +33,17 @@ router.post("/:username", async (req, res) => {
     
     const songsDir = join(__dirname, "../public/resources/songs");
 
-    console.log("body", req.body);
+    console.log("client backend got: ", req.body);
 
     const zip = new Zip();
-    zip.addFile("changes.json", Buffer.from(JSON.stringify(req.body)) );
-    for (const song of Object.values(req.body.server.wants)) {
-        zip.addLocalFile( join(songsDir, song.filename) );
+    zip.addFile("changes.json", Buffer.from(
+        // exclude syncStatus from json before sending to server
+        JSON.stringify(req.body, (key, value) => key === "syncStatus"? undefined : value)
+    ));
+
+    for (const song of req.body.unsynced) {
+        if (song.syncStatus === "new")
+            zip.addLocalFile( join(songsDir, song.filename) );
     }
 
     try {
@@ -43,9 +56,10 @@ router.post("/:username", async (req, res) => {
             responseType: "arraybuffer"
         });
         console.log("returned buffer", Buffer.from(newSongs.data));
-        // new Zip(res.data).extractAllTo(songsDir + "/", true);
+
         await extractAllToPromise(new Zip(Buffer.from(newSongs.data)), songsDir);
         console.log("added new songs");
+
         res.status(200).end();
     } catch (err) {
         console.log("error!!", err);
