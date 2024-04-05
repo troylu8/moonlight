@@ -68,8 +68,11 @@ export async function syncData() {
             }
 
             // if client has song/playlist, but it hasnt been synced to latest changes 
-            else if (item.syncStatus === "synced") 
+            else if (item.syncStatus === "synced") {
+                console.log("updating", item.title);
                 item.update(itemData);
+            }
+                
         }
     }
 
@@ -88,11 +91,10 @@ export async function syncData() {
                     "songEntries",
                     "playlistEntry",
                     "checkboxDiv",
-                    "playlists",
                     "cycle"
                 ].includes(key)) return undefined;
 
-                if (key === "songs") return Array.from(value).map(s => s.id);
+                if (key === "songs" || key === "playlists") return Array.from(value).map(i => i.id);
 
                 return value;
             }),

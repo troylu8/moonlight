@@ -15,7 +15,7 @@
     padding: 20px;
 }
 
-#song-settings {
+#song-settings, #playlist-settings {
     display: none;
     flex-direction: column;
     gap: 10px

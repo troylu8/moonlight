@@ -40,7 +40,7 @@ router.post("/:username", async (req, res) => {
     const zip = new Zip();
     zip.addFile("changes.json", Buffer.from(
         // exclude syncStatus from json before sending to server
-        JSON.stringify(req.body, (key, value) => key === "syncStatus"? undefined : value)
+        JSON.stringify(req.body, (key, value) => key === "_syncStatus"? undefined : value)
     ));
 
     for (const song of req.body["unsynced-songs"]) {

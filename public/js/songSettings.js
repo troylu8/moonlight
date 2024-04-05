@@ -61,7 +61,7 @@ export function openSongSettings(song, song__title, song__artist) {
 }
 
 titleInput.addEventListener("input", () => {
-    currentlyEditing.setSyncStatusEdited();
+    currentlyEditing.syncStatus = "edited";
 
     allEntriesUpdated = false;
 
@@ -73,7 +73,7 @@ titleInput.addEventListener("input", () => {
     song__titleLive.innerText = titleInput.value;
 })
 artistInput.addEventListener("input", () => {
-    currentlyEditing.setSyncStatusEdited();
+    currentlyEditing.syncStatus = "edited";
     
     allEntriesUpdated = false;
 
@@ -85,10 +85,8 @@ artistInput.addEventListener("input", () => {
 })
 
 deleteBtn.addEventListener("click", () => {
-
     currentlyEditing.delete();
 
-    if (data.curr.song === currentlyEditing) setSong("none");
     clearCurrentlyEditing();
 
     sidebar.setSidebarOpen(false);
@@ -101,6 +99,11 @@ export function updateSongEntries() {
     for (const songElem of currentlyEditing.songEntries) {
         setTitleArtistText(songElem, currentlyEditing.title, currentlyEditing.artist);
     }
+
+    if (data.curr.song === currentlyEditing) {
+        playingTitleElem.innerText = titleInput.value;
+        playingArtistElem.innerText = titleInput.value;
+    }   
 
     console.log("all entries updated");
 

@@ -33,16 +33,20 @@
         </nav>
 
         <div id="playlists-div">
-            <h2> Playlists </h2>
+            <div id="playlists-div__header">
+                <h2> Playlists </h2>
+                <button id="new-playlist"> new </button>
+            </div>
+            
 
-            <nav id="playlists-nav">
+            <nav id="playlists__nav">
                 <!-- playlist elems here -->
             </nav>
         </div>
 
         <main id="main-div">
             <h1 id="playlist-header"> playlist title </h1>
-
+            <p id="playlist-desc"> desc </p>
             <!-- playlist__group elems here -->
         </main>
         
@@ -143,6 +147,19 @@
                     <button id="song-settings__delete"> delete </button>
                 </div>
 
+                <div id="playlist-settings">
+                    <div id="playlist-settings__metadata">
+                        <p id="playlist-settings__size"> 123 mb </p>
+                    </div>
+
+                    <p>title</p>
+                    <input id="playlist-settings__title" type="text">
+                    <p>description</p>
+                    <input id="playlist-settings__desc" type="text">
+
+                    <button id="playlist-settings__delete"> delete </button>
+                </div>
+
                 <div id="settings">
                     <div id="create-account">
                         <h5> create account </h5>
@@ -205,6 +222,7 @@
     <script src="js/userdata.js" type="module"></script>
     <script src="js/play.js" type="module"></script>
     <script src="js/songElements.js" type="module"></script>
+    <script src="js/playlistSettings.js" type="module"></script>
     <script src="js/fx.js" type="module"></script>
     <script src="js/sync.js" type="module"></script>
     

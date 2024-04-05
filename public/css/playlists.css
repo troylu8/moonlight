@@ -12,11 +12,18 @@
     padding: 20px;
 }
 
+#playlists-div__header {
+    display: flex;
+    justify-content: space-between;
+}
 h2 {
     margin: 0;
 }
+#new-playlist {
+    cursor: pointer;
+}
 
-#playlists-nav {
+#playlists__nav {
     margin-top: 15px;
     overflow-y: auto;
     overflow-x: hidden;

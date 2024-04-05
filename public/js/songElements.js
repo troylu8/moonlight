@@ -1,6 +1,7 @@
 import * as songSettings from "./songSettings.js";
 import { togglePlay } from "./play.js";
-import { data, Playlist } from "./userdata.js";
+import { data, Playlist, Song } from "./userdata.js";
+import { openPlaylistSettings } from "./playlistSettings.js";
 
 const OPTIONS_SVG = 
    `<svg fill="var(--color1)" width="20px" height="20px" viewBox="0 0 32 32" >
@@ -53,6 +54,7 @@ export function createSongEntry(song, playlist) {
 
     playlist.groupElem.appendChild(songEntry);
 
+    new Song().song
     song.songEntries.add(songEntry);
     return [songEntry, song__title, song__artist];
 }
@@ -66,7 +68,7 @@ export function deleteSongEntry(song, playlist) {
 }
 
 const mainDiv = document.getElementById("main-div");
-const playlistsNav = document.getElementById("playlists-nav");
+const playlistsNav = document.getElementById("playlists__nav");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
 
 /** PLAYLIST OPTION IN SONG SETTINGS */
@@ -92,6 +94,7 @@ export function createPlaylistCheckboxDivs(playlist) {
     playlistCheckboxes.appendChild(option);
 }
 
+
 /** PLAYLIST ENTRY IN LEFT NAV 
  * @param {Playlist} playlist
  */
@@ -99,7 +102,7 @@ export function createPlaylistEntries(playlist) {
     
     const playlistElem = createElement("div", "li:" + playlist.id, "playlist");
     playlistElem.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
-    playlistElem.addEventListener("click", () => {
+    playlistElem.addEventListener("click", (e) => {
         setViewPlaylist(playlist)
     });
     playlist.playlistEntry = playlistElem;
@@ -107,12 +110,11 @@ export function createPlaylistEntries(playlist) {
     const playlist__options = createElement("button", null, "playlist__options");
     playlist__options.innerHTML = OPTIONS_SVG;
     playlist__options.addEventListener("click", (e) => {
-        playlist.delete();
+        openPlaylistSettings(playlist);
         e.stopPropagation();
     })
 
     playlistElem.appendChild(playlist__options);
-    // playlistElem.parentNode.appendChild(playlist__options)
 
     playlistsNav.appendChild(playlistElem);
 }
@@ -136,7 +138,8 @@ function createPlaylistGroup(playlist) {
 
 /** @type {HTMLElement} */
 let activePlaylistGroup;
-const playlistHeader = document.getElementById("playlist-header");
+export const playlistHeader = document.getElementById("playlist-header");
+export const playlistDesc = document.getElementById("playlist-desc");
 
 /** 
  * @param {Playlist | "none"} playlist
@@ -150,12 +153,16 @@ export function setViewPlaylist(playlist, setAsListenPlaylist) {
 
     if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
 
-    if (playlist === "none") playlistHeader.innerText = "-";
+    if (playlist === "none") {
+        playlistHeader.innerText = "-";
+        playlistDesc.innerText = "-";
+    } 
     else {
         if (!playlist.groupElem) 
             playlist.groupElem = createPlaylistGroup(playlist);
 
         playlistHeader.innerText = playlist.title;
+        playlistDesc.innerText = playlist.desc;
         songSettings.updateSongEntries();
 
         activePlaylistGroup = playlist.groupElem;

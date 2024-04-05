@@ -1,6 +1,7 @@
 import * as songElements from "./songElements.js";
 import * as play from "./play.js";
 import { PlaylistCycle } from "./play.js";
+import { updateSongEntries } from "./songSettings.js";
 
 export class Song {
     constructor(id, options) {
@@ -13,7 +14,7 @@ export class Song {
         this.duration = options.duration;
 
         /** @type {"new" | "edited" | "synced"} */
-        this.syncStatus = options.syncStatus ?? "new";
+        this._syncStatus = options.syncStatus ?? "new";
 
         /** @type {Set<HTMLElement>} */
         this.songEntries = new Set();
@@ -26,9 +27,14 @@ export class Song {
         }
     }
 
-    setSyncStatusEdited() {
-        if (this.syncStatus !== "new") this.syncStatus = "edited";
+    /** @param {"new" | "edited" | "synced"} val cannot set `syncStatus` to `edited` when it is `new`*/
+    set syncStatus(val) { 
+        if (val === "edited" && this._syncStatus === "new") return;
+        this._syncStatus = val;
     }
+
+    /** @returns {"new" | "edited" | "synced"} */
+    get syncStatus() {return this._syncStatus}
     
     update(options) {
         this.title = options.title;
@@ -38,15 +44,15 @@ export class Song {
             for (const playlist of options.playlists) 
                 this.addToPlaylist(playlist);
         }
+        updateSongEntries();
     }
 
     /** @param {Playlist} playlist */
     addToPlaylist(playlist) {
-        console.log("tried to add to", playlist);
-        if (playlist.songs.has(this)) return;
+        if (!playlist || playlist.songs.has(this)) return;
         
-        this.setSyncStatusEdited();
-        playlist.setSyncStatusEdited();
+        this.syncStatus = "edited";
+        playlist.syncStatus = "edited";
 
         playlist.songs.add(this);
         this.playlists.add(playlist);
@@ -62,8 +68,8 @@ export class Song {
     removeFromPlaylist(playlist) {
         if (!playlist.songs.has(this)) return;
 
-        this.setSyncStatusEdited();
-        playlist.setSyncStatusEdited();
+        this.syncStatus = "edited";
+        playlist.syncStatus = "edited";
 
         playlist.songs.delete(this);
         this.playlists.delete(playlist);
@@ -74,7 +80,8 @@ export class Song {
 
     delete() {
         //TODO: test this
-        if (this === data.curr.song) play.playNextSong();
+        if (data.curr.listenPlaylist.songs.size === 1) play.setSong("none");
+        else if (this === data.curr.song) play.playNextSong();
 
         data.trashqueue.set("songs." + this.id, "songs/" + this.filename);
 
@@ -95,6 +102,7 @@ export class Playlist {
         data.playlists.set(id, this);
         this.id = id;
         this.title = options.title;
+        this.desc = options.desc ?? "";
         
         /** @type {HTMLElement} */
         this.playlistEntry = null;
@@ -107,7 +115,7 @@ export class Playlist {
         this.cycle = null;
 
         /** @type {"new" | "edited" | "synced"} */
-        this.syncStatus = options.syncStatus ?? "new";
+        this._syncStatus = options.syncStatus ?? "new";
 
         songElements.createPlaylistEntries(this);
         songElements.createPlaylistCheckboxDivs(this);
@@ -120,10 +128,14 @@ export class Playlist {
         
     }
 
-    setSyncStatusEdited() {
-        if (this.syncStatus !== "new") this.syncStatus = "edited";
-        console.log(this.syncStatus);
+    /** @param {"new" | "edited" | "synced"} val cannot set `syncStatus` to `edited` when it is `new`*/
+    set syncStatus(val) { 
+        if (val === "edited" && this._syncStatus === "new") return;
+        this._syncStatus = val;
     }
+
+    /** @returns {"new" | "edited" | "synced"} */
+    get syncStatus() {return this._syncStatus}
 
     delete() {
         
@@ -156,10 +168,17 @@ export class Playlist {
 
     update(options) {        
         this.title = options.title;
+        this.desc = options.desc;
 
         this.songs = new Set();
         for (const sid of options.songs) 
             data.songs.get(sid).addToPlaylist(this);
+
+        if (this === data.curr.viewPlaylist) {
+            songElements.playlistHeader.innerText = this.title;
+            songElements.playlistDesc.innerText = this.desc;
+            this.playlistEntry.firstElementChild.innerText = this.title;
+        }
     }
     
 }
@@ -191,15 +210,15 @@ export const data = {
     /** sid -> song @type {Map<string, Song>} */
     songs: new Map(),
 
+    /** set `listenPlaylist` to `viewPlaylist` and initialize shuffle  */
     updateListenPlaylist() {
         
         if (data.curr.viewPlaylist === "none") {
+            if (data.curr.listenPlaylist === "none") return;
 
-            // if current playlist has current song, set song to none
-            if (data.curr.listenPlaylist.songs.has(data.curr.song)) play.setSong("none");
+            play.setSong("none");
             data.curr.listenPlaylist = "none";
             console.log("listenplaylist set to none");
-
             return;
         }
 
