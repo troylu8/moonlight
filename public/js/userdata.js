@@ -2,9 +2,10 @@ import * as songElements from "./songElements.js";
 import * as play from "./play.js";
 import { PlaylistCycle } from "./play.js";
 import { updateSongEntries } from "./songSettings.js";
+import { uid } from "./sync.js";
 
 export class Song {
-    constructor(id, options) {
+    constructor(id, options, initializeAsSynced) {
         data.songs.set(id, this);
         this.id = id;
         this.title = options.title;
@@ -15,6 +16,7 @@ export class Song {
 
         /** @type {"new" | "edited" | "synced"} */
         this._syncStatus = options.syncStatus ?? "new";
+        if (initializeAsSynced) this._syncStatus = "synced";
 
         /** @type {Set<HTMLElement>} */
         this.songEntries = new Set();
@@ -23,7 +25,7 @@ export class Song {
         this.playlists = new Set();
         if (options.playlists) {
             for (const pid of options.playlists) 
-                this.addToPlaylist(data.playlists.get(pid));
+                this.addToPlaylist(pid, !initializeAsSynced);
         }
     }
 
@@ -48,11 +50,15 @@ export class Song {
     }
 
     /** @param {Playlist} playlist */
-    addToPlaylist(playlist) {
+    addToPlaylist(playlist, changeSyncStatus) {
+        if ( !(playlist instanceof Playlist) ) playlist = data.playlists.get(playlist);
+
         if (!playlist || playlist.songs.has(this)) return;
         
-        this.syncStatus = "edited";
-        playlist.syncStatus = "edited";
+        if (changeSyncStatus ?? true) {
+            this.syncStatus = "edited";
+            playlist.syncStatus = "edited";    
+        }
 
         playlist.songs.add(this);
         this.playlists.add(playlist);
@@ -98,7 +104,7 @@ export class Song {
 
 export class Playlist {
     
-    constructor(id, options) {
+    constructor(id, options, initializeAsSynced) {
         data.playlists.set(id, this);
         this.id = id;
         this.title = options.title;
@@ -116,15 +122,17 @@ export class Playlist {
 
         /** @type {"new" | "edited" | "synced"} */
         this._syncStatus = options.syncStatus ?? "new";
+        if (initializeAsSynced) this._syncStatus = "synced"
 
         songElements.createPlaylistEntries(this);
         songElements.createPlaylistCheckboxDivs(this);
 
         /** @type {Set<Song>} */
         this.songs = new Set();
-        if (options.songs) 
-            options.songs.forEach(sid => this.songs.add(sid));
-        
+        if (options.songs) {
+            for (const sid of options.songs) 
+                data.songs.get(sid).addToPlaylist(this, !initializeAsSynced);
+        }
         
     }
 
@@ -263,7 +271,7 @@ export const data = {
     },
     
     async saveDataLocal() {    
-        await fetch("http://localhost:5000/files/save-userdata", {
+        await fetch("http://localhost:5000/files/save-userdata/" + uid, {
             method: "PUT",
             body: this.stringify()
         })
@@ -273,7 +281,7 @@ export const data = {
 
 
 async function fetchUserdata() {
-    const res = await fetch("http://localhost:5000/files/read-userdata");
+    const res = await fetch("http://localhost:5000/files/read-userdata/" + uid);
     const json = await res.json();
 
     data.trashqueue = new Map(json.trashqueue);
@@ -288,7 +296,7 @@ async function fetchUserdata() {
 
     play.setSong( data.songs.get(json.curr.song) );
 
-    songElements.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);
+    songElements.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist) ?? "none", true);
 
     data.settings = json.settings;
     play.setShuffle(json.settings.shuffle);

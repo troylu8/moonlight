@@ -1,5 +1,5 @@
+import genID from "./id.js";
 import { setSidebarContent } from "./sidebar.js";
-import { data } from "./userdata.js";
 import * as sync from "./sync.js";
 
 const settings = document.getElementById("settings");
@@ -30,11 +30,17 @@ document.getElementById("create-account__submit")
         if (error) return console.log(error);
         if (create__password.value !== repeatPassword.value) return console.log("passwords dont match");
 
-        //TODO: change to actual ip!
-        const createReq = await fetch(`https://localhost:5001/create-account-dir/${create__username.value}`, {method: "POST"});
-        if (createReq.status === 409) return console.log("username taken!");
+        const uid = genID(14);
 
-        await sync.setCredentials(create__username.value, create__password.value, true);
+        //TODO: change to actual ip!
+        // create account at server
+        const createReq = await fetch(`https://localhost:5001/create-account-dir/${uid}/${create__username.value}`, {method: "POST"});
+        if (createReq.status === 409) return console.log("username taken");
+
+        // create account at client
+        await fetch("http://localhost:5000/files/create-account-dir/" + uid, {method: "POST"});
+
+        await sync.setCredentials(uid, create__username.value, create__password.value, true);
         
         signedInAs.innerText = "signed in as " + create__username.value;
         setAccountElem(accountInfo);
@@ -47,14 +53,17 @@ const signIn__password = document.getElementById("sign-in__password");
 
 document.getElementById("sign-in__submit")
     .addEventListener("click", async () => {
+
         if (usernameErrors(signIn__username.value)) 
             return console.log("username not found");
         
-        sync.setCredentials(signIn__username.value, signIn__password.value);
-        const data = await sync.getData();
+        const uid = await sync.getUID(signIn__username.value);
+        if (!uid) return console.log("no user named ", signIn__username.value);
 
+        const data = await sync.getData(uid, signIn__password.value);
         if (data === 401) return console.log("unauthorized!");
-        if (data === 404) return console.log("no user named ", signIn__username.value);
+        
+        sync.setCredentials(uid, signIn__username.value, signIn__password.value);
 
         signedInAs.innerText = "signed in as " + signIn__username.value;
         setAccountElem(accountInfo);

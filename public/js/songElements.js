@@ -54,7 +54,6 @@ export function createSongEntry(song, playlist) {
 
     playlist.groupElem.appendChild(songEntry);
 
-    new Song().song
     song.songEntries.add(songEntry);
     return [songEntry, song__title, song__artist];
 }

@@ -1,9 +1,10 @@
 import { setSidebarContent, setSidebarOpen } from "./sidebar.js";
 import { Playlist, data } from "./userdata.js";
 import { playlistHeader, playlistDesc } from "./songElements.js";
+import genID from "./id.js";
 
 document.getElementById("new-playlist").addEventListener("click", () => {
-    new Playlist(Date.now(), { title: "new playlist" });
+    new Playlist(genID(14), { title: "new playlist" });
 })
 
 const playlistSettings = document.getElementById("playlist-settings");

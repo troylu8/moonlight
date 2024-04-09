@@ -1,15 +1,15 @@
 import { data, Song, Playlist } from "./userdata.js";
 
-let username;
-let pass;
+export let uid = "guest";
+export let username = "guest";
+let password;
 
 const syncBtn = document.getElementById("sync");
 syncBtn.addEventListener("click", () => syncData());
 
 export async function syncData() {
-    if (!username) {
-        return console.log("not signed in!");
-    }
+    if (!uid) return console.log("not signed in!");
+
     const serverJSON = await getData();
     
     console.log("server", Object.values(serverJSON.songs).map(s => s.filename ));
@@ -82,7 +82,7 @@ export async function syncData() {
     console.log("changes ", changes);
 
     try {
-        const response = await fetch("http://localhost:5000/sync/" + username, {
+        const response = await fetch("http://localhost:5000/sync/" + uid, {
             method: "POST",
             body: JSON.stringify(changes, 
             (key, value) => {
@@ -106,23 +106,14 @@ export async function syncData() {
         console.log("frontend received", response.status);
 
         if (!response.ok) return;
-        
-        for (const song of changes["unsynced-songs"]) 
-            song.syncStatus = "synced";
-        for (const playlists of changes["unsynced-playlists"]) 
-            playlists.syncStatus = "synced";
 
-        for (const song of newItems.songs) {
-            song.syncStatus = "synced";
-            console.log("newitems", newItems);
-            new Song(song.id, song);
-            console.log("created new song", song.title);
-        }
-        for (const playlist of newItems.playlists) {
-            playlist.syncStatus = "synced";
-            new Playlist(playlist.id, playlist);
-            console.log("created new playlist", playlist.title);
-        }
+        console.log("newitems", newItems);
+        
+        for (const song of changes["unsynced-songs"])           song._syncStatus = "synced";
+        for (const playlists of changes["unsynced-playlists"])  playlists._syncStatus = "synced";
+
+        for (const songData of newItems.songs) new Song(songData.id, songData, true);
+        for (const playlistData of newItems.playlists) new Playlist(playlistData.id, playlistData, true);
         
         
         data.trashqueue.clear();
@@ -131,18 +122,24 @@ export async function syncData() {
 
 } 
 
-export async function setCredentials(u, p, newAccount) {
-    username = u;
-    pass = p;
+export async function setCredentials(id, user, pass, newAccount) {
+    uid = id;
+    username = user;
+    password = pass;
 
     if (newAccount) await setPassword(pass);
 }
 
-export async function getData() {
-    console.log("getting data with ", pass);
-    const res = await fetch(`https://localhost:5001/get-data/${username}`, {
+export async function getUID(username) {
+    const res = await fetch(`https://localhost:5001/get-uid/${username}`);
+    if (res.status === 404) return console.log("username doesnt exist");
+    return await res.text();
+}
+
+export async function getData(id, pass) {
+    const res = await fetch(`https://localhost:5001/get-data/${id ?? uid}`, {
         method: "POST",
-        body: pass
+        body: pass ?? password
     })
     if (res.ok) return await res.json();
 
@@ -150,22 +147,22 @@ export async function getData() {
 }
 
 export async function uploadData() {
-    await fetch(`https://localhost:5001/upload-data/${username}`, {
+    await fetch(`https://localhost:5001/upload-data/${uid}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
         },
         body: data.stringify({
-            "pass": pass,
+            "pass": password,
             "userdata": data
         }, ["curr", "settings", "trashqueue", "edited"])
     });
 }
 
 async function setPassword(p) {
-    await fetch(`https://localhost:5001/set-hash/${username}`, {
+    await fetch(`https://localhost:5001/set-hash/${uid}`, {
         method: "POST",
         body: p // in body to allow '/' character
     });
-    pass = p;
+    password = p;
 }

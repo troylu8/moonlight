@@ -63,7 +63,12 @@ export function setSong(song) {
     };
 
     //TODO: WHEN USING ELECTRON, USE ./ INSTEAD OF ../
-    audio.src = "../resources/songs/" + encodeURIComponent(song.filename);
+    const path = (song.id.startsWith("yt")) ?
+        `../public/resources/yt/${encodeURIComponent(song.filename)}` :
+        `../public/resources/users/${req.params["username"]}/songs/${encodeURIComponent(song.filename)}`;
+
+        console.log(decodeURI(path));
+    audio.src = path;
     data.curr.song = song;
 
     titleElem.innerText = song.title;

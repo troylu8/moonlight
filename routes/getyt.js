@@ -33,8 +33,8 @@ class DownloadProcess {
 
         if (this.destroy) return cb(500);  // destroy request comes in while getting info 
         
-        const filename = `${cleanFileName(info.videoDetails.title)}.mp3`
-        const path = "./public/resources/songs/" + filename;
+        const filename = `yt ${cleanFileName(info.videoDetails.title)}.mp3`
+        const path = "./public/resources/yt/" + filename;
         
         const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
         const writeStream = fs.createWriteStream(path);
@@ -53,7 +53,7 @@ class DownloadProcess {
     
         dlstream.on("end", () => {
             cb(200, {
-                "id": "yt" + id,
+                "id": "yt#" + id,
                 "filename": filename,
                 "title": info.videoDetails.title,
                 "artist": info.videoDetails.author.name,

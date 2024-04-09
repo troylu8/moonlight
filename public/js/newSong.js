@@ -1,6 +1,8 @@
 import * as dropdown from "./toggleDropdown.js"
 import * as songSettings from "./songSettings.js"
 import { data } from "./userdata.js";
+import { username } from "./sync.js";
+import genID from "./id.js";
 
 console.log("ORofRTMg-iY", "NRQRC_0ZQ00", "AqI97zHMoQw", "DXZPtndQw8U", "nmix0phrCVU");
 
@@ -70,8 +72,8 @@ async function getyt(link) {
 /** add to data.songs, add to current playlist, open settings */
 async function acceptSongResponse(fetchResponse) {
     const songJSON = JSON.parse(await fetchResponse.json());
-
-    const song = new data.Song(songJSON.id, songJSON)
+    
+    const song = new data.Song(songJSON.id ?? genID(14), songJSON)
 
     const songElems = song.addToPlaylist(data.curr.viewPlaylist); 
     songSettings.openSongSettings(song, songElems[1], songElems[2]);
@@ -156,6 +158,6 @@ function getYTID(link) { return link.slice(-11); }
 document.getElementById("song-upload").addEventListener("click", async () => {
     if (data.playlists.size === 0) return console.log("no playlists to add song to!");
 
-    const res = await fetch(`http://localhost:5000/upload/`, {method: "POST"});
+    const res = await fetch("http://localhost:5000/upload/" + username, {method: "POST"});
     if (res.status === 200) acceptSongResponse(res);
 });

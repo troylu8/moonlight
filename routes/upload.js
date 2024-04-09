@@ -6,7 +6,7 @@ const mm = require('music-metadata');
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
+router.post('/:username', async (req, res) => {
     const data = await dialog.showOpenDialog(
         {
             filters: [ { name: "sound", extensions: ["mp3", "wav"] } ],
@@ -19,10 +19,9 @@ router.post('/', async (req, res) => {
 
     const filename = basename(data.filePaths[0]);
 
-    const writeStream = fs.createWriteStream("./public/resources/songs/" + filename);
+    const writeStream = fs.createWriteStream( `./public/resources/users/${req.params["username"]}/songs/${filename}` );
 
     const song = {
-        id: Date.now(),
         filename: filename,
         title: filename.replace(/\.[^\/.]+$/, ""), // regex to remove extensions
         artist: "uploaded by you",
@@ -35,6 +34,5 @@ router.post('/', async (req, res) => {
     fs.createReadStream(data.filePaths[0]).pipe(writeStream);
     
 });
-
 
 module.exports = router;

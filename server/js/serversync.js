@@ -37,9 +37,9 @@ function writeZip(zip, targetfilename, cb) {
 }
 const writeZipPromise = promisify(writeZip);
 
-router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req, res) => {
+router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, res) => {
 
-    const userDir = join(__dirname, "users", req.params["user"]);
+    const userDir = join(__dirname, "../users", req.params["uid"]);
     const zipPath = join(userDir, "userfiles.zip");
 
     const createdNewFile = await createFile(zipPath);
@@ -97,6 +97,7 @@ router.post('/:user', express.raw( {type: "*/*", limit: Infinity} ), async (req,
     const toClient = new Zip();
 
     for (const filepath of changes.requestedFiles) {
+        console.log("packing ", filepath);
         const entry = userfiles.getEntry(filepath);
         toClient.addFile(entry.entryName, await getDataPromise(entry));
         console.log("returning", entry.entryName);

@@ -31,9 +31,9 @@ router.use(express.json());
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-router.post("/:username", async (req, res) => {
+router.post("/:uid", async (req, res) => {
     
-    const resourcesDir = join(__dirname, "../public/resources");
+    const resourcesDir = join(__dirname, "../public/resources/users", req.params["uid"]);
 
     console.log("client backend got: ", req.body);
 
@@ -52,7 +52,7 @@ router.post("/:username", async (req, res) => {
     try {
         const newSongs = await axios({
             method: 'POST',
-            url: "https://localhost:5001/sync/" + req.params["username"], 
+            url: "https://localhost:5001/sync/" + req.params["uid"], 
             data: zip.toBuffer(), 
             maxContentLength: Infinity,
             maxBodyLength: Infinity,
