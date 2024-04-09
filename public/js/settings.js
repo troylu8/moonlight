@@ -1,6 +1,7 @@
 import genID from "./id.js";
 import { setSidebarContent } from "./sidebar.js";
 import * as sync from "./sync.js";
+import { loadUserdata } from "./userdata.js";
 
 const settings = document.getElementById("settings");
 document.getElementById("settings-btn").onclick = () => setSidebarContent(settings);
@@ -32,7 +33,6 @@ document.getElementById("create-account__submit")
 
         const uid = genID(14);
 
-        //TODO: change to actual ip!
         // create account at server
         const createReq = await fetch(`https://localhost:5001/create-account-dir/${uid}/${create__username.value}`, {method: "POST"});
         if (createReq.status === 409) return console.log("username taken");
@@ -64,6 +64,7 @@ document.getElementById("sign-in__submit")
         if (data === 401) return console.log("unauthorized!");
         
         sync.setCredentials(uid, signIn__username.value, signIn__password.value);
+        loadUserdata(uid);
 
         signedInAs.innerText = "signed in as " + signIn__username.value;
         setAccountElem(accountInfo);
@@ -86,8 +87,14 @@ const isSafeFilename = (str) => ! (/[/\\?%*:|"<>]/g.test(str));
 
 document.getElementById("create-account__already-have")
     .addEventListener("click", () => setAccountElem(signIn));
-document.getElementById("sign-out")
-    .addEventListener("click", () => setAccountElem(signIn));
 document.getElementById("sign-in__create-account")
     .addEventListener("click", () => setAccountElem(createAccount));
 
+document.getElementById("sign-out").addEventListener("click", () => {
+    
+    sync.setCredentials("guest", "guest", undefined);
+    loadUserdata("guest");
+    
+    setAccountElem(signIn);
+
+});

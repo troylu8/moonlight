@@ -62,12 +62,11 @@ export function setSong(song) {
         return;
     };
 
-    //TODO: WHEN USING ELECTRON, USE ./ INSTEAD OF ../
-    const path = (song.id.startsWith("yt")) ?
-        `../public/resources/yt/${encodeURIComponent(song.filename)}` :
-        `../public/resources/users/${req.params["username"]}/songs/${encodeURIComponent(song.filename)}`;
+    const path = (song.id.startsWith("yt#")) ?
+        `resources/yt/${encodeURIComponent(song.filename)}` :
+        `resources/users/${req.params["username"]}/songs/${encodeURIComponent(song.filename)}`;
 
-        console.log(decodeURI(path));
+    console.log(decodeURI(path));
     audio.src = path;
     data.curr.song = song;
 
@@ -354,7 +353,7 @@ export function playNextSong() {
 document.getElementById("next").addEventListener("click", playNextSong);
 
 document.getElementById("prev").addEventListener("click", () => {
-    if (data.curr.listenPlaylist.songs.size <= 1) return;
+    if (data.curr.listenPlaylist.songs.size <= 1 && data.curr.song.playlists.has(data.curr.listenPlaylist)) return;
     
     if (!data.settings.shuffle) {
         const nextSong = data.curr.listenPlaylist.cycle.shuffleIndexes.get(data.curr.song).prev.song;

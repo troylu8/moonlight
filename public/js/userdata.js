@@ -2,7 +2,7 @@ import * as songElements from "./songElements.js";
 import * as play from "./play.js";
 import { PlaylistCycle } from "./play.js";
 import { updateSongEntries } from "./songSettings.js";
-import { uid } from "./sync.js";
+import * as sync from "./sync.js";
 
 export class Song {
     constructor(id, options, initializeAsSynced) {
@@ -86,7 +86,7 @@ export class Song {
 
     delete() {
         //TODO: test this
-        if (data.curr.listenPlaylist.songs.size === 1) play.setSong("none");
+        if (data.curr.listenPlaylist != "none" && data.curr.listenPlaylist.songs.size === 1) play.setSong("none");
         else if (this === data.curr.song) play.playNextSong();
 
         data.trashqueue.set("songs." + this.id, "songs/" + this.filename);
@@ -167,11 +167,15 @@ export class Playlist {
         
         data.playlists.delete(this.id);
 
+        this.removeElements();
+
+        console.log("deleted playlist " + this.title);
+    }
+
+    removeElements() {
         this.playlistEntry.remove();
         if (this.groupElem) this.groupElem.remove();
         this.checkboxDiv.remove();
-
-        console.log("deleted playlist " + this.title);
     }
 
     update(options) {        
@@ -191,32 +195,29 @@ export class Playlist {
     
 }
 
-export const data = {
+class Data {
 
-    Song: Song,
-    Playlist: Playlist,
+    settings = {
+        shuffle: false,
+    };
 
-    settings: {
-        shuffle: false
-    },
-
-    curr: {
+    curr = {
         /** @type {Song} */
         song: null,
         /** @type {Playlist} playlist currently listening */
         listenPlaylist: null,
         /** @type {Playlist} playlist currently viewing */
         viewPlaylist: null,
-    },
+    };
 
     /** @type {Map<string, string>} songID -> filename */
-    trashqueue: null,
+    trashqueue = null;
 
     /** pid -> playlist @type {Map<string, Playlist>} */
-    playlists: new Map(),
+    playlists = new Map();
 
     /** sid -> song @type {Map<string, Song>} */
-    songs: new Map(),
+    songs = new Map();
 
     /** set `listenPlaylist` to `viewPlaylist` and initialize shuffle  */
     updateListenPlaylist() {
@@ -236,7 +237,7 @@ export const data = {
             data.curr.listenPlaylist.cycle = new PlaylistCycle(data.curr.listenPlaylist);
 
         else data.curr.listenPlaylist.cycle._reshuffle(data.settings.shuffle);
-    },
+    };
 
     stringify(obj, ignore) {
         obj = obj ?? this;
@@ -268,7 +269,7 @@ export const data = {
                 return value;
             }, 4
         )
-    },
+    };
     
     async saveDataLocal() {    
         await fetch("http://localhost:5000/files/save-userdata/" + uid, {
@@ -278,12 +279,19 @@ export const data = {
     }
 };
 
+/** @type {Data}  */
+export let data;
 
-
-async function fetchUserdata() {
+export async function loadUserdata(uid) {
+    if (data) {
+        for (const playlist of data.playlists.values()) 
+            playlist.removeElements()
+    }
+    data = new Data();
+    
     const res = await fetch("http://localhost:5000/files/read-userdata/" + uid);
     const json = await res.json();
-
+    
     data.trashqueue = new Map(json.trashqueue);
 
     for (const sid in json.songs)         
@@ -303,4 +311,4 @@ async function fetchUserdata() {
     play.audio.volume = json.settings.volume;
     
 }
-fetchUserdata();
+loadUserdata(sync.uid);

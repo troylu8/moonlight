@@ -11,7 +11,9 @@ const OPTIONS_SVG =
 export function createSongEntry(song, playlist) {
     if (!playlist.groupElem) return;
     
-    const songEntry = createElement("div", null, "song " + song.id);
+    const className = song.id.startsWith("yt#") ? song.id.substring(3) : song.id;
+
+    const songEntry = createElement("div", null, "song " + className);
     songEntry.innerHTML = 
        `<div class="song__left"></div>
 
@@ -58,10 +60,13 @@ export function createSongEntry(song, playlist) {
     return [songEntry, song__title, song__artist];
 }
 
+/** @param {Playlist} playlist  */
 export function deleteSongEntry(song, playlist) {
     if (!playlist.groupElem) return;
     
-    const entry = playlist.groupElem.querySelector("." + song.id)
+    const className = song.id.startsWith("yt#") ? song.id.substring(3) : song.id;
+
+    const entry = playlist.groupElem.querySelector("." + className);
     entry.remove();
     song.songEntries.delete(entry);
 }

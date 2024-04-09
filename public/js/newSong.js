@@ -1,6 +1,6 @@
 import * as dropdown from "./toggleDropdown.js"
 import * as songSettings from "./songSettings.js"
-import { data } from "./userdata.js";
+import { data, Song } from "./userdata.js";
 import { username } from "./sync.js";
 import genID from "./id.js";
 
@@ -73,7 +73,7 @@ async function getyt(link) {
 async function acceptSongResponse(fetchResponse) {
     const songJSON = JSON.parse(await fetchResponse.json());
     
-    const song = new data.Song(songJSON.id ?? genID(14), songJSON)
+    const song = new Song(songJSON.id ?? genID(14), songJSON)
 
     const songElems = song.addToPlaylist(data.curr.viewPlaylist); 
     songSettings.openSongSettings(song, songElems[1], songElems[2]);

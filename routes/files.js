@@ -1,6 +1,7 @@
 
 const express = require('express');
 const fs = require('fs');
+const { dirname } = require('path');
 
 const router = express.Router();
 
@@ -9,26 +10,38 @@ router.post("/create-account-dir/:uid", (req, res) => {
     // simply rename the guest directory to the user
     // a new guest directory will be created when needed
     fs.rename(
-        `${__dirname}/public/resources/users/guest`,
-        `${__dirname}/public/resources/users/${req.params["uid"]}`,
+        `${__dirname}/../public/resources/users/guest`,
+        `${__dirname}/../public/resources/users/${req.params["uid"]}`,
         (err) => res.end()
     )
 })
 
+const defaultUserData = `
+{
+    "settings": {
+        "shuffle": false,
+        "volume": 0.5
+    },
+    "curr": {
+        "listenPlaylist": "none"
+    },
+    "trashqueue": [],
+    "playlists": {},
+    "songs": {}
+}`;
+
 router.get("/read-userdata/:uid", async (req, res) => {
-    const userDir = `${__dirname}/../public/resources/users/${req.params["uid"]}`;
-    await ensureUserDir(userDir);
-    
-    fs.readFile(
-        userDir + "/userdata.json", 
-        "utf8", 
-        (err, data) => res.json(JSON.parse(data))
+
+    const data = await readFileOrDefault(
+        `${__dirname}/../public/resources/users/${req.params["uid"]}/userdata.json`,
+        defaultUserData
     )
+    res.json(JSON.parse(data));
 })
 
 router.delete("/:uid/:songFilename", (req, res) => {
 
-    const path = (req.params["songFilename"].startsWith("yt")) ?
+    const path = (req.params["songFilename"].startsWith("yt#")) ?
         `${__dirname}/../public/resources/yt/${req.params["song"]}` :
         `${__dirname}/../public/resources/users/${req.params["uid"]}/songs/${req.params["song"]}`;
     
@@ -37,40 +50,35 @@ router.delete("/:uid/:songFilename", (req, res) => {
 
 router.use("/save-userdata", express.text())
 router.put("/save-userdata/:uid", async (req, res) => {
-    const userDir = `${__dirname}/../public/resources/users/${req.params["uid"]}`;
-    await ensureUserDir(userDir);
 
-    fs.writeFile(
-        userDir + "/userdata.json",
-        req.body, 
-        (err) => res.end()
-    );
+    await createAndWriteFile(
+        `${__dirname}/../public/resources/users/${req.params["uid"]}/userdata.json`,
+        req.body
+    )
+    res.end();
 })
 
-async function ensureUserDir(userDir) {
+/** read file, or create file with default text if doesnt exist */
+async function readFileOrDefault(path, defaultString) {
     try {
-        await fs.promises.writeFile(userDir + "/userdata.json", "", {flag: "ax"});
-        return false;
+        return await fs.promises.readFile(path, "utf8");
     } catch (err) {
-        if (err.code === "EEXIST") return true;
+        if (err.code === "ENOENT") {
+            createAndWriteFile(path, defaultString);
+            return defaultString;
+        }
+    }
+}
 
-        await fs.promises.mkdir(userDir, {recursive: true});
-        await fs.promises.writeFile(userDir + "/userdata.json",
-           `{
-                "settings": {
-                    "shuffle": false,
-                    "volume": 0.5
-                },
-                "curr": {
-                    "listenPlaylist": "none"
-                },
-                "trashqueue": [],
-                "playlists": {},
-                "songs": {}
-            }`,
-        "utf8");
-        
-        return false;
+/** creates file if it doesnt exist */
+async function createAndWriteFile(path, data) {
+    try {
+        await fs.promises.writeFile(path, data, "utf8");
+    } catch (err) {
+        if (err.code === "ENOENT") {
+            await fs.promises.mkdir(dirname(path), {recursive: true});
+            await fs.promises.writeFile(path, data, "utf8");
+        }
     }
 }
 
