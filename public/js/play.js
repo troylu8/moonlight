@@ -66,12 +66,13 @@ export function setSong(song) {
         `resources/yt/${encodeURIComponent(song.filename)}` :
         `resources/users/${req.params["username"]}/songs/${encodeURIComponent(song.filename)}`;
 
-    console.log(decodeURI(path));
     audio.src = path;
     data.curr.song = song;
 
     titleElem.innerText = song.title;
     artistElem.innerText = song.artist;
+
+    toBeDeleted.delete();
 }
 
 export function togglePlay(song) {
@@ -97,9 +98,30 @@ export function togglePlay(song) {
 
 }
 
+/** remove song from playlist cycle when playing next song */
+export const toBeDeleted = {
+    /** @type {Playlist} */
+    playlist: null,
+    /** @type {Song} */
+    song: null,
+
+    set(playlist, song) {
+        this.playlist = playlist;
+        this.song = song;
+        console.log(this);
+    },
+
+    delete() {
+        if (this.playlist) {
+            this.playlist.cycle.deleteSong(this.song);
+            this.playlist = null;
+            this.song = null;
+        }
+    }
+}
+
+
 document.getElementById("play").addEventListener("click", () => togglePlay());
-
-
 
 
 const seek = document.getElementById("seek__slider");
@@ -280,6 +302,7 @@ export class PlaylistCycle {
         }
         // nullify songs we just played so that we reshuffle upon encountering an already played segment
         this.shuffleArr[this.currIndex - 1] = null; 
+        
         return next;
     }
 
@@ -336,24 +359,27 @@ function kickAway(arr, start, banned) {
     return arr;
 }
 
-export function playNextSong() {
-    if (data.curr.listenPlaylist.songs.size <= 1) return;
-
+export function setSongNext(play) {
+    if (data.curr.listenPlaylist.songs.size <= 1 && !toBeDeleted.playlist) return;
+    console.log(play);
     // if not at the top of history stack, play next in stack
     if (!inThePresent()) {
         console.log("not at top of history yet");
         console.log(historyIndex, history.map(id => data.songs.get(id).title));
 
-        return togglePlay( data.songs.get(history[++historyIndex]) );
+        setSong( data.songs.get(history[++historyIndex]) );
+        if (play) audio.play();
+        return;
     }
 
-    togglePlay( data.curr.listenPlaylist.cycle.nextSong() );
+    setSong( data.curr.listenPlaylist.cycle.nextSong() );
+    if (play) audio.play();
 }
 
-document.getElementById("next").addEventListener("click", playNextSong);
+document.getElementById("next").addEventListener("click", setSongNext);
 
 document.getElementById("prev").addEventListener("click", () => {
-    if (data.curr.listenPlaylist.songs.size <= 1 && data.curr.song.playlists.has(data.curr.listenPlaylist)) return;
+    if (data.curr.listenPlaylist.songs.size <= 1 && !toBeDeleted.playlist) return;
     
     if (!data.settings.shuffle) {
         const nextSong = data.curr.listenPlaylist.cycle.shuffleIndexes.get(data.curr.song).prev.song;

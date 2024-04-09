@@ -65,6 +65,8 @@ export class Song {
 
         const songElems = songElements.createSongEntry(this, playlist);
 
+        if (this === data.curr.song && playlist === data.curr.listenPlaylist && playlist.songs.size !== 0) 
+            play.toBeDeleted.set(null, null);
         if (playlist.cycle) playlist.cycle.addSong(this, true);
 
         return songElems;
@@ -81,19 +83,22 @@ export class Song {
         this.playlists.delete(playlist);
         if (playlist.groupElem) songElements.deleteSongEntry(this, playlist);
 
-        if (playlist.cycle) playlist.cycle.deleteSong(this);
+        if (this === data.curr.song && playlist === data.curr.listenPlaylist && playlist.songs.size !== 0) 
+            play.toBeDeleted.set(playlist, this);
+        else if (playlist.cycle) playlist.cycle.deleteSong(this);
     }
 
     delete() {
         //TODO: test this
         if (data.curr.listenPlaylist != "none" && data.curr.listenPlaylist.songs.size === 1) play.setSong("none");
-        else if (this === data.curr.song) play.playNextSong();
+        else if (this === data.curr.song) play.setSongNext(!play.audio.paused);
 
         data.trashqueue.set("songs." + this.id, "songs/" + this.filename);
 
         for (const playlist of this.playlists) 
             this.removeFromPlaylist(playlist);
-        
+
+        play.toBeDeleted.delete();
         data.songs.delete(this.id);
 
         console.log("deleted " + this.title);
@@ -272,7 +277,7 @@ class Data {
     };
     
     async saveDataLocal() {    
-        await fetch("http://localhost:5000/files/save-userdata/" + uid, {
+        await fetch("http://localhost:5000/files/save-userdata/" + sync.uid, {
             method: "PUT",
             body: this.stringify()
         })
