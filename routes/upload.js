@@ -6,7 +6,7 @@ const mm = require('music-metadata');
 
 const router = express.Router();
 
-router.post('/:username', async (req, res) => {
+router.post('/:uid', async (req, res) => {
     const data = await dialog.showOpenDialog(
         {
             filters: [ { name: "sound", extensions: ["mp3", "wav"] } ],
@@ -19,7 +19,7 @@ router.post('/:username', async (req, res) => {
 
     const filename = basename(data.filePaths[0]);
 
-    const writeStream = fs.createWriteStream( `./public/resources/users/${req.params["username"]}/songs/${filename}` );
+    const writeStream = fs.createWriteStream( `./public/resources/users/${req.params["uid"]}/songs/${filename}` );
 
     const song = {
         filename: filename,

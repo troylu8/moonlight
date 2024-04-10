@@ -3,89 +3,90 @@ const fs = require('fs');
 const { join } = require("path");
 const bcrypt = require('bcrypt');
 const { QuickDB } = require('quick.db');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 const uidDB = new QuickDB({filePath: __dirname + "/../uids.sqlite"});
+const usersDB = new QuickDB({filePath: __dirname + "/../db.sqlite"});
+
+
 
 router.post("/create-account-dir/:uid/:username", async (req, res) => {
     if (await uidDB.has(req.params["username"])) return res.status(409).end("username taken");
-
-    const userDir = join(__dirname, "/../users/", req.params["uid"]);
-
-    fs.mkdir(userDir, async (err) => {
-        if (err) throw err;
         
-        // initialize data.json
-        await fs.promises.writeFile( 
-            join(userDir, "data.json"),
-            JSON.stringify({
-                "playlists": {},
-                "songs": {}
-            }),
-            "utf8"
-        );
-        
-        await uidDB.set(req.params["username"], req.params["uid"]);
-
-        res.status(200).end();
+    await uidDB.set(req.params["username"], req.params["uid"]);
+    await usersDB.set(req.params["uid"] + ".userdata", {
+        "playlists": {},
+        "songs": {}
     })
+
+    res.status(200).end(createJWT(req.params["uid"]));
 })
 
-router.get("/get-uid/:username", async (req, res) => {
+router.post("get-jwt/:username", express.text(), async (req, res) => {
     const uid = await uidDB.get(req.params["username"]);
-    res.status(uid? 200 : 404).end(uid);
+
+    const verifyRes = await verifyPass(uid, req.body);
+    if (verifyRes === "wrong pass") return res.status(401).end();
+    if (verifyRes === "no user")    return res.status(404).end();
+
+    res.end(createJWT(uid));
 })
 
-router.use("/set-hash", express.text());
-router.post("/set-hash/:uid", async (req, res) => {
+function createJWT(uid) {
+    jwt.sign({uid: uid}, "secret key", (err, encoded) => {
+        if (err) throw err;
+        return encoded;
+    })
+}
+
+router.post("/set-hash/:jwt", express.text(), async (req, res) => {
     
-    fs.writeFile(
-        join(__dirname, "/../users", req.params["uid"], "hash.txt"), 
-        await bcrypt.hash(req.body, 11), 
-        (err) => { res.status(err? 500 : 200).end() }
-    )
-    
-})
+    const uid = jwt.decode(req.params["jwt"]).uid;
 
-router.use("/get-data", express.text());
-router.post("/get-data/:uid", async (req, res) => {
+    if (await uidDB.has(uid)) {
+        jwt.verify(req.params["jwt"], "secret key", async (err, payload) => {
+            if (err) return res.status(401).end();
 
-    const userDir = join(__dirname, "../users", req.params["uid"]);
-
-    const passMatches = await comparePass(req.body, userDir);
-    if (passMatches === "no user") return res.status(404).end();
-
-    if (passMatches === "success") {
-        const json = await fs.promises.readFile(join(userDir, "data.json"),"utf-8");
-        res.status(200).json(JSON.parse(json));
+            await usersDB.set(uid + ".hash", await bcrypt.hash(req.body, 11));
+            res.status(200).end("edited hash")
+        })
     }
-    else res.status(401).end();
+    else {
+        await usersDB.set(uid + ".hash",  await bcrypt.hash(req.body, 11));
+        res.status(200).end("added hash")
+    }
+    
+})
+
+router.get("/get-data/:jwt", express.text(), async (req, res) => {
+
+    jwt.verify(req.params["jwt"], "secret key", async (err, payload) => {
+        if (err) return res.status(401).end();
+
+        res.status(200).json(await usersDB.get(payload.uid + ".userdata"));
+    })
+
 });
 
-router.use("/upload-data", express.json());
-router.put("/upload-data/:uid", async (req, res) => {
+router.put("/upload-data/:jwt", express.json(), async (req, res) => {
 
-    const userDir = join(__dirname, "users", req.params["uid"]);
-    
-    const passMatches = comparePass(req.body.pass, userDir);
-    if (passMatches === "no user") return res.status(404).end();
-    
-    if (passMatches === "success") {
-        fs.writeFile(
-            join(userDir, "data.json"),
-            JSON.stringify(req.body.userdata),
-            () => res.end("written")
-        )
-    }
-    else res.status(401).end();
+    jwt.verify(req.params["jwt"], "secret key", async (err, payload) => {
+        if (err) return res.status(401).end();
+
+        await usersDB.set(payload.uid + ".userdata", req.body.userdata);
+        res.status(200).end();
+    })
     
 })
+
+
 
 
 /** @returns {Promise<"success"  | "wrong pass" | "no user">} */
-async function comparePass(pass, userDir) {
+async function verifyPass(uid, pass) {
     try {
-        const hash = await fs.promises.readFile(join(userDir, "hash.txt"), "utf8");
+        const hash = await usersDB.get(uid + ".hash");
         return (await bcrypt.compare(pass, hash))? "success" : "wrong pass";
     } catch (err) {
         if (err.code === "ENOENT") return "no user";

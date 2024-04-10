@@ -17,6 +17,7 @@
     "cors": "^2.8.5",
     "electron": "^29.1.1",
     "express": "^4.18.3",
+    "jsonwebtoken": "^9.0.2",
     "music-metadata": "^7.14.0",
     "quick.db": "^9.1.7",
     "ytdl-core": "^4.11.5"

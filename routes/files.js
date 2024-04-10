@@ -5,30 +5,27 @@ const { dirname } = require('path');
 
 const router = express.Router();
 
-router.post("/create-account-dir/:uid", (req, res) => {
-
-    // simply rename the guest directory to the user
-    // a new guest directory will be created when needed
-    fs.rename(
-        `${__dirname}/../public/resources/users/guest`,
-        `${__dirname}/../public/resources/users/${req.params["uid"]}`,
-        (err) => res.end()
-    )
+router.get("guest-id", (req, res) => {
+    fs.readFile(`${__dirname}/../public/resources/guestID.txt`, "utf8", (err, data) => {
+        if (err) throw err;
+        res.end(data);
+    })
 })
 
-const defaultUserData = `
-{
-    "settings": {
-        "shuffle": false,
-        "volume": 0.5
-    },
-    "curr": {
-        "listenPlaylist": "none"
-    },
-    "trashqueue": [],
-    "playlists": {},
-    "songs": {}
-}`;
+const defaultUserData = JSON.stringify({
+        "settings": {
+            "shuffle": false,
+            "volume": 0.5
+        },
+        "curr": {
+            "listenPlaylist": "none"
+        },
+        "trashqueue": [],
+        "playlists": {},
+        "songs": {}
+    }, 
+    undefined, 4
+);
 
 router.get("/read-userdata/:uid", async (req, res) => {
 
@@ -40,12 +37,11 @@ router.get("/read-userdata/:uid", async (req, res) => {
 })
 
 router.delete("/:uid/:songFilename", (req, res) => {
-
-    const path = (req.params["songFilename"].startsWith("yt#")) ?
-        `${__dirname}/../public/resources/yt/${req.params["song"]}` :
-        `${__dirname}/../public/resources/users/${req.params["uid"]}/songs/${req.params["song"]}`;
     
-    fs.unlink(path, () => res.end());
+    fs.unlink(
+        `${__dirname}/../public/resources/users/${req.params["uid"]}/songs/${req.params["song"]}`,
+        () => res.end()
+    );
 })
 
 router.use("/save-userdata", express.text())

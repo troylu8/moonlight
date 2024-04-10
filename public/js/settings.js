@@ -1,4 +1,3 @@
-import genID from "./id.js";
 import { setSidebarContent } from "./sidebar.js";
 import * as sync from "./sync.js";
 import { loadUserdata } from "./userdata.js";
@@ -31,16 +30,11 @@ document.getElementById("create-account__submit")
         if (error) return console.log(error);
         if (create__password.value !== repeatPassword.value) return console.log("passwords dont match");
 
-        const uid = genID(14);
-
         // create account at server
-        const createReq = await fetch(`https://localhost:5001/create-account-dir/${uid}/${create__username.value}`, {method: "POST"});
-        if (createReq.status === 409) return console.log("username taken");
+        const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${sync.uid}/${create__username.value}`, {method: "POST"});
+        if (jwtReq.status === 409) return console.log("username taken");
 
-        // create account at client
-        await fetch("http://localhost:5000/files/create-account-dir/" + uid, {method: "POST"});
-
-        await sync.setCredentials(uid, create__username.value, create__password.value, true);
+        sync.setAccInfo(await jwtReq.text(), null, create__username.value);
         
         signedInAs.innerText = "signed in as " + create__username.value;
         setAccountElem(accountInfo);
@@ -57,18 +51,31 @@ document.getElementById("sign-in__submit")
         if (usernameErrors(signIn__username.value)) 
             return console.log("username not found");
         
-        const uid = await sync.getUID(signIn__username.value);
-        if (!uid) return console.log("no user named ", signIn__username.value);
-
-        const data = await sync.getData(uid, signIn__password.value);
-        if (data === 401) return console.log("unauthorized!");
+        const jwtReq = await fetch("https://localhost:5001/get-jwt/" + signIn__username.value, {
+            method: "POST",
+            body: signIn__password.value
+        });
+        if (jwtReq.status === 404) return console.log("no user named ", signIn__username.value);
+        if (jwtReq.status === 401) return console.log("unauthorized!");
         
-        sync.setCredentials(uid, signIn__username.value, signIn__password.value);
+        const jwt = await jwtReq.text();
+        sync.setAccInfo(jwt, parseJwt(jwt).uid, signIn__username.value);
         loadUserdata(uid);
 
         signedInAs.innerText = "signed in as " + signIn__username.value;
         setAccountElem(accountInfo);
 })
+
+/** [stack overflow link](https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library) */
+function parseJwt(token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+}
 
 async function hash(input) {
     const res = await fetch("http://localhost:5000/hash", {
@@ -92,7 +99,7 @@ document.getElementById("sign-in__create-account")
 
 document.getElementById("sign-out").addEventListener("click", () => {
     
-    sync.setCredentials("guest", "guest", undefined);
+    sync.setAccInfo("guest", "guest", undefined);
     loadUserdata("guest");
     
     setAccountElem(signIn);

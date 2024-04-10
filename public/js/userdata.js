@@ -93,7 +93,8 @@ export class Song {
         if (data.curr.listenPlaylist != "none" && data.curr.listenPlaylist.songs.size === 1) play.setSong("none");
         else if (this === data.curr.song) play.setSongNext(!play.audio.paused);
 
-        data.trashqueue.set("songs." + this.id, "songs/" + this.filename);
+        if (this.syncStatus !== "new")
+            data.trashqueue.set("songs." + this.id, "songs/" + this.filename);
 
         for (const playlist of this.playlists) 
             this.removeFromPlaylist(playlist);
@@ -153,7 +154,8 @@ export class Playlist {
     delete() {
         
         //TODO: add playlist files!
-        data.trashqueue.set("playlists." + this.id, "playlists/ dummy value");
+        if (this.syncStatus !== "new")
+            data.trashqueue.set("playlists." + this.id, "playlists/ dummy value");
 
         // if only playlist, set view and listen playlists to none
         if (data.playlists.size === 1) songElements.setViewPlaylist("none", true);

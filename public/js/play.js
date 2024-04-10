@@ -2,6 +2,7 @@ import { addSliderDragEvent } from "./sliders.js";
 import { getTimeDisplay } from "./songElements.js";
 import { setSpin, updateVolumeIcon } from "./fx.js";
 import { data, Playlist, Song } from "./userdata.js";
+import { uid } from "./sync.js";
 
 class SpinningAudio extends Audio {
     play() {
@@ -62,9 +63,7 @@ export function setSong(song) {
         return;
     };
 
-    const path = (song.id.startsWith("yt#")) ?
-        `resources/yt/${encodeURIComponent(song.filename)}` :
-        `resources/users/${req.params["username"]}/songs/${encodeURIComponent(song.filename)}`;
+    const path = `resources/users/${uid}/songs/${encodeURIComponent(song.filename)}`;
 
     audio.src = path;
     data.curr.song = song;
@@ -366,7 +365,7 @@ export function setSongNext(play) {
     if (!inThePresent()) {
         console.log("not at top of history yet");
         console.log(historyIndex, history.map(id => data.songs.get(id).title));
-
+        
         setSong( data.songs.get(history[++historyIndex]) );
         if (play) audio.play();
         return;
@@ -405,7 +404,7 @@ const shuffleSvg = document.getElementById("shuffle-svg");
 export function setShuffle(shuffle) {
     data.settings.shuffle = shuffle;
     
-    if (shuffle) data.curr.listenPlaylist.cycle.updateCurrIndex();
+    if (shuffle && data.curr.listenPlaylist !== "none") data.curr.listenPlaylist.cycle.updateCurrIndex();
     
     console.log("shuffle ", shuffle);
     shuffleSvg.style.stroke = shuffle? "var(--color2)" : "var(--color1)";

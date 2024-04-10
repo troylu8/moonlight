@@ -26,16 +26,17 @@ const tracker = {
 
 class DownloadProcess {
 
-    async download(id, cb) {
+    async download(ytid, uid, cb) {
         if (this.destroy) return cb(500); // destroy request comes in before getyt request
 
-        const info = await ytdl.getInfo(id);
+        const info = await ytdl.getInfo(ytid);
 
         if (this.destroy) return cb(500);  // destroy request comes in while getting info 
         
-        const filename = `yt ${cleanFileName(info.videoDetails.title)}.mp3`
-        const path = "./public/resources/yt/" + filename;
-        
+        const filename = `yt#${ytid} ${cleanFileName(info.videoDetails.title)}.mp3`
+        const path = `./public/resources/users/${uid}/songs/${filename}`;
+        await fs.promises.mkdir(`./public/resources/users/${uid}/songs`, {recursive: true});
+
         const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
         const writeStream = fs.createWriteStream(path);
         dlstream.pipe(writeStream);
@@ -53,7 +54,7 @@ class DownloadProcess {
     
         dlstream.on("end", () => {
             cb(200, {
-                "id": "yt#" + id,
+                "id": "yt#" + ytid,
                 "filename": filename,
                 "title": info.videoDetails.title,
                 "artist": info.videoDetails.author.name,
@@ -67,6 +68,7 @@ class DownloadProcess {
     
 }
 
+/** @type {DownloadProcess} */
 let currentDP;
 
 router.get("/ready", (req, res) => {
@@ -79,11 +81,12 @@ router.get("/ready", (req, res) => {
 })
 
 // shouldnt continue unless after a destroy request
-router.get("/ytid/:id", async (req, res) => {
+router.get("/ytid/:ytid/:uid", async (req, res) => {
     
     console.log(`${req.method} at ${req.url}`);
-
-    currentDP.download(req.params["id"], async (status, song) => {
+    
+    currentDP.download(req.params["ytid"], req.params["uid"],
+        async (status, song) => {
         if (status !== 200) return res.status(status).end();
         
         res.status(200).json(JSON.stringify(song));        

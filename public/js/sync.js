@@ -1,8 +1,17 @@
+import genID from "./id.js";
 import { data, Song, Playlist } from "./userdata.js";
 
-export let uid = "guest";
+export let uid = genID(14);
 export let username = "guest";
-let password;
+
+/** @type {string} */
+export let jwt;
+
+export function setAccInfo(JWT, UID, USERNAME) {
+    jwt = JWT ?? jwt;
+    uid = UID ?? uid;
+    username = USERNAME ?? username;
+}
 
 const syncBtn = document.getElementById("sync");
 syncBtn.addEventListener("click", () => syncData());
@@ -122,27 +131,9 @@ export async function syncData() {
 
 } 
 
-export async function setCredentials(id, user, pass, newAccount) {
-    uid = id;
-    username = user;
-    password = pass;
-
-    if (newAccount) await setPassword(pass);
-}
-
-export async function getUID(username) {
-    const res = await fetch(`https://localhost:5001/get-uid/${username}`);
-    if (res.status === 404) return console.log("username doesnt exist");
-    return await res.text();
-}
-
-export async function getData(id, pass) {
-    const res = await fetch(`https://localhost:5001/get-data/${id ?? uid}`, {
-        method: "POST",
-        body: pass ?? password
-    })
+export async function getData(jwt) {
+    const res = await fetch(`https://localhost:5001/get-data/${jwt}`);
     if (res.ok) return await res.json();
-
     return res.status;
 }
 
@@ -157,12 +148,4 @@ export async function uploadData() {
             "userdata": data
         }, ["curr", "settings", "trashqueue", "edited"])
     });
-}
-
-async function setPassword(p) {
-    await fetch(`https://localhost:5001/set-hash/${uid}`, {
-        method: "POST",
-        body: p // in body to allow '/' character
-    });
-    password = p;
 }

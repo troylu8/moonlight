@@ -1,5 +1,6 @@
 import * as userdata from "./userdata.js";
 import * as play from "./play.js";
+import * as sync from "./sync.js";
 
 document.getElementById("info__title").onclick = () => {
     console.log("saving data");
@@ -23,6 +24,12 @@ document.body.addEventListener("keydown", (e) => {
         case "H":
             if (!play.history) return console.log(" history is null ");
             console.log(play.historyIndex, play.history.map(id => userdata.data.songs.get(id).title));
+            break;
+        case "S":
+            console.log({
+                uid: sync.uid,
+                jwt: sync.jwt
+            });
             break;
     }
     

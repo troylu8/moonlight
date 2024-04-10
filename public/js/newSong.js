@@ -1,7 +1,7 @@
 import * as dropdown from "./toggleDropdown.js"
 import * as songSettings from "./songSettings.js"
 import { data, Song } from "./userdata.js";
-import { username } from "./sync.js";
+import { uid } from "./sync.js";
 import genID from "./id.js";
 
 console.log("ORofRTMg-iY", "NRQRC_0ZQ00", "AqI97zHMoQw", "DXZPtndQw8U", "nmix0phrCVU");
@@ -22,7 +22,7 @@ async function getyt(link) {
     if (!isValidLink(link)) 
         return showErrorMsg("invalid link");
 
-    const id = getYTID(link);
+    const ytid = getYTID(link);
 
     //TODO: enable this
     // if ( data.songs["yt" + id] !== undefined ) 
@@ -30,7 +30,7 @@ async function getyt(link) {
 
     setButtonEnabled(false, "...");
     
-    if ( !(await videoExists(id)) ) {
+    if ( !(await videoExists(ytid)) ) {
         showErrorMsg("video doesnt exist");
         return setButtonEnabled(true, "ent");
     }
@@ -56,7 +56,7 @@ async function getyt(link) {
     setButtonEnabled(true, "x");
     
 
-    const res = await fetch(`http://localhost:5000/getyt/ytid/` + id);
+    const res = await fetch(`http://localhost:5000/getyt/ytid/${ytid}/${uid}`);
     console.log("download ended");
 
     if (res.status === 200) { // video downloaded fully
@@ -158,6 +158,6 @@ function getYTID(link) { return link.slice(-11); }
 document.getElementById("song-upload").addEventListener("click", async () => {
     if (data.playlists.size === 0) return console.log("no playlists to add song to!");
 
-    const res = await fetch("http://localhost:5000/upload/" + username, {method: "POST"});
+    const res = await fetch("http://localhost:5000/upload/" + uid, {method: "POST"});
     if (res.status === 200) acceptSongResponse(res);
 });

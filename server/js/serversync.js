@@ -1,8 +1,11 @@
 const express = require('express');
 const fs = require('fs');
 const Zip = require("adm-zip");
+const { QuickDB } = require("quick.db");
 const { join } = require("path");
 const { promisify } = require('util');
+
+const usersDB = new QuickDB({filePath: __dirname + "/../db.sqlite"});
 
 const router = express.Router();
 
@@ -39,10 +42,10 @@ const writeZipPromise = promisify(writeZip);
 
 router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, res) => {
 
-    const userDir = join(__dirname, "../users", req.params["uid"]);
-    const zipPath = join(userDir, "userfiles.zip");
+    const zipPath = join(__dirname, "../userfiles", req.params["uid"] + ".zip");
 
     const createdNewFile = await createFile(zipPath);
+    console.log(zipPath, createdNewFile);
     
     const userfiles = new Zip(createdNewFile? undefined : zipPath);
     const arrived = new Zip(req.body);
@@ -63,7 +66,7 @@ router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, 
         }
     }
 
-    const data = JSON.parse( await fs.promises.readFile( join(userDir, "data.json"), {encoding: "utf8", }) );
+    const data = await usersDB.get(req.params["uid"] + ".userdata");
     
     const changes = JSON.parse( await getDataPromise(arrived.getEntry("changes.json")) );
     
@@ -73,6 +76,7 @@ router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, 
     for (const song of changes["unsynced-songs"]) {
         data.songs[song.id] = song;
         console.log("added", song.title);
+        
     }
     for (const playlist of changes["unsynced-playlists"]) {
         data.playlists[playlist.id] = playlist;
@@ -88,7 +92,8 @@ router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, 
         console.log("deleted", info[0], info[1]);
     }
 
-    await fs.promises.writeFile( join(userDir, "data.json"), JSON.stringify(data, (key, value) => key === "id"? undefined : value), "utf8");
+
+    await usersDB.set(req.params["uid"] + ".userdata", data);
     console.log("finished writing json");
     
     await writeZipPromise(userfiles, zipPath);
@@ -104,8 +109,6 @@ router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, 
     }
     
     res.send(toClient.toBuffer())
-    
-    
 });
 
 module.exports = router;

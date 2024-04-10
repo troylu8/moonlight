@@ -44,8 +44,9 @@ router.post("/:uid", async (req, res) => {
     ));
 
     for (const song of req.body["unsynced-songs"]) {
-        if (song.syncStatus === "new")
+        if (song._syncStatus === "new") 
             zip.addLocalFile( join(resourcesDir, "songs", song.filename), "songs/" );
+            
     }
     //TODO: add playlist files here!!!!!  ! 
 
