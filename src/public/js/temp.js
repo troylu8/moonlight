@@ -1,6 +1,6 @@
 import * as userdata from "./userdata.js";
 import * as play from "./play.js";
-import * as sync from "./sync.js";
+import * as sync from "./account.js";
 
 document.getElementById("info__title").onclick = () => {
     console.log("saving data");
@@ -29,7 +29,8 @@ document.body.addEventListener("keydown", async (e) => {
             console.log({
                 gid: sync.guestID,
                 uid: sync.uid,
-                jwt: sync.jwt
+                jwt: sync.jwt,
+                username: sync.username
             });
             break;
     }

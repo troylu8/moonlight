@@ -1,7 +1,7 @@
 import * as dropdown from "./toggleDropdown.js"
 import * as songSettings from "./songSettings.js"
 import { data, Song } from "./userdata.js";
-import { uid } from "./sync.js";
+import { uid } from "./account.js";
 import genID from "./id.js";
 
 console.log("ORofRTMg-iY", "NRQRC_0ZQ00", "AqI97zHMoQw", "DXZPtndQw8U", "nmix0phrCVU");

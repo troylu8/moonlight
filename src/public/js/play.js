@@ -2,7 +2,7 @@ import { addSliderDragEvent } from "./sliders.js";
 import { getTimeDisplay } from "./songElements.js";
 import { setSpin, updateVolumeIcon } from "./fx.js";
 import { data, Playlist, Song } from "./userdata.js";
-import { uid } from "./sync.js";
+import { uid } from "./account.js";
 
 class SpinningAudio extends Audio {
     play() {

@@ -2,7 +2,7 @@ import * as songElements from "./songElements.js";
 import * as play from "./play.js";
 import { PlaylistCycle } from "./play.js";
 import { updateSongEntries } from "./songSettings.js";
-import * as sync from "./sync.js";
+import * as sync from "./account.js";
 
 export class Song {
     constructor(id, options, initializeAsSynced) {

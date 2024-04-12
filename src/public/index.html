@@ -14,6 +14,25 @@
 
     <body>
 
+        <div id="titlescreen">
+            <h1> title </h1>
+            <div id="create-account">
+                <h5> create account </h5>
+                <input id="create-account__username" type="text" placeholder="username"> 
+                <input id="create-account__password" type="text" placeholder="password"> 
+                <input id="create-account__repeat-password" type="text" placeholder="repeat password">
+                <button id="create-account__submit"> create </button>
+                <a id="create-account__already-have"> already have account </a>
+            </div>
+            <div id="sign-in">
+                <h5> sign in </h5>
+                <input id="sign-in__username" type="text" placeholder="username">
+                <input id="sign-in__password" type="text" placeholder="password">
+                <button id="sign-in__submit"> sign in </button>
+                <a id="sign-in__create-account"> create new account </a>
+            </div>
+        </div>
+
         <nav id="options-div">
             <div id="sync" class="options-btn"> sync </div>
             <div id="new" class="options-btn">
@@ -162,21 +181,7 @@
                 </div>
 
                 <div id="settings">
-                    <div id="create-account">
-                        <h5> create account </h5>
-                        <input id="create-account__username" type="text" placeholder="username"> 
-                        <input id="create-account__password" type="text" placeholder="password"> 
-                        <input id="create-account__repeat-password" type="text" placeholder="repeat password">
-                        <button id="create-account__submit"> create </button>
-                        <a id="create-account__already-have"> already have account </a>
-                    </div>
-                    <div id="sign-in">
-                        <h5> sign in </h5>
-                        <input id="sign-in__username" type="text" placeholder="username">
-                        <input id="sign-in__password" type="text" placeholder="password">
-                        <button id="sign-in__submit"> sign in </button>
-                        <a id="sign-in__create-account"> create new account </a>
-                    </div>
+                    
                     <div id="account-info">
                         <h5 id="signed-in-as"> signed in as username </h5>
                         <button id="sign-out"> sign out </button>
@@ -225,7 +230,7 @@
     <script src="js/songElements.js" type="module"></script>
     <script src="js/playlistSettings.js" type="module"></script>
     <script src="js/fx.js" type="module"></script>
-    <script src="js/sync.js" type="module"></script>
+    <script src="js/account.js" type="module"></script>
     
     <script src="js/temp.js" type="module"></script>
 

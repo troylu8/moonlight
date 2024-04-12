@@ -14,33 +14,68 @@ export async function saveNewGuestID() {
 }
 
 export let uid;
-export let username = "guest";
-
-async function signInAsGuest() {
-    if (!guestID && !(await fetchGuestID()) ) {
-        console.log("no guest id, making one");
-        saveNewGuestID();
-    }
-    uid = guestID;
-    loadUserdata(guestID);
-}
-window.onload = signInAsGuest;
-// signInAsGuest();
+export let username;
 
 /** @type {string} */
 export let jwt;
 
-export function setAccInfo(JWT, UID, USERNAME) {
-    jwt = JWT ?? jwt;
-    uid = UID ?? uid;
-    username = USERNAME ?? username;
+export async function setAccInfo(JWT, UID, USERNAME) {
+    if (JWT === "guest") {
+        if (!guestID && !(await fetchGuestID()) ) {
+            console.log("no guest id, making one");
+            saveNewGuestID();
+        }
+    
+        jwt = null;
+        uid = guestID;
+        username = "guest";
+    }
+    else {
+        jwt = JWT ?? jwt;
+        uid = UID ?? uid;
+        username = USERNAME ?? username;    
+    }
 }
+
+window.onload = async () => {
+    await setAccInfo("guest");
+    loadUserdata(guestID);
+};
+
+function usernameErrors(username) {
+    if (!isSafeFilename(username)) return "forbidden characters";
+    if (username === "") return "empty";
+}
+
+/** @returns {"forbidden characters" | "empty" | "passwords dont match" | "username taken" | true} */
+export async function createAccount(USERNAME, PASSWORD, repeatPassword) {
+    const error = usernameErrors(USERNAME);
+    if (error) return error;
+    if (PASSWORD !== repeatPassword) return "passwords dont match";
+
+    const uid = (username === "guest")? guestID : genID(14);
+    
+    // create account at server
+    const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${uid}/${create__username.value}`, {
+        method: "POST",
+        body: PASSWORD
+    });
+    if (jwtReq.status === 409) return "username taken";
+
+    saveNewGuestID();
+
+    setAccInfo(await jwtReq.text(), uid, USERNAME);
+    setAccountElem(accountInfo);
+
+    return true;
+}
+
 
 const syncBtn = document.getElementById("sync");
 syncBtn.addEventListener("click", () => syncData());
 
 export async function syncData() {
-    if (guestID === uid) return console.log("not signed in!");
+    if (username === "guest") return console.log("not signed in!");
 
     const serverJSON = await getData();
     

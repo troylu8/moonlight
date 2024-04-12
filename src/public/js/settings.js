@@ -1,5 +1,6 @@
+import genID from "./id.js";
 import { setSidebarContent } from "./sidebar.js";
-import * as sync from "./sync.js";
+import * as sync from "./account.js";
 import { loadUserdata } from "./userdata.js";
 
 const settings = document.getElementById("settings");
@@ -26,23 +27,7 @@ const signedInAs = document.getElementById("signed-in-as");
 
 document.getElementById("create-account__submit")
     .addEventListener("click", async () => {
-        const error = usernameErrors(create__username.value);
-        if (error) return console.log(error);
-        if (create__password.value !== repeatPassword.value) return console.log("passwords dont match");
-
-        // create account at server
-        const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${sync.uid}/${create__username.value}`, {
-            method: "POST",
-            body: create__password.value
-        });
-        if (jwtReq.status === 409) return console.log("username taken");
-
-        sync.saveNewGuestID();
-
-        sync.setAccInfo(await jwtReq.text(), sync.uid, create__username.value);
         
-        signedInAs.innerText = "signed in as " + create__username.value;
-        setAccountElem(accountInfo);
 
         //TODO: sync!!
 }) 
@@ -64,22 +49,21 @@ document.getElementById("sign-in__submit")
         if (jwtReq.status === 401) return console.log("unauthorized!");
         
         const jwt = await jwtReq.text();
-        sync.setAccInfo(jwt, parseJwt(jwt).uid, signIn__username.value);
-        loadUserdata(uid);
+        console.log("successfully signed in with jwt", jwt,  jwt.length, jwtReq.status);
+        sync.setAccInfo(jwt, extractUID(jwt), signIn__username.value);
+        loadUserdata(sync.uid);
 
         signedInAs.innerText = "signed in as " + signIn__username.value;
         setAccountElem(accountInfo);
 })
 
 /** [stack overflow link](https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library) */
-function parseJwt(token) {
-    var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+function extractUID(jwt) {
+    const base64Url = jwt.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    return decodeURIComponent(window.atob(base64).split('').map(function(c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
-
-    return JSON.parse(jsonPayload);
 }
 
 async function hash(input) {
@@ -90,10 +74,7 @@ async function hash(input) {
     return await res.text();
 }
 
-function usernameErrors(username) {
-    if (!isSafeFilename(username)) return "forbidden characters";
-    if (username === "") return "empty";
-}
+
 
 const isSafeFilename = (str) => ! (/[/\\?%*:|"<>]/g.test(str));
 
@@ -102,11 +83,8 @@ document.getElementById("create-account__already-have")
 document.getElementById("sign-in__create-account")
     .addEventListener("click", () => setAccountElem(createAccount));
 
-document.getElementById("sign-out").addEventListener("click", async () => {
-    
-    sync.setAccInfo("guest", "guest", undefined);
-    loadUserdata(sync.guestID ?? await sync.fetchGuestID());
-    
+document.getElementById("sign-out").addEventListener("click", () => {
+    sync.setAccInfo("guest");
+    loadUserdata(sync.guestID);
     setAccountElem(signIn);
-
 });

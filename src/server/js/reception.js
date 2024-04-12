@@ -3,6 +3,9 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const { QuickDB } = require('quick.db');
 const jwt = require('jsonwebtoken');
+const { promisify } = require('util');
+
+const createJWT = promisify(jwt.sign);
 
 const router = express.Router();
 const uidDB = new QuickDB({filePath: __dirname + "/../uids.sqlite"});
@@ -23,27 +26,20 @@ router.post("/create-account-dir/:uid/:username", express.text(), async (req, re
         "hash": await bcrypt.hash(req.body, 11)
     })
 
-    res.status(200).end(createJWT(req.params["uid"]));
+    res.status(200).end(await createJWT(req.params["uid"], secretKey));
 })
 
-router.post("getjwt/:username", express.text(), async (req, res) => {
-    console.log("got something");
+router.post("/get-jwt/:username", express.text(), async (req, res) => {
     const uid = await uidDB.get(req.params["username"]);
-    console.log("uid", uid);
     if (!uid) return res.status(404).end();
 
     const hash = await usersDB.get(uid + ".hash");
-    
-    if (await bcrypt.compare(req.body, hash)) res.status(200).end(createJWT(uid));
-    else                                  res.status(401).end();
+
+    if (await bcrypt.compare(req.body, hash))   res.status(200).end(await createJWT(uid, secretKey));
+    else                                        res.status(401).end();
 })
 
-function createJWT(uid) {
-    jwt.sign({uid: uid}, secretKey, (err, encoded) => {
-        if (err) throw err;
-        return encoded;
-    })
-}
+
 
 router.post("/set-hash/:jwt", express.text(), async (req, res) => {
     
