@@ -1,0 +1,186 @@
+#play-div {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    
+    background-color: lightblue;    
+
+    display: grid;
+    grid-template-columns: 3fr 4fr 3fr;
+
+    height: var(--play-div-height);
+    padding: 0 15px;
+}
+
+#info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-wrap: nowrap;
+    overflow: hidden;
+
+    gap: 5px;
+}
+
+#info__title, #info__artist {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#main-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+#main-control__buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px
+}
+input[type='range'] {
+    border-radius: 8px;
+    height: 4px;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+#seek {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+#seek__passed, #seek__total {
+    margin: 0;
+}
+
+#seek__slider {
+    width: 100%;
+}
+  
+input[type='range']::-webkit-slider-thumb {
+    width: 5px;
+    -webkit-appearance: none;
+    height: 12px;
+    background: black;
+    border-radius: 2px;
+}
+
+#play-right {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    gap: 10px;
+}
+
+#volume-slider {
+    width: 100px;
+}
+
+
+#play {
+    width: 50px;
+    height: 50px;
+}
+
+.svg-cont {
+    position: relative;
+
+    margin: auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 95%;
+    height: 95%;
+
+    transition: 0.05s;
+}
+.svg-cont:hover {
+    width: 100%;
+    height: 100%;
+}
+.svg-cont:active {
+    width: 95%;
+    height: 95%;
+}
+
+.svg-child {
+    position: absolute;
+
+    margin: auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+@keyframes spinning {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#play__circle {
+    animation-iteration-count: infinite;
+    animation-name: spinning;
+    animation-timing-function: linear;
+    animation-play-state: paused;
+} 
+
+#play__pause {
+    display: none;
+}
+
+
+#prev, #next {
+    width: 50px;
+    height: 50px;
+}
+
+#prev #prev-svg, #next #next-svg {
+    position: relative;
+
+    width: 60%;
+    height: 60%;
+
+    margin: 20%;
+
+    transition: 0.1s;
+}
+
+#prev:hover #prev-svg {
+    margin-left: 15%;
+    margin-right: 25%;
+}
+#next:hover #next-svg {
+    margin-left: 25%;
+    margin-right: 15%;
+}
+
+#prev:active #prev-svg {
+    margin-left: 10%;
+    margin-right: 30%;
+}
+#next:active #next-svg {
+    margin-left: 30%;
+    margin-right: 10%;
+}
+
+#volume, #shuffle {
+    width: 30px;
+    height: 30px;
+}
+#volume__muted, #volume__low, #volume__high {
+    display: none;
+}

@@ -1,4 +1,5 @@
 node_modules
-public/resources
-server/users
-favicon.ico
+src/node_modules
+src/public/resources
+src/server/users
+src/server/auth

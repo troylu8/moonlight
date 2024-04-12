@@ -1,0 +1,68 @@
+#options-div {
+    background-color: lightgreen;
+
+    position: fixed;
+    top: 0;
+    left: var(--playlists-div-width);
+    right: var(--sidebar-div-width);
+    height: var(--options-div-height);
+
+    z-index: 1;
+
+    display: flex;
+    justify-content: end;
+    align-items: center;
+
+    padding-right: 10px;
+    gap: 10px;
+
+    transition: 0.5s;
+}
+
+.options-btn {
+    background-color: lightblue;
+    position: relative;
+    cursor: pointer;
+}
+
+#new-song-dropdown {    
+    position: absolute;
+    top: 20px;
+    right: 0;
+
+    display: none;
+    flex-direction: column;
+    align-items: center;
+
+    background-color: lightgrey;
+    padding: 10px;
+
+    cursor: default;
+}
+
+
+#song-upload {
+    background-color: rgb(70, 70, 255);
+    border: none;
+    color: white;
+}
+#song-upload__input {
+    display: none;
+}
+
+#paste-link {
+    display: flex;
+}
+
+#loading-bar {
+    background-color: rgb(70, 70, 255);
+    
+    width: 0%;
+    height: 6px;
+
+    transition: 0.2s;
+
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
