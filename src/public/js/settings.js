@@ -31,10 +31,15 @@ document.getElementById("create-account__submit")
         if (create__password.value !== repeatPassword.value) return console.log("passwords dont match");
 
         // create account at server
-        const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${sync.uid}/${create__username.value}`, {method: "POST"});
+        const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${sync.uid}/${create__username.value}`, {
+            method: "POST",
+            body: create__password.value
+        });
         if (jwtReq.status === 409) return console.log("username taken");
 
-        sync.setAccInfo(await jwtReq.text(), null, create__username.value);
+        sync.saveNewGuestID();
+
+        sync.setAccInfo(await jwtReq.text(), sync.uid, create__username.value);
         
         signedInAs.innerText = "signed in as " + create__username.value;
         setAccountElem(accountInfo);
@@ -97,10 +102,10 @@ document.getElementById("create-account__already-have")
 document.getElementById("sign-in__create-account")
     .addEventListener("click", () => setAccountElem(createAccount));
 
-document.getElementById("sign-out").addEventListener("click", () => {
+document.getElementById("sign-out").addEventListener("click", async () => {
     
     sync.setAccInfo("guest", "guest", undefined);
-    loadUserdata("guest");
+    loadUserdata(sync.guestID ?? await sync.fetchGuestID());
     
     setAccountElem(signIn);
 

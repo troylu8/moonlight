@@ -2,6 +2,9 @@
 const express = require('express');
 const fs = require('fs');
 const { dirname } = require('path');
+const { QuickDB } = require("quick.db");
+
+const guestbook = new QuickDB({filePath: `${__dirname}/../public/resources/guestbook.sqlite`});
 
 const router = express.Router();
 
@@ -21,9 +24,10 @@ const defaultUserData = JSON.stringify({
 );
 
 router.get("/guest-id", async (req, res) => {
-    fs.readFile(`${__dirname}/../public/resources/guestID.txt`, "utf8", (err, data) => {
-        res.end(data);
-    })
+    res.end(await guestbook.get("guest id"));
+})
+router.put("/guest-id/:id", async (req, res) => {
+    res.end(await guestbook.set("guest id", req.params["id"]));
 })
 
 router.get("/read-userdata/:uid", async (req, res) => {
@@ -81,6 +85,7 @@ async function ensurePathThen(func) {
             await fs.promises.mkdir(dirname(err.path), {recursive: true});
             return await func();
         }
+        else throw err;
     }
 } 
 

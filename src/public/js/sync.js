@@ -1,8 +1,31 @@
 import genID from "./id.js";
-import { data, Song, Playlist } from "./userdata.js";
+import { data, Song, Playlist, loadUserdata } from "./userdata.js";
 
-export let uid = genID(14);
+export let guestID;
+export async function fetchGuestID() {
+    const res = await fetch("http://localhost:5000/files/guest-id");
+    console.log(res.status);
+    guestID = await res.text();
+    return guestID;
+}
+export async function saveNewGuestID() {
+    guestID = genID(14);
+    await fetch("http://localhost:5000/files/guest-id/" + guestID, {method: "PUT"});
+}
+
+export let uid;
 export let username = "guest";
+
+async function signInAsGuest() {
+    if (!guestID && !(await fetchGuestID()) ) {
+        console.log("no guest id, making one");
+        saveNewGuestID();
+    }
+    uid = guestID;
+    loadUserdata(guestID);
+}
+window.onload = signInAsGuest;
+// signInAsGuest();
 
 /** @type {string} */
 export let jwt;
@@ -17,7 +40,7 @@ const syncBtn = document.getElementById("sync");
 syncBtn.addEventListener("click", () => syncData());
 
 export async function syncData() {
-    if (!uid) return console.log("not signed in!");
+    if (guestID === uid) return console.log("not signed in!");
 
     const serverJSON = await getData();
     

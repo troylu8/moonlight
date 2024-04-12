@@ -318,4 +318,3 @@ export async function loadUserdata(uid) {
     play.audio.volume = json.settings.volume;
     
 }
-loadUserdata(sync.uid);

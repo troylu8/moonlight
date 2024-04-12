@@ -7,7 +7,7 @@ document.getElementById("info__title").onclick = () => {
     userdata.data.saveDataLocal();
 }
 
-document.body.addEventListener("keydown", (e) => {
+document.body.addEventListener("keydown", async (e) => {
     switch (e.key) {
         case "A":
             userdata.data.curr.listenPlaylist.cycle.print();
@@ -27,6 +27,7 @@ document.body.addEventListener("keydown", (e) => {
             break;
         case "S":
             console.log({
+                gid: sync.guestID,
                 uid: sync.uid,
                 jwt: sync.jwt
             });

@@ -11,26 +11,31 @@ const usersDB = new QuickDB({filePath: __dirname + "/../db.sqlite"});
 const secretKey = fs.readFileSync(__dirname + "/auth/secret.key", "utf8");
 console.log("secretkey:", secretKey);
 
-router.post("/create-account-dir/:uid/:username", async (req, res) => {
+router.post("/create-account-dir/:uid/:username", express.text(), async (req, res) => {
     if (await uidDB.has(req.params["username"])) return res.status(409).end("username taken");
-        
+    
     await uidDB.set(req.params["username"], req.params["uid"]);
-    await usersDB.set(req.params["uid"] + ".userdata", {
-        "playlists": {},
-        "songs": {}
+    await usersDB.set(req.params["uid"], {
+        "userdata": {
+            "playlists": {},
+            "songs": {}
+        },
+        "hash": await bcrypt.hash(req.body, 11)
     })
 
     res.status(200).end(createJWT(req.params["uid"]));
 })
 
-router.post("get-jwt/:username", express.text(), async (req, res) => {
+router.post("getjwt/:username", express.text(), async (req, res) => {
+    console.log("got something");
     const uid = await uidDB.get(req.params["username"]);
+    console.log("uid", uid);
+    if (!uid) return res.status(404).end();
 
-    const verifyRes = await verifyPass(uid, req.body);
-    if (verifyRes === "wrong pass") return res.status(401).end();
-    if (verifyRes === "no user")    return res.status(404).end();
-
-    res.end(createJWT(uid));
+    const hash = await usersDB.get(uid + ".hash");
+    
+    if (await bcrypt.compare(req.body, hash)) res.status(200).end(createJWT(uid));
+    else                                  res.status(401).end();
 })
 
 function createJWT(uid) {
@@ -79,19 +84,6 @@ router.put("/upload-data/:jwt", express.json(), async (req, res) => {
     })
     
 })
-
-
-
-
-/** @returns {Promise<"success"  | "wrong pass" | "no user">} */
-async function verifyPass(uid, pass) {
-    try {
-        const hash = await usersDB.get(uid + ".hash");
-        return (await bcrypt.compare(pass, hash))? "success" : "wrong pass";
-    } catch (err) {
-        if (err.code === "ENOENT") return "no user";
-    }
-}
 
 
 module.exports = router;

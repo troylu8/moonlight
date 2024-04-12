@@ -220,7 +220,7 @@ export class PlaylistCycle {
         this.nodes.get(song).delete();
 
         const i = this.songIndexes.get(song);
-        swap(this.shuffleArr, i, this.shuffleArr.length-1);
+        this.shuffleArr[i] = this.shuffleArr[this.shuffleArr.length-1];
         this.songIndexes.set(this.shuffleArr[i], i);
         
         this.shuffleArr.pop();
