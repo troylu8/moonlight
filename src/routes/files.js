@@ -30,6 +30,15 @@ router.put("/guest-id/:id", async (req, res) => {
     res.end(await guestbook.set("guest id", req.params["id"]));
 })
 
+router.get("/get-cached", async (req, res) => {
+    const cache = await guestbook.get("cache");
+    res.status(cache? 200 : 404).end(cache);
+})
+router.put("/cache", express.json(), (req, res) => {
+    guestbook.set("cache", req.body);
+    res.end();
+})
+
 router.get("/read-userdata/:uid", async (req, res) => {
 
     const data = await readFileOrDefault(

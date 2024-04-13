@@ -2,6 +2,7 @@ import * as userdata from "./userdata.js";
 import * as play from "./play.js";
 import * as sync from "./account.js";
 import { setTitleScreen } from "./signinElems.js";
+import { settings } from "./settings.js";
 
 document.getElementById("info__title").onclick = () => {
     console.log("saving data");
@@ -26,7 +27,7 @@ document.body.addEventListener("keydown", async (e) => {
             if (!play.history) return console.log(" history is null ");
             console.log(play.historyIndex, play.history.map(id => userdata.data.songs.get(id).title));
             break;
-        case "S":
+        case "I":
             console.log({
                 gid: sync.guestID,
                 uid: sync.uid,
@@ -39,6 +40,9 @@ document.body.addEventListener("keydown", async (e) => {
             break;
         case "Y":
             setTitleScreen(false);
+            break;
+        case "S":
+            console.log(settings);
             break;
     }
     

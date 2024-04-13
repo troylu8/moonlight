@@ -33,9 +33,10 @@ async function setAccInfo(JWT, UID, USERNAME) {
     else {
         jwt = JWT ?? jwt;
         uid = UID ?? uid;
-        username = USERNAME ?? username;    
+        username = USERNAME ?? username;
     }
 }
+export function clearAccInfo() { jwt = uid = username = null; }
 
 export async function signInAsGuest() {
     await setAccInfo("guest");
@@ -44,21 +45,22 @@ export async function signInAsGuest() {
 }
 
 /** @returns {Promise<"username taken" | "success">} */
-export async function createAccData(username, password) {
+export async function createAccData(USERNAME, PASSWORD) {
     const fromGuest = username === "guest";
+    console.log("fromGuest", fromGuest);
     const uid = fromGuest? guestID : genID(14);
     
     // create account at server
-    const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${uid}/${username}`, {
+    const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${uid}/${USERNAME}`, {
         method: "POST",
-        body: password
+        body: PASSWORD
     });
     if (jwtReq.status === 409) return "username taken";
 
     // i was going to clear guest id here, but might as well save a new one
     if (fromGuest) saveNewGuestID();
 
-    setAccInfo(await jwtReq.text(), uid, username);
+    setAccInfo(await jwtReq.text(), uid, USERNAME);
     if (!fromGuest) loadLocaldata(uid);
 
     return "success";
@@ -66,6 +68,10 @@ export async function createAccData(username, password) {
 
 /** @returns {Promise<"username not found" | "unauthorized" | "success">} */
 export async function fetchAccData(USERNAME, PASSWORD) {
+
+
+    const cacheReq = await fetch("http://localhost:5000/read-cached-jwt");
+    if (cacheReq.ok) {}
 
     const jwtReq = await fetch("https://localhost:5001/get-jwt/" + USERNAME, {
         method: "POST",

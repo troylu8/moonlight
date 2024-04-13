@@ -1,5 +1,7 @@
 import * as acc from "./account.js"
 import Dropdown from "./dropdown.js";
+import { audio } from "./play.js";
+import { settings } from "./settings.js";
 
 const titlescreen = document.getElementById("titlescreen");
 const primary = document.getElementById("primary");
@@ -7,24 +9,25 @@ const primary = document.getElementById("primary");
 export function setTitleScreen(active) {
     titlescreen.style.display = active? "grid" : "none";
     primary.style.display = active? "none" : "block";
+
+    if (active) audio.pause();
 }
 
-
-let signInActive = true;
+const signedInAs = document.getElementById("signed-in-as");
 
 
 const isSafeFilename = (str) => ! (/[/\\?%*:|"<>]/g.test(str));
-function inputErrors(username, password, repeatPassword) {
+function inputErrors(username, password, repeatPassword, signingIn) {
     if (!isSafeFilename(username)) return "username has forbidden characters";
     if (username === "") return "username cannot be empty";
     if (password === "") return "password cannot be empty";
-    if (!signInActive && password !== repeatPassword) return "passwords don't match"
+    if (!signingIn && password !== repeatPassword) return "passwords don't match"
 }
 
 /**
  * @param {object} options contains `username`, `password`, `repeatPassword`, `error`, `submit` fields
- * @param {function() : boolean} isSigningIn returns `true` if signing in, `false` if creating an acc */
-function initAccCreator(options, isSigningIn) {
+ */
+function initAccCreator(options) {
     const {username, password, repeatPassword, error, submit} = options;
 
     // typing clears error text, pressing enter clicks submit
@@ -36,16 +39,18 @@ function initAccCreator(options, isSigningIn) {
     });
 
     submit.addEventListener("click", async () => {
-        const res = inputErrors(username.value, password.value, repeatPassword.value) ??
-                    (isSigningIn()?
+        const signingIn = repeatPassword.style.display !== "block";
+        const res = inputErrors(username.value, password.value, repeatPassword.value, signingIn) ??
+                    (signingIn? 
                     await acc.fetchAccData(username.value, password.value) :
                     await acc.createAccData(username.value, password.value))
     
         if (res === "success")  {
             setTitleScreen(false);
-            accountBtn.firstElementChild.innerText = username.value;
+            accountBtn.firstElementChild.innerText = signedInAs.innerText = username.value;
             fromGuestBtn.remove();
-        } 
+            accDropdown.close();
+        }
         else {
             // blink effect if we get the error repeatedly 
             if (error.innerText !== "") {
@@ -63,7 +68,8 @@ document.getElementById("account__continue").addEventListener("click", () => {
     setTitleScreen(false);
     
     accountDropdown.appendChild(fromGuestBtn);
-    accountBtn.firstElementChild.innerText = "[guest]";
+    accountBtn.firstElementChild.innerText = signedInAs.innerText = "[guest]";
+
 });
 
 const repeatPassword = document.getElementById("account__repeat-password");
@@ -76,21 +82,20 @@ initAccCreator({
     repeatPassword: repeatPassword,
     error: error,
     submit: submit
-}, () => signInActive)
+})
 
 const title = document.getElementById("account__title");
 const toggle = document.getElementById("account__toggle");
 
 toggle.addEventListener("click", () => {
-    signInActive = !signInActive;
+    const signInActive = repeatPassword.style.display !== "block";
     
-    toggle.innerText = signInActive? "create new account" : "already have account";
-    title.innerText = submit.innerText = signInActive? "sign in" : "create account";
+    toggle.innerText = signInActive? "already have account" : "create new account";
+    title.innerText = submit.innerText = signInActive? "create account" : "sign in" ;
 
-    repeatPassword.style.display = signInActive? "none" : "block";
+    repeatPassword.style.display = signInActive? "block" : "none";
     repeatPassword.value = error.innerText = "";
 });
-
 
 
 
@@ -101,7 +106,7 @@ const fromGuest = {
     error: document.getElementById("from__error"),
     submit: document.getElementById("from__submit")
 }
-initAccCreator(fromGuest, () => false);
+initAccCreator(fromGuest);
 
 const fromGuestBtn = document.getElementById("create-account-from");
 fromGuestBtn.addEventListener("click", () => {
@@ -111,6 +116,22 @@ fromGuestBtn.addEventListener("click", () => {
 
 document.getElementById("sign-out").addEventListener("click", () => {
     setTitleScreen(true);
+
+    
+    if (settings.get("stay-signed-in")) {
+        fetch("http://localhost:5000/cache", {
+            method: "PUT",
+            body: {
+                uid: acc.uid,
+                jwt: acc.jwt
+            },
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+    }
+
+    acc.clearAccInfo();
 });
 
 const accountBtn = document.getElementById("account-btn");
@@ -124,4 +145,4 @@ class AccDropdown extends Dropdown {
         fromGuestBtn.style.display = "block";
     }
 }
-new AccDropdown(accountBtn, accountDropdown);
+const accDropdown = new AccDropdown(accountBtn, accountDropdown);

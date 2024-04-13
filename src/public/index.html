@@ -57,6 +57,8 @@
                     <span>guest</span>
                     <div id="account__dropdown">
                         <button id="sign-out"> sign&nbspout </button>
+
+                        <button id="user-settings-btn"> user&nbspsettings </button>
                         
                         <button id="create-account-from"> create&nbspaccount&nbspfrom&nbspguest&nbspdata </button>
                         <input id="from__username"  type="text" placeholder="username">
@@ -198,38 +200,42 @@
     
                         <button id="playlist-settings__delete"> delete </button>
                     </div>
-    
-                    <div id="settings">
+
+                    <div id="user-settings">
                         
-                        <div id="account-info">
-                            <h5 id="signed-in-as"> signed in as username </h5>
-                            <button id="sign-out"> sign out </button>
-                        </div>
-    
+                        <h5> signed in as <span id="signed-in-as">username</span> </h5>
+                        
                         <div>
-                            <input type="checkbox" id="show-logo">
-                            <label for="show-logo"> show logo </label>
-                        </div>
-                        <div>
-                            <input type="checkbox" id="pause-while-seek">
-                            <label for="pause-while-seek"> pause song while seeking </label>    
-                        </div>
-                        <div>
-                            <input type="checkbox" id="delete-uploaded">
-                            <label for="delete-uploaded"> delete original files after uploading a song </label>    
-                        </div>
-                        <div>
-                            <input type="checkbox" id="sort-playlist-options">
-                            <label for="sort-playlist-options"> sort playlist options </label>    
-                        </div>
-                        <div>
-                            <input type="checkbox" id="stay-signed-in" checked>
+                            <input type="checkbox" id="stay-signed-in" class="settings-field" checked>
                             <label for="stay-signed-in"> stay signed in </label>    
                         </div>
                         <div>
-                            <input type="checkbox" id="sync-after-sign-in" checked>
+                            <input type="checkbox" id="sync-after-sign-in" class="settings-field" checked>
                             <label for="sync-after-sign-in"> sync after sign in </label>    
                         </div>
+                    </div>
+    
+                    <div id="settings">
+                        
+                        
+    
+                        <div>
+                            <input type="checkbox" id="show-logo" class="settings-field">
+                            <label for="show-logo"> show logo </label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="pause-while-seek" class="settings-field">
+                            <label for="pause-while-seek"> pause song while seeking </label>    
+                        </div>
+                        <div>
+                            <input type="checkbox" id="delete-uploaded" class="settings-field">
+                            <label for="delete-uploaded"> delete original files after uploading a song </label>    
+                        </div>
+                        <div>
+                            <input type="checkbox" id="sort-playlist-options" class="settings-field">
+                            <label for="sort-playlist-options"> sort playlist options </label>    
+                        </div>
+                        
                         <p> total space used: <span>456 mb</span> </p>
                     </div>
     
