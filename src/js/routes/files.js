@@ -1,10 +1,11 @@
 
 const express = require('express');
 const fs = require('fs');
-const { dirname } = require('path');
 const { QuickDB } = require("quick.db");
+const cipher = require("../cipher.js");
+const { readFileOrDefault, ensurePathThen } = require('../util.js');
 
-const guestbook = new QuickDB({filePath: `${__dirname}/../public/resources/guestbook.sqlite`});
+const guestbook = new QuickDB({filePath: __dirname + "/../../public/resources/guestbook.sqlite"});
 
 const router = express.Router();
 
@@ -32,12 +33,23 @@ router.put("/guest-id/:id", async (req, res) => {
 
 router.get("/get-cached", async (req, res) => {
     const cache = await guestbook.get("cache");
-    res.status(cache? 200 : 404).end(cache);
+    if (!cache) return res.status(404).end();
+
+    const decrypted = cipher.decrypt(cache);
+    res.end(decrypted);
 })
-router.put("/cache", express.json(), (req, res) => {
-    guestbook.set("cache", req.body);
+router.put("/cache", express.text(), (req, res) => {
+    if (typeof req.body !== "string") {
+        guestbook.delete("cache");
+    }    
+    else {
+        const encrypted = cipher.encrypt(req.body);
+        guestbook.set("cache", encrypted);
+    }
+    
     res.end();
 })
+
 
 router.get("/read-userdata/:uid", async (req, res) => {
 
@@ -69,34 +81,4 @@ router.put("/save-userdata/:uid", async (req, res) => {
     res.end();
 })
 
-/** read file, or create file with default text if doesnt exist */
-async function readFileOrDefault(path, defaultString, encoding) {
-    encoding = encoding ?? "utf8";
-    
-    try {
-        return await fs.promises.readFile(path, encoding);
-    } catch (err) {
-        if (err.code === "ENOENT") {
-            await fs.promises.mkdir(dirname(path), {recursive: true});
-            await fs.promises.writeFile(path, defaultString, encoding);
-
-            return defaultString;
-        }
-    }
-}
-
-async function ensurePathThen(func) {
-    console.log("ensuring");
-    try {
-        return await func();
-    } catch (err) {
-        if (err.code === "ENOENT") {
-            await fs.promises.mkdir(dirname(err.path), {recursive: true});
-            return await func();
-        }
-        else throw err;
-    }
-} 
-
 module.exports = router;
-module.exports.ensurePathThen = ensurePathThen;

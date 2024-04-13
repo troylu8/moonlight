@@ -1,7 +1,6 @@
 import * as acc from "./account.js"
 import Dropdown from "./dropdown.js";
 import { audio } from "./play.js";
-import { settings } from "./settings.js";
 
 const titlescreen = document.getElementById("titlescreen");
 const primary = document.getElementById("primary");
@@ -47,9 +46,7 @@ function initAccCreator(options) {
     
         if (res === "success")  {
             setTitleScreen(false);
-            accountBtn.firstElementChild.innerText = signedInAs.innerText = username.value;
-            fromGuestBtn.remove();
-            accDropdown.close();
+            updateForUsername(username.value);
         }
         else {
             // blink effect if we get the error repeatedly 
@@ -63,13 +60,22 @@ function initAccCreator(options) {
 
 }
 
-document.getElementById("account__continue").addEventListener("click", () => {
-    acc.signInAsGuest();
-    setTitleScreen(false);
-    
-    accountDropdown.appendChild(fromGuestBtn);
-    accountBtn.firstElementChild.innerText = signedInAs.innerText = "[guest]";
+/** updates DOM elements to reflect new username */
+export function updateForUsername(username) {
+    accountBtn.firstElementChild.innerText = signedInAs.innerText = username;
 
+    if (acc.isGuest())  accountDropdown.appendChild(fromGuestBtn);
+    else                fromGuestBtn.remove();
+
+    accDropdown.close();
+}
+
+document.getElementById("account__continue").addEventListener("click", async () => {
+    
+    await acc.fetchGuestData();
+
+    setTitleScreen(false);
+    updateForUsername("[guest]");
 });
 
 const repeatPassword = document.getElementById("account__repeat-password");
@@ -116,22 +122,10 @@ fromGuestBtn.addEventListener("click", () => {
 
 document.getElementById("sign-out").addEventListener("click", () => {
     setTitleScreen(true);
-
-    
-    if (settings.get("stay-signed-in")) {
-        fetch("http://localhost:5000/cache", {
-            method: "PUT",
-            body: {
-                uid: acc.uid,
-                jwt: acc.jwt
-            },
-            headers: {
-                "Content-Type": "application/json"
-            }
-        })
-    }
-
     acc.clearAccInfo();
+
+    console.log("clearing cache");
+    fetch("http://localhost:5000/files/cache", {method: "PUT"});
 });
 
 const accountBtn = document.getElementById("account-btn");
@@ -145,4 +139,4 @@ class AccDropdown extends Dropdown {
         fromGuestBtn.style.display = "block";
     }
 }
-const accDropdown = new AccDropdown(accountBtn, accountDropdown);
+export const accDropdown = new AccDropdown(accountBtn, accountDropdown);

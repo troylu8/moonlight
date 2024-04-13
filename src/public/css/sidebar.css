@@ -39,4 +39,9 @@
     border: solid 2px white;
 }
 
+#user-settings {
+    display: none;
+    flex-direction: column;
+}
+
 

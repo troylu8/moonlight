@@ -26,7 +26,7 @@ router.post("/create-account-dir/:uid/:username", express.text(), async (req, re
         "hash": await bcrypt.hash(req.body, 11)
     })
 
-    res.status(200).end(await createJWT(req.params["uid"], secretKey));
+    res.status(200).end(await createJWT({uid: req.params["uid"], username: req.params["username"]}, secretKey));
 })
 
 router.post("/get-jwt/:username", express.text(), async (req, res) => {
@@ -35,8 +35,10 @@ router.post("/get-jwt/:username", express.text(), async (req, res) => {
 
     const hash = await usersDB.get(uid + ".hash");
 
-    if (await bcrypt.compare(req.body, hash))   res.status(200).end(await createJWT(uid, secretKey));
-    else                                        res.status(401).end();
+    if (await bcrypt.compare(req.body, hash))   
+        res.status(200).end(await createJWT({uid: uid, username: req.params["username"]}, secretKey));
+    else 
+        res.status(401).end();
 })
 
 

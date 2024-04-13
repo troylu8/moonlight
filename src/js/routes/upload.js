@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const { basename } = require('path');
 const { parseFile } = require('music-metadata');
-const { ensurePathThen } = require('./files.js');
+const { ensurePathThen } = require("../util.js");
 
 
 const router = express.Router();

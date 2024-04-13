@@ -290,7 +290,7 @@ class Data {
 /** @type {Data}  */
 export let data;
 
-export async function loadUserdata(uid) {
+export async function loadLocaldata(uid) {
     if (data) {
         for (const playlist of data.playlists.values()) 
             playlist.removeElements()

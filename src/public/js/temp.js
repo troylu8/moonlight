@@ -1,12 +1,24 @@
 import * as userdata from "./userdata.js";
 import * as play from "./play.js";
-import * as sync from "./account.js";
+import * as acc from "./account.js";
 import { setTitleScreen } from "./signinElems.js";
 import { settings } from "./settings.js";
 
 document.getElementById("info__title").onclick = () => {
     console.log("saving data");
     userdata.data.saveDataLocal();
+}
+document.getElementById("info__artist").onclick = () => {
+    
+    if (acc.username && settings.get("stay-signed-in")) {
+
+        console.log("caching jwt");
+
+        fetch("http://localhost:5000/files/cache", {
+            method: "PUT",
+            body: acc.isGuest()? "guest" : acc.jwt
+        })
+    }
 }
 
 document.body.addEventListener("keydown", async (e) => {
@@ -29,10 +41,10 @@ document.body.addEventListener("keydown", async (e) => {
             break;
         case "I":
             console.log({
-                gid: sync.guestID,
-                uid: sync.uid,
-                jwt: sync.jwt,
-                username: sync.username
+                gid: acc.guestID,
+                uid: acc.uid,
+                jwt: acc.jwt,
+                username: acc.username
             });
             break;
         case "T":

@@ -1,5 +1,6 @@
 import genID from "./id.js";
-import { data, Song, Playlist, loadUserdata as loadLocaldata } from "./userdata.js";
+import { updateForUsername, setTitleScreen } from "./signinElems.js";
+import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 
 export let guestID;
 export async function fetchGuestID() {
@@ -28,7 +29,7 @@ async function setAccInfo(JWT, UID, USERNAME) {
     
         jwt = null;
         uid = guestID;
-        username = "guest";
+        username = "[guest]";
     }
     else {
         jwt = JWT ?? jwt;
@@ -38,15 +39,17 @@ async function setAccInfo(JWT, UID, USERNAME) {
 }
 export function clearAccInfo() { jwt = uid = username = null; }
 
-export async function signInAsGuest() {
+export async function fetchGuestData() {
     await setAccInfo("guest");
     console.log("loading", guestID);
     await loadLocaldata(guestID);
 }
 
+export function isGuest() { return uid === guestID; }
+
 /** @returns {Promise<"username taken" | "success">} */
 export async function createAccData(USERNAME, PASSWORD) {
-    const fromGuest = username === "guest";
+    const fromGuest = isGuest();
     console.log("fromGuest", fromGuest);
     const uid = fromGuest? guestID : genID(14);
     
@@ -61,17 +64,32 @@ export async function createAccData(USERNAME, PASSWORD) {
     if (fromGuest) saveNewGuestID();
 
     setAccInfo(await jwtReq.text(), uid, USERNAME);
-    if (!fromGuest) loadLocaldata(uid);
+    if (!fromGuest) await loadLocaldata(uid);
 
     return "success";
 }
 
+window.onload = async () => {
+    
+    const cacheReq = await fetch("http://localhost:5000/files/get-cached");
+    
+    if (!cacheReq.ok) return console.log("no data cached");
+    const jwt = await cacheReq.text();
+    console.log("cache is", jwt);
+
+    if (jwt === "guest") await fetchGuestData();
+    else {
+        const info = parseJWT(jwt);
+        await setAccInfo(jwt, info.uid, info.username);
+        await loadLocaldata(uid);
+    }
+    
+    setTitleScreen(false);
+    updateForUsername(username);
+}
+
 /** @returns {Promise<"username not found" | "unauthorized" | "success">} */
 export async function fetchAccData(USERNAME, PASSWORD) {
-
-
-    const cacheReq = await fetch("http://localhost:5000/read-cached-jwt");
-    if (cacheReq.ok) {}
 
     const jwtReq = await fetch("https://localhost:5001/get-jwt/" + USERNAME, {
         method: "POST",
@@ -81,19 +99,21 @@ export async function fetchAccData(USERNAME, PASSWORD) {
     if (jwtReq.status === 401) return "wrong password"
     const jwt = await jwtReq.text();
 
-    setAccInfo(jwt, extractUID(jwt), USERNAME);
-    loadLocaldata(uid);
+    await setAccInfo(jwt, parseJWT(jwt).uid, USERNAME);
+    await loadLocaldata(uid);
 
     return "success";
 }
 
 /** [stack overflow link](https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library) */
-function extractUID(jwt) {
+function parseJWT(jwt) {
     const base64Url = jwt.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    return decodeURIComponent(window.atob(base64).split('').map(function(c) {
+    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
+
+    return JSON.parse(jsonPayload);
 }
 
 async function hash(input) {
@@ -108,7 +128,7 @@ const syncBtn = document.getElementById("sync");
 syncBtn.addEventListener("click", () => syncData());
 
 export async function syncData() {
-    if (username === "guest") return console.log("not signed in!");
+    if (isGuest()) return console.log("not signed in!");
 
     const serverJSON = await getData();
     
