@@ -3,20 +3,26 @@ export default class Dropdown {
     /** 
      * @param {HTMLElement} button 
      * @param {HTMLElement} dropdown element with display: flex
-     * @param {function() : boolean} allowClose return false when dropdown should stay open 
+     * @param {object} options
+     * @param {function() : boolean} options.allowClose return false when dropdown should stay open 
+     * @param {function() : any} options.onclose called when dropdown is closed 
      */
-    constructor(button, dropdown, allowClose) {
+    constructor(button, dropdown, options) {
         this.visible = false;
         this.button = button;
         this.dropdown = dropdown;
 
-        allowClose = allowClose ?? ( () => true ); // if omitted allowClose, always true
+        if (options) {
+            this._onclose = options.onclose;
+            this.allowClose = options.allowClose ?? ( () => true ); // if omitted allowClose, always true
+        }
 
+        
         button.addEventListener("click", (e) => {
             if (e.currentTarget !== button) return;
             
             if (this.visible) {
-                if (allowClose()) this.close();
+                if (this.allowClose()) this.close();
             }
             else this.open();
         });
@@ -24,7 +30,7 @@ export default class Dropdown {
 
         document.body.addEventListener("mousedown", (e) => {
             
-            if (this.visible && !button.contains(e.target) && allowClose()) {
+            if (this.visible && !button.contains(e.target) && this.allowClose()) {
                 this.close();
             }
         })
@@ -38,6 +44,7 @@ export default class Dropdown {
     close() {
         this.dropdown.style.display = "none";
         this.visible = false;
+        this._onclose();
     }
 }
 

@@ -130,8 +130,9 @@ syncBtn.addEventListener("click", () => syncData());
 export async function syncData() {
     if (isGuest()) return console.log("not signed in!");
 
-    const serverJSON = await getData();
+    const serverJSON = await getData(jwt);
     
+    console.log(serverJSON);
     console.log("server", Object.values(serverJSON.songs).map(s => s.filename ));
     console.log("client", Array.from(data.songs).map(s => { return {syncStatus: s[1].syncStatus, filename: s[1].filename} } ));
 

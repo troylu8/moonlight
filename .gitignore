@@ -5,3 +5,4 @@ src/server/users
 src/server/auth
 *.key
 src/server/*.sqlite
+src/server/userfiles

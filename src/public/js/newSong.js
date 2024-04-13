@@ -8,12 +8,8 @@ console.log("ORofRTMg-iY", "NRQRC_0ZQ00", "AqI97zHMoQw", "DXZPtndQw8U", "nmix0ph
 
 const input = document.getElementById("paste-link__input");
 const button = document.getElementById("paste-link__btn");
-const uploadBtn = document.getElementById("song-upload");
 const error = document.getElementById("new__error");
 
-[input, button, uploadBtn].forEach(elem => {
-    elem.onfocus = () =>
-})
 
 
 /** between dings from getyt and destroy, button is disabled */
@@ -95,7 +91,10 @@ function showErrorMsg(msg) {
 const dropdown = new Dropdown(
     document.getElementById("new"), 
     document.getElementById("new__dropdown"),
-    () => !tracking
+    {
+        allowClose: () => !tracking,
+        onclose: () => error.innerText = ""
+    }
 );
 
 function stopLoading(closeDropdown) {
@@ -172,7 +171,7 @@ function getYTID(link) { return link.slice(-11); }
 const fileInput = document.getElementById("song-upload__input");
 
 
-uploadBtn.addEventListener("click", () => {
+document.getElementById("song-upload").addEventListener("click", () => {
     if (!data.curr.viewPlaylist) return error.showError("select a playlist to add song");
     fileInput.click()
 } );

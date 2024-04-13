@@ -32,8 +32,8 @@ function initAccCreator(options) {
     // typing clears error text, pressing enter clicks submit
     [username, password, repeatPassword].forEach((node) => {
         node.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") submit.click();
-            error.innerText = "";
+            if (e.key === "Enter")  submit.click();
+            else                    error.innerText = "";
         })
     });
 
@@ -124,12 +124,10 @@ document.getElementById("sign-out").addEventListener("click", () => {
 const accountBtn = document.getElementById("account-btn");
 const accountDropdown = document.getElementById("account__dropdown");
 
-class AccDropdown extends Dropdown {
-    close() {
-        super.close();
-
+export const accDropdown = new Dropdown(accountBtn, accountDropdown, {
+    onclose: () => {
         for (const elem of Object.values(fromGuest)) elem.style.display = "none";
         fromGuestBtn.style.display = "block";
+        fromGuest.error.innerText = "";
     }
-}
-export const accDropdown = new AccDropdown(accountBtn, accountDropdown);
+}); 
