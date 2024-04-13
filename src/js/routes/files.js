@@ -5,7 +5,7 @@ const { QuickDB } = require("quick.db");
 const cipher = require("../cipher.js");
 const { readFileOrDefault, ensurePathThen } = require('../util.js');
 
-const guestbook = new QuickDB({filePath: __dirname + "/../../public/resources/guestbook.sqlite"});
+const guestbook = new QuickDB({filePath: global.resources + "/guestbook.sqlite"});
 
 const router = express.Router();
 
@@ -14,9 +14,7 @@ const defaultUserData = JSON.stringify({
             "shuffle": false,
             "volume": 0.5
         },
-        "curr": {
-            "listenPlaylist": "none"
-        },
+        "curr": {},
         "trashqueue": [],
         "playlists": {},
         "songs": {}
@@ -54,16 +52,16 @@ router.put("/cache", express.text(), (req, res) => {
 router.get("/read-userdata/:uid", async (req, res) => {
 
     const data = await readFileOrDefault(
-        `${__dirname}/../public/resources/users/${req.params["uid"]}/userdata.json`,
-        defaultUserData
-    )
+        `${global.resources}/users/${req.params["uid"]}/userdata.json`,
+        defaultUserData, "utf8"
+    );
     res.json(JSON.parse(data));
 })
 
 router.delete("/:uid/:songFilename", (req, res) => {
     
     fs.unlink(
-        `${__dirname}/../public/resources/users/${req.params["uid"]}/songs/${req.params["song"]}`,
+        `${global.resources}/users/${req.params["uid"]}/songs/${req.params["song"]}`,
         () => res.end()
     );
 })
@@ -73,7 +71,7 @@ router.put("/save-userdata/:uid", async (req, res) => {
 
     await ensurePathThen( 
         async () => await fs.promises.writeFile(
-            `${__dirname}/../public/resources/users/${req.params["uid"]}/userdata.json`, 
+            `${global.resources}/users/${req.params["uid"]}/userdata.json`, 
             req.body,
             "utf8"
         )

@@ -91,3 +91,14 @@ export function setVolumeIcon(type) {
     activeVolumeIcon = volumeIcons[type];
     activeVolumeIcon.style.display = "block";
 }
+
+for (const errorElem of document.getElementsByClassName("error-msg")) {
+    errorElem.showError = (text) => {
+        // blink effect if we get the error repeatedly 
+        if (errorElem.innerText !== "") {
+            errorElem.style.opacity = "0";
+            setTimeout(() => errorElem.style.opacity = "1", 50);        
+        }
+        errorElem.innerText = text;
+    }
+}

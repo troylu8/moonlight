@@ -3,7 +3,7 @@ const fs = require('fs');
 const { readFileOrDefault } = require('./util.js');
 
 let secretKey;
-readFileOrDefault(__dirname + "/client.key", randomBytes(32), "hex")
+readFileOrDefault(global.resources + "/client.key", randomBytes(32), "hex")
     .then(data => {
         secretKey = data instanceof Buffer? data : Buffer.from(data, "hex");
         console.log("client secret key:", secretKey, secretKey.byteLength);

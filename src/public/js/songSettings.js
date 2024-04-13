@@ -1,5 +1,5 @@
 import * as sidebar from "./sidebar.js";
-import { titleElem as playingTitleElem, artistElem as playingArtistElem, setSong } from "./play.js";
+import { titleElem as playingTitleElem, artistElem as playingArtistElem } from "./play.js";
 import { data, Song } from "./userdata.js";
 
 

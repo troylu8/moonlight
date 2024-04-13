@@ -48,14 +48,7 @@ function initAccCreator(options) {
             setTitleScreen(false);
             updateForUsername(username.value);
         }
-        else {
-            // blink effect if we get the error repeatedly 
-            if (error.innerText !== "") {
-                error.style.opacity = "0";
-                setTimeout(() => error.style.opacity = "1", 50);        
-            }
-            error.innerText = res;
-        } 
+        else error.showError(res);
     });
 
 }

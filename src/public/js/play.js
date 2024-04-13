@@ -47,11 +47,10 @@ function inThePresent() {
 }
 
 /** set a new currently playing song, will reset seek to beginning
- * @param {Song | "none"} song 
+ * @param {Song} song 
 */
 export function setSong(song) {
-    if (!song) return;
-    if (song === "none") {
+    if (!song) {
         console.log("set song to none");
         audio.src = "";
         data.curr.song = null;
@@ -405,7 +404,7 @@ const shuffleSvg = document.getElementById("shuffle-svg");
 export function setShuffle(shuffle) {
     data.settings.shuffle = shuffle;
     
-    if (shuffle && data.curr.listenPlaylist !== "none") data.curr.listenPlaylist.cycle.updateCurrIndex();
+    if (shuffle && data.curr.listenPlaylist) data.curr.listenPlaylist.cycle.updateCurrIndex();
     
     console.log("shuffle ", shuffle);
     shuffleSvg.style.stroke = shuffle? "var(--color2)" : "var(--color1)";

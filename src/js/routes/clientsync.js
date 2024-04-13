@@ -33,7 +33,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 router.post("/:uid", async (req, res) => {
     
-    const resourcesDir = join(__dirname, "../public/resources/users", req.params["uid"]);
+    const resourcesDir = join(global.resources, "users", req.params["uid"]);
 
     console.log("client backend got: ", req.body);
 

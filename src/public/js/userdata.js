@@ -91,7 +91,7 @@ export class Song {
 
     delete() {
         //TODO: test this
-        if (data.curr.listenPlaylist != "none" && data.curr.listenPlaylist.songs.size === 1) play.setSong("none");
+        if (data.curr.listenPlaylist && data.curr.listenPlaylist.songs.size === 1) play.setSong(null);
         else if (this === data.curr.song) play.setSongNext(!play.audio.paused);
 
         if (this.syncStatus !== "new")
@@ -158,17 +158,18 @@ export class Playlist {
         if (this.syncStatus !== "new")
             data.trashqueue.set("playlists." + this.id, "playlists/ dummy value");
 
-        // if only playlist, set view and listen playlists to none
-        if (data.playlists.size === 1) songElements.setViewPlaylist("none", true);
+        // if only playlist, nullify view and listen playlists 
+        if (data.playlists.size === 1) songElements.setViewPlaylist(null, true);
 
         else if (this === data.curr.viewPlaylist) {
             const prevID = this.playlistEntry.previousElementSibling.id.substring(3);
             songElements.setViewPlaylist(data.playlists.get(prevID), true);
         }
-        else if (this === data.curr.listenPlaylist && this.songs.has(data.curr.song)) {
-            play.setSong("none");
-            data.curr.listenPlaylist = "none";
-        }
+        else if (this === data.curr.listenPlaylist) {
+            data.curr.listenPlaylist = null;
+            play.setSong(null);
+        } 
+        
 
         for (const song of this.songs) 
             song.removeFromPlaylist(this);
@@ -229,17 +230,13 @@ class Data {
 
     /** set `listenPlaylist` to `viewPlaylist` and initialize shuffle  */
     updateListenPlaylist() {
-        
-        if (data.curr.viewPlaylist === "none") {
-            if (data.curr.listenPlaylist === "none") return;
-
-            play.setSong("none");
-            data.curr.listenPlaylist = "none";
-            console.log("listenplaylist set to none");
-            return;
-        }
 
         data.curr.listenPlaylist = data.curr.viewPlaylist;
+
+        if (!data.curr.listenPlaylist) {
+            console.log("listenplaylist set to none");
+            return play.setSong(null);
+        } 
         
         if (!data.curr.listenPlaylist.cycle)
             data.curr.listenPlaylist.cycle = new PlaylistCycle(data.curr.listenPlaylist);
@@ -312,7 +309,7 @@ export async function loadLocaldata(uid) {
 
     play.setSong( data.songs.get(json.curr.song) );
 
-    songElements.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist) ?? "none", true);
+    songElements.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);
 
     data.settings = json.settings;
     play.setShuffle(json.settings.shuffle);

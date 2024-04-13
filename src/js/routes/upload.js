@@ -14,7 +14,7 @@ router.post('/:uid', express.text(), async (req, res) => {
 
     ensurePathThen(async () => {
         
-        await fs.promises.writeFile(`${__dirname}/../public/resources/users/${req.params["uid"]}/songs/${filename}`, data);
+        await fs.promises.writeFile(`${global.resources}/users/${req.params["uid"]}/songs/${filename}`, data);
         
         res.status(200).json(JSON.stringify( {
             filename: filename,

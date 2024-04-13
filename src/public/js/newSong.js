@@ -8,6 +8,13 @@ console.log("ORofRTMg-iY", "NRQRC_0ZQ00", "AqI97zHMoQw", "DXZPtndQw8U", "nmix0ph
 
 const input = document.getElementById("paste-link__input");
 const button = document.getElementById("paste-link__btn");
+const uploadBtn = document.getElementById("song-upload");
+const error = document.getElementById("new__error");
+
+[input, button, uploadBtn].forEach(elem => {
+    elem.onfocus = () =>
+})
+
 
 /** between dings from getyt and destroy, button is disabled */
 let enabled = true;
@@ -124,7 +131,7 @@ button.onclick = () => {
 
     if (tracking) destroy();
     else {
-        if (data.playlists.size === 0) return console.log("no playlists to add song to!");
+        if (!data.curr.viewPlaylist) return error.showError("select a playlist to add song");
         getyt(input.value);
     } 
 }
@@ -164,11 +171,13 @@ function getYTID(link) { return link.slice(-11); }
 
 const fileInput = document.getElementById("song-upload__input");
 
-document.getElementById("song-upload").addEventListener("click", () => fileInput.click());
+
+uploadBtn.addEventListener("click", () => {
+    if (!data.curr.viewPlaylist) return error.showError("select a playlist to add song");
+    fileInput.click()
+} );
 
 fileInput.addEventListener("change", async () => {
-    if (data.playlists.size === 0) return console.log("no playlists to add song to!");
-
     const res = await fetch("http://localhost:5000/upload/" + uid, {
         method: "POST",
         body: fileInput.value

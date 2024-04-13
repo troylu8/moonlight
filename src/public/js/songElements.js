@@ -146,7 +146,7 @@ export const playlistHeader = document.getElementById("playlist-header");
 export const playlistDesc = document.getElementById("playlist-desc");
 
 /** 
- * @param {Playlist | "none"} playlist
+ * @param {Playlist} playlist
  * @param {boolean} setAsListenPlaylist
  */
 export function setViewPlaylist(playlist, setAsListenPlaylist) {
@@ -157,7 +157,7 @@ export function setViewPlaylist(playlist, setAsListenPlaylist) {
 
     if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
 
-    if (playlist === "none") {
+    if (!playlist) {
         playlistHeader.innerText = "-";
         playlistDesc.innerText = "-";
     } 

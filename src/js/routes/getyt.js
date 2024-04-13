@@ -14,7 +14,6 @@ function cleanFileName(str) {
     return str.replace(/[/\\?%*:|"<>]/g, '-')
 }
 
-
 const tracker = {
     downloaded: 0,
     total: 1,
@@ -34,8 +33,8 @@ class DownloadProcess {
         if (this.destroy) return cb(500);  // destroy request comes in while getting info 
         
         const filename = `yt#${ytid} ${cleanFileName(info.videoDetails.title)}.mp3`
-        const path = `${__dirname}/../public/resources/users/${uid}/songs/${filename}`;
-        await fs.promises.mkdir(`${__dirname}/../public/resources/users/${uid}/songs`, {recursive: true});
+        const path = `${global.resources}/users/${uid}/songs/${filename}`;
+        await fs.promises.mkdir(`${global.resources}/users/${uid}/songs`, {recursive: true});
 
         const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
         const writeStream = fs.createWriteStream(path);

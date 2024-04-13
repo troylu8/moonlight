@@ -6,10 +6,10 @@ async function readFileOrDefault(path, defaultData, encoding) {
     encoding = encoding ?? "utf8";
     
     try {
-        return await fs.promises.readFile(path, defaultData, encoding);
+        return await fs.promises.readFile(path, encoding);
     } catch (err) {
         if (err.code === "ENOENT") {
-            
+                
             console.log("writing as ", encoding);
             
             await fs.promises.mkdir(dirname(path), {recursive: true});
@@ -17,6 +17,7 @@ async function readFileOrDefault(path, defaultData, encoding) {
 
             return defaultData;
         }
+        else throw err;
     }
 }
 
