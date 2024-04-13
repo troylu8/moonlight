@@ -1,5 +1,5 @@
 import genID from "./id.js";
-import { data, Song, Playlist, loadUserdata } from "./userdata.js";
+import { data, Song, Playlist, loadUserdata as loadLocaldata } from "./userdata.js";
 
 export let guestID;
 export async function fetchGuestID() {
@@ -40,11 +40,11 @@ async function setAccInfo(JWT, UID, USERNAME) {
 export async function signInAsGuest() {
     await setAccInfo("guest");
     console.log("loading", guestID);
-    await loadUserdata(guestID);
+    await loadLocaldata(guestID);
 }
 
 /** @returns {Promise<"username taken" | "success">} */
-export async function createAccount(username, password) {
+export async function createAccData(username, password) {
     const fromGuest = username === "guest";
     const uid = fromGuest? guestID : genID(14);
     
@@ -59,13 +59,13 @@ export async function createAccount(username, password) {
     if (fromGuest) saveNewGuestID();
 
     setAccInfo(await jwtReq.text(), uid, username);
-    if (!fromGuest) loadUserdata(uid);
+    if (!fromGuest) loadLocaldata(uid);
 
     return "success";
 }
 
 /** @returns {Promise<"username not found" | "unauthorized" | "success">} */
-export async function signIn(USERNAME, PASSWORD) {
+export async function fetchAccData(USERNAME, PASSWORD) {
 
     const jwtReq = await fetch("https://localhost:5001/get-jwt/" + USERNAME, {
         method: "POST",
@@ -76,7 +76,7 @@ export async function signIn(USERNAME, PASSWORD) {
     const jwt = await jwtReq.text();
 
     setAccInfo(jwt, extractUID(jwt), USERNAME);
-    loadUserdata(uid);
+    loadLocaldata(uid);
 
     return "success";
 }

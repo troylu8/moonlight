@@ -5,7 +5,7 @@ const titlescreen = document.getElementById("titlescreen");
 const primary = document.getElementById("primary");
 
 export function setTitleScreen(active) {
-    titlescreen.style.display = active? "flex" : "none";
+    titlescreen.style.display = active? "grid" : "none";
     primary.style.display = active? "none" : "block";
 }
 
@@ -21,7 +21,10 @@ function inputErrors(username, password, repeatPassword) {
     if (!signInActive && password !== repeatPassword) return "passwords don't match"
 }
 
-function initAccCreator(options) {
+/**
+ * @param {object} options contains `username`, `password`, `repeatPassword`, `error`, `submit` fields
+ * @param {function() : boolean} isSigningIn returns `true` if signing in, `false` if creating an acc */
+function initAccCreator(options, isSigningIn) {
     const {username, password, repeatPassword, error, submit} = options;
 
     // typing clears error text, pressing enter clicks submit
@@ -34,24 +37,34 @@ function initAccCreator(options) {
 
     submit.addEventListener("click", async () => {
         const res = inputErrors(username.value, password.value, repeatPassword.value) ??
-                    (signInActive?
-                    await acc.signIn(username.value, password.value) :
-                    await acc.createAccount(username.value, password.value))
+                    (isSigningIn()?
+                    await acc.fetchAccData(username.value, password.value) :
+                    await acc.createAccData(username.value, password.value))
     
-        if (res === "success")  setTitleScreen(false);
+        if (res === "success")  {
+            setTitleScreen(false);
+            accountBtn.firstElementChild.innerText = username.value;
+            fromGuestBtn.remove();
+        } 
         else {
-    
             // blink effect if we get the error repeatedly 
             if (error.innerText !== "") {
                 error.style.opacity = "0";
                 setTimeout(() => error.style.opacity = "1", 50);        
             }
-    
             error.innerText = res;
         } 
     });
 
 }
+
+document.getElementById("account__continue").addEventListener("click", () => {
+    acc.signInAsGuest();
+    setTitleScreen(false);
+    
+    accountDropdown.appendChild(fromGuestBtn);
+    accountBtn.firstElementChild.innerText = "[guest]";
+});
 
 const repeatPassword = document.getElementById("account__repeat-password");
 const error = document.getElementById("account__error")
@@ -63,7 +76,7 @@ initAccCreator({
     repeatPassword: repeatPassword,
     error: error,
     submit: submit
-})
+}, () => signInActive)
 
 const title = document.getElementById("account__title");
 const toggle = document.getElementById("account__toggle");
@@ -78,10 +91,7 @@ toggle.addEventListener("click", () => {
     repeatPassword.value = error.innerText = "";
 });
 
-document.getElementById("account__continue").addEventListener("click", () => {
-    acc.signInAsGuest();
-    setTitleScreen(false);
-});
+
 
 
 const fromGuest = {
@@ -91,7 +101,7 @@ const fromGuest = {
     error: document.getElementById("from__error"),
     submit: document.getElementById("from__submit")
 }
-initAccCreator(fromGuest);
+initAccCreator(fromGuest, () => false);
 
 const fromGuestBtn = document.getElementById("create-account-from");
 fromGuestBtn.addEventListener("click", () => {
@@ -99,16 +109,19 @@ fromGuestBtn.addEventListener("click", () => {
     fromGuestBtn.style.display = "none";
 });
 
-const dropdown = new Dropdown(
-    document.getElementById("account-btn"), 
-    document.getElementById("account__dropdown")
-)
-const closeFn = dropdown.close;
-dropdown.close = () => {
-    closeFn();
+document.getElementById("sign-out").addEventListener("click", () => {
+    setTitleScreen(true);
+});
 
-    for (const elem of Object.values(fromGuest)) elem.style.display = "none";
-    fromGuestBtn.style.display = "block";
+const accountBtn = document.getElementById("account-btn");
+const accountDropdown = document.getElementById("account__dropdown");
+
+class AccDropdown extends Dropdown {
+    close() {
+        super.close();
+
+        for (const elem of Object.values(fromGuest)) elem.style.display = "none";
+        fromGuestBtn.style.display = "block";
+    }
 }
-
-
+new AccDropdown(accountBtn, accountDropdown);

@@ -25,7 +25,7 @@
     cursor: pointer;
 }
 
-#new__dropdown {    
+#new__dropdown, #account__dropdown {    
     position: absolute;
     top: 20px;
     right: 0;
@@ -67,7 +67,6 @@
     left: 0;
 }
 
-#account__dropdown {
+#from__username, #from__password, #from__repeat-password, #from__error, #from__submit {
     display: none;
-    background-color: lightcoral;
 }

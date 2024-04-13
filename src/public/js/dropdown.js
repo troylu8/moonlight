@@ -13,16 +13,18 @@ export default class Dropdown {
         allowClose = allowClose ?? ( () => true ); // if omitted allowClose, always true
 
         button.addEventListener("click", (e) => {
-            if (e.target !== button) return;
+            if (e.currentTarget !== button) return;
             
             if (this.visible) {
-                if (allowClose()) close();
+                if (allowClose()) this.close();
             }
-            else open();
+            else this.open();
         });
+        dropdown.addEventListener("click", (e) => e.stopPropagation());
 
-        document.body.addEventListener("click", (e) => {
-            if (this.visible && !add.contains(e.target) && allowClose()) {
+        document.body.addEventListener("mousedown", (e) => {
+            
+            if (this.visible && !button.contains(e.target) && allowClose()) {
                 this.close();
             }
         })
