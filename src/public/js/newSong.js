@@ -1,4 +1,4 @@
-import * as dropdown from "./toggleDropdown.js"
+import Dropdown from "./dropdown.js"
 import * as songSettings from "./songSettings.js"
 import { data, Song } from "./userdata.js";
 import { uid } from "./account.js";
@@ -84,6 +84,12 @@ function showErrorMsg(msg) {
     input.style.color = "red";
     console.log(msg);
 }
+
+const dropdown = new Dropdown(
+    document.getElementById("new"), 
+    document.getElementById("new__dropdown"),
+    () => !tracking
+);
 
 function stopLoading(closeDropdown) {
     tracking = false;

@@ -16,3 +16,27 @@ button {
 button:focus {
     outline: none;
 }
+
+a {
+    cursor: pointer;
+}
+
+h1 {
+    margin: 0;
+}
+
+h2 {
+    margin: 0;
+}
+
+h5 {
+    padding: 15px;
+    margin: 0;
+}
+
+input[type='range'] {
+    border-radius: 8px;
+    height: 4px;
+    outline: none;
+    -webkit-appearance: none;
+}

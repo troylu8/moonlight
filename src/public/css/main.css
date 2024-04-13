@@ -10,10 +10,6 @@
     transition: 0.5s;
 }
 
-h1 {
-    margin: 0;
-}
-
 .playlist__group {
     display: none;
     flex-direction: column;

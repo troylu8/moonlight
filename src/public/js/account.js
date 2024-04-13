@@ -19,7 +19,7 @@ export let username;
 /** @type {string} */
 export let jwt;
 
-export async function setAccInfo(JWT, UID, USERNAME) {
+async function setAccInfo(JWT, UID, USERNAME) {
     if (JWT === "guest") {
         if (!guestID && !(await fetchGuestID()) ) {
             console.log("no guest id, making one");
@@ -37,39 +37,66 @@ export async function setAccInfo(JWT, UID, USERNAME) {
     }
 }
 
-window.onload = async () => {
+export async function signInAsGuest() {
     await setAccInfo("guest");
-    loadUserdata(guestID);
-};
-
-function usernameErrors(username) {
-    if (!isSafeFilename(username)) return "forbidden characters";
-    if (username === "") return "empty";
+    console.log("loading", guestID);
+    await loadUserdata(guestID);
 }
 
-/** @returns {"forbidden characters" | "empty" | "passwords dont match" | "username taken" | true} */
-export async function createAccount(USERNAME, PASSWORD, repeatPassword) {
-    const error = usernameErrors(USERNAME);
-    if (error) return error;
-    if (PASSWORD !== repeatPassword) return "passwords dont match";
-
-    const uid = (username === "guest")? guestID : genID(14);
+/** @returns {Promise<"username taken" | "success">} */
+export async function createAccount(username, password) {
+    const fromGuest = username === "guest";
+    const uid = fromGuest? guestID : genID(14);
     
     // create account at server
-    const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${uid}/${create__username.value}`, {
+    const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${uid}/${username}`, {
         method: "POST",
-        body: PASSWORD
+        body: password
     });
     if (jwtReq.status === 409) return "username taken";
 
-    saveNewGuestID();
+    // i was going to clear guest id here, but might as well save a new one
+    if (fromGuest) saveNewGuestID();
 
-    setAccInfo(await jwtReq.text(), uid, USERNAME);
-    setAccountElem(accountInfo);
+    setAccInfo(await jwtReq.text(), uid, username);
+    if (!fromGuest) loadUserdata(uid);
 
-    return true;
+    return "success";
 }
 
+/** @returns {Promise<"username not found" | "unauthorized" | "success">} */
+export async function signIn(USERNAME, PASSWORD) {
+
+    const jwtReq = await fetch("https://localhost:5001/get-jwt/" + USERNAME, {
+        method: "POST",
+        body: PASSWORD
+    });
+    if (jwtReq.status === 404) return "username not found";
+    if (jwtReq.status === 401) return "wrong password"
+    const jwt = await jwtReq.text();
+
+    setAccInfo(jwt, extractUID(jwt), USERNAME);
+    loadUserdata(uid);
+
+    return "success";
+}
+
+/** [stack overflow link](https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library) */
+function extractUID(jwt) {
+    const base64Url = jwt.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    return decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+}
+
+async function hash(input) {
+    const res = await fetch("http://localhost:5000/hash", {
+        method: "POST",    
+        body: input
+    });
+    return await res.text();
+}
 
 const syncBtn = document.getElementById("sync");
 syncBtn.addEventListener("click", () => syncData());

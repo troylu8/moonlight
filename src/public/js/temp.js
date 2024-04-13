@@ -1,6 +1,7 @@
 import * as userdata from "./userdata.js";
 import * as play from "./play.js";
 import * as sync from "./account.js";
+import { setTitleScreen } from "./signinElems.js";
 
 document.getElementById("info__title").onclick = () => {
     console.log("saving data");
@@ -32,6 +33,12 @@ document.body.addEventListener("keydown", async (e) => {
                 jwt: sync.jwt,
                 username: sync.username
             });
+            break;
+        case "T":
+            setTitleScreen(true);
+            break;
+        case "Y":
+            setTitleScreen(false);
             break;
     }
     

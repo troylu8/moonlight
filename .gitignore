@@ -3,3 +3,4 @@ src/node_modules
 src/public/resources
 src/server/users
 src/server/auth
+src/server/*.sqlite

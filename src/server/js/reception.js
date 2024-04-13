@@ -11,7 +11,7 @@ const router = express.Router();
 const uidDB = new QuickDB({filePath: __dirname + "/../uids.sqlite"});
 const usersDB = new QuickDB({filePath: __dirname + "/../db.sqlite"});
 
-const secretKey = fs.readFileSync(__dirname + "/auth/secret.key", "utf8");
+const secretKey = fs.readFileSync(__dirname + "/../auth/secret.key", "utf8");
 console.log("secretkey:", secretKey);
 
 router.post("/create-account-dir/:uid/:username", express.text(), async (req, res) => {

@@ -4,6 +4,7 @@ import { setSpin, updateVolumeIcon } from "./fx.js";
 import { data, Playlist, Song } from "./userdata.js";
 import { uid } from "./account.js";
 
+
 class SpinningAudio extends Audio {
     play() {
         super.play();
