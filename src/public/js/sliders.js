@@ -1,7 +1,7 @@
 
 
 for (const s of document.getElementsByClassName("slider")) {
-    setSliderColors(s, "var(--color1)", "#DEE2E6");
+    setSliderColors(s, "var(--accent-color)", "var(--primary-color)");
 }
 
 function setSliderColors(slider, left, right) {

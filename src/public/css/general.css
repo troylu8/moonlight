@@ -4,20 +4,52 @@
     --options-div-height: 40px;
     --play-div-height: 90px;
 
-    --color1: black;
-    --color2: red;
+    --background-color: #17181a;
+    --background-color-side: #232427;
+    --background-color-main: #3a3c42;
+    --primary-color: #DBE4F0;
+    --accent-color: #9C55E8;
+    --error-color: #d13030;
+}
+
+@font-face {
+    font-family: SometypeMono;
+    src: url(../resources/other/SometypeMono-Regular.ttf);
+}
+
+body, button, input[type="text"] {
+    color: var(--primary-color);
+
+    font-family: SometypeMono, monospace;
+    font-weight: 600;
+    font-optical-sizing: auto;
 }
 
 button {
-    background-color: #00000000;
+    background-color: var(--accent-color);
     border: none;
     padding: 0;
+
+    border-radius: 5px;
 }
-button:focus {
+button:hover {
+    filter: brightness(110%);
     outline: none;
+}
+button:active {
+    filter: brightness(120%);
 }
 
 a {
+    color: var(--accent-color);
+    font-weight: 500;
+    font-size: smaller;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+button, a {
     cursor: pointer;
 }
 
@@ -39,4 +71,27 @@ input[type='range'] {
     height: 4px;
     outline: none;
     -webkit-appearance: none;
+}
+
+.error-msg {
+    font-size: small;
+    color: var(--error-color);
+
+    margin-top: 0;
+}
+
+input[type="text"] {
+    background-color: var(--primary-color);
+    color: var(--accent-color);
+
+    padding: 5px;
+    border-radius: 5px;
+
+    border: none;
+    outline: none;
+
+    color: var(--accent-color);
+}
+input[type="text"]:focus {
+    outline: solid 3px var(--accent-color);
 }

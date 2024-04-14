@@ -407,7 +407,7 @@ export function setShuffle(shuffle) {
     if (shuffle && data.curr.listenPlaylist) data.curr.listenPlaylist.cycle.updateCurrIndex();
     
     console.log("shuffle ", shuffle);
-    shuffleSvg.style.stroke = shuffle? "var(--color2)" : "var(--color1)";
+    shuffleSvg.style.stroke = shuffle? "var(--accent-color)" : "var(--primary-color)";
 }
 
 const shuffleBtn = document.getElementById("shuffle")

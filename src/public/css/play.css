@@ -4,7 +4,7 @@
     right: 0;
     bottom: 0;
     
-    background-color: lightblue;    
+    background-color: var(--background-color);    
 
     display: grid;
     grid-template-columns: 3fr 4fr 3fr;
@@ -60,10 +60,10 @@
 }
   
 input[type='range']::-webkit-slider-thumb {
-    width: 5px;
+    width: 4px;
     -webkit-appearance: none;
     height: 12px;
-    background: black;
+    background: var(--accent-color);
     border-radius: 2px;
 }
 

@@ -1,5 +1,5 @@
 #options-div {
-    background-color: lightgreen;
+    background-color: var(--background-color-main);
 
     position: fixed;
     top: 0;
@@ -20,21 +20,24 @@
 }
 
 .options-btn {
-    background-color: lightblue;
     position: relative;
+    background-color: var(--accent-color);
+    padding: 4px 5px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
 #new__dropdown, #account__dropdown {    
     position: absolute;
-    top: 20px;
+    top: 30px;
     right: 0;
 
     display: none;
     flex-direction: column;
     align-items: center;
 
-    background-color: lightgrey;
+    background-color: var(--background-color);
+    border-radius: 10px;
     padding: 10px;
 
     cursor: default;

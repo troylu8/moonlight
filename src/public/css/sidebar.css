@@ -1,6 +1,6 @@
 #sidebar-div {
 
-    background-color: lightcoral;
+    background-color: var(--background-color-side);
 
     position: fixed;
     right:  calc(var(--sidebar-div-width) - 350px); 
@@ -44,4 +44,8 @@
     flex-direction: column;
 }
 
-
+#sidebar__collapse {
+    width: 20px;
+    height: 20px;
+    background-color: #00000000;
+}

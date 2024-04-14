@@ -8,7 +8,11 @@
     display: grid;
     grid-template-rows: 1fr 1fr;
     
-    background-color: lightgray;
+    background-color: var(--background-color);
+}
+
+#titlescreen__logo {
+    height: 150px;
 }
 
 #titlescreen__top, #titlescreen__bottom {
@@ -32,16 +36,27 @@
     flex-direction: column;
     align-items: center;
 }
+
 #sign-in {
     display: flex;
 }
 #account__repeat-password {
     display: none;
 }
-.error-msg {
-    font-size: small;
-    color: rgb(162, 34, 34);
 
-    margin-top: 0;
+
+#account__title {
+    margin-top: 20px;
 }
 
+#titlescreen__bottom input[type="text"] {
+    margin-top: 8px;
+}
+
+#account__toggle {
+    margin-top: 20px;
+}
+
+#account__submit {
+    padding: 7px 10px;
+}

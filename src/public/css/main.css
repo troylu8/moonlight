@@ -1,5 +1,5 @@
 #main-div {
-    background-color: rgb(252, 232, 232);
+    background-color: var(--background-color-main);
     position: fixed;
     left: var(--playlists-div-width);
     right: var(--sidebar-div-width);
@@ -46,8 +46,8 @@
     visibility: visible;
 }
 .song__options:hover svg {
-    stroke: var(--color2);
-    fill: var(--color2);
+    stroke: var(--accent-color);
+    fill: var(--accent-color);
 }
 
 .song__play {

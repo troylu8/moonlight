@@ -1,7 +1,7 @@
 
 
 #playlists-div {
-    background-color: lightcoral;
+    background-color: var(--background-color-side);
 
     position: fixed;
     left: 0;
