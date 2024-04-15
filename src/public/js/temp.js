@@ -4,6 +4,11 @@ import * as acc from "./account.js";
 import { setTitleScreen } from "./signinElems.js";
 import { settings } from "./settings.js";
 
+
+const songs = ["LaEgpNBt-bQ","shyRW65dvn0","eSW2LVbPThw","rB7XFQgJHBI","p0s0_4KO9t4","lzHtVBFE9jU"]
+console.log(songs.join(" "));
+
+
 document.getElementById("info__title").onclick = () => {
     console.log("saving data");
     userdata.data.saveDataLocal();

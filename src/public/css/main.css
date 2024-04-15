@@ -83,3 +83,7 @@
 .song__artist {
     font-weight: 400;
 }
+
+.song__play:hover svg, .song__options:hover svg {
+    stroke: var(--accent-color);
+}

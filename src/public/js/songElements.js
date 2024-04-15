@@ -27,7 +27,7 @@ export function createSongEntry(song, playlist) {
     const song__artist = createElement("span", null, "song__artist song__artist:" + song.id, song.artist);
     songEntry.firstChild.appendChild(song__artist);
 
-    const song__options = createElement("button", null, "song__options svg-hover");
+    const song__options = createElement("div", null, "song__options");
     song__options.innerHTML = OPTIONS_SVG;
     songEntry.lastChild.appendChild(song__options);
 

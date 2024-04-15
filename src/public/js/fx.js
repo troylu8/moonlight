@@ -102,3 +102,36 @@ for (const errorElem of document.getElementsByClassName("error-msg")) {
         errorElem.innerText = text;
     }
 }
+
+
+const tx = document.getElementsByClassName("auto-height");
+
+for (let i = 0; i < tx.length; i++) {
+    
+  tx[i].resize = () => {
+  	console.log("resizing with text", tx[i].value);
+    tx[i].style.height = '1px';
+    tx[i].style.height = (tx[i].scrollHeight) + "px";
+    console.log(tx[i].style.height);
+  };
+  tx[i].addEventListener("input", () => {
+    tx[i].value = tx[i].value.replaceAll("\n", "");
+    tx[i].resize();
+  } , false);
+  tx[i].setText = (text) => {
+  	tx[i].value = text;
+    setTimeout(tx[i].resize, 0);
+  }
+  
+  let wasEmpty = tx[i].value === "";
+  if (wasEmpty) tx[i].value = "a"; // dummy character
+  setTimeout(() => {
+    tx[i].resize();
+    if (wasEmpty) tx[i].value = "";
+  }, 0);
+  
+  tx[i].addEventListener("keydown", (e) => {
+    if (e.key === "Enter") e.preventDefault();
+  })
+}
+console.log("AAAAAAAAAA");

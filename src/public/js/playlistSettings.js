@@ -9,8 +9,8 @@ document.getElementById("new-playlist").addEventListener("click", () => {
 
 const playlistSettings = document.getElementById("playlist-settings");
 
-const titleInput = document.getElementById("playlist-settings__title");
-const descInput = document.getElementById("playlist-settings__desc");
+const titleArea = document.getElementById("playlist-settings__title");
+const descArea = document.getElementById("playlist-settings__desc");
 const deleteBtn = document.getElementById("playlist-settings__delete");
 
 /** @type {Playlist} */
@@ -20,29 +20,29 @@ let currentlyEditing;
 export function openPlaylistSettings(playlist) {
     currentlyEditing = playlist;
 
-    titleInput.value = playlist.title;
-    descInput.value = playlist.desc;
+    titleArea.setText(playlist.title);
+    descArea.setText(playlist.desc);
 
     setSidebarContent(playlistSettings);
 }
 
-titleInput.addEventListener("input", () => {
+titleArea.addEventListener("input", () => {
     currentlyEditing.syncStatus = "edited";
 
-    currentlyEditing.title = titleInput.value;
+    currentlyEditing.title = titleArea.value;
 
     if (data.curr.viewPlaylist === currentlyEditing) 
-        playlistHeader.innerText = titleInput.value;    
+        playlistHeader.innerText = titleArea.value;    
 
-    currentlyEditing.playlistEntry.firstElementChild.innerText = titleInput.value;
+    currentlyEditing.playlistEntry.firstElementChild.innerText = titleArea.value;
 });
-descInput.addEventListener("input", () => {
+descArea.addEventListener("input", () => {
     currentlyEditing.syncStatus = "edited";
 
-    currentlyEditing.desc = descInput.value;
+    currentlyEditing.desc = descArea.value;
     
     if (data.curr.viewPlaylist === currentlyEditing) 
-        playlistDesc.innerText = descInput.value;
+        playlistDesc.innerText = descArea.value;
 });
 deleteBtn.addEventListener("click", () => {
     currentlyEditing.delete();

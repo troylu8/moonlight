@@ -22,9 +22,28 @@
 }
 
 #song-settings__metadata {
+    font-size: smaller;
+
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+
+    opacity: 80%;
+
+    transition: 0.2s;
+}
+#song-settings__metadata:hover {
+    cursor: pointer;
+    opacity: 100%;
+}
+
+#song-settings__filename {
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+#song-settings__size {
+    text-wrap: nowrap;
 }
 
 #settings {
@@ -48,4 +67,31 @@
     width: 20px;
     height: 20px;
     background-color: #00000000;
+}
+
+.song-settings__field p {
+    margin-top: 5px;
+    font-size: smaller;
+    color: var(--accent-color);
+}
+
+.song-settings__field textarea {
+    font-size: large;
+
+    height: 1em;
+    width: 100%;
+    
+    padding: 0;
+    background-color: var(--background-color-side);
+    color: var(--accent-color);
+    border-radius: 0;
+    outline: none;
+    border: none;
+
+    overflow-y: hidden;
+    resize: none;
+}
+
+.song-settings__field textarea:focus, .song-settings__field textarea:hover {
+    box-shadow: 0 2px 0 var(--accent-color);
 }

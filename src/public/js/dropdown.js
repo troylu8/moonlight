@@ -1,4 +1,3 @@
-
 export default class Dropdown {
     /** 
      * @param {HTMLElement} button 

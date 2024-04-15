@@ -4,7 +4,6 @@ import { data, Song } from "./userdata.js";
 import { uid } from "./account.js";
 import genID from "./id.js";
 
-console.log("ORofRTMg-iY", "NRQRC_0ZQ00", "AqI97zHMoQw", "DXZPtndQw8U", "nmix0phrCVU");
 
 const input = document.getElementById("paste-link__input");
 const button = document.getElementById("paste-link__btn");

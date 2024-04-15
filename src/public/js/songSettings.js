@@ -7,8 +7,8 @@ export const songSettings = document.getElementById("song-settings");
 
 const filename = document.getElementById("song-settings__filename");
 const size = document.getElementById("song-settings__size");
-const titleInput = document.getElementById("song-settings__title");
-const artistInput = document.getElementById("song-settings__artist");
+const titleArea = document.getElementById("song-settings__title");
+const artistArea = document.getElementById("song-settings__artist");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
 const deleteBtn = document.getElementById("song-settings__delete");
 
@@ -38,8 +38,9 @@ export function openSongSettings(song, song__title, song__artist) {
 
     filename.innerText = song.filename;
     size.innerText = (song.size / (1024 * 1000)).toFixed(2) + " MB";
-    titleInput.value = song.title;
-    artistInput.value = song.artist;
+    console.log("setting title area", song.title);
+    titleArea.setText(song.title);
+    artistArea.setText(song.artist);
 
     const notchecked = [];
 
@@ -60,29 +61,29 @@ export function openSongSettings(song, song__title, song__artist) {
     sidebar.setSidebarContent(songSettings);
 }
 
-titleInput.addEventListener("input", () => {
+titleArea.addEventListener("input", () => {
     currentlyEditing.syncStatus = "edited";
 
     allEntriesUpdated = false;
 
-    currentlyEditing.title = titleInput.value;
+    currentlyEditing.title = titleArea.value;
 
     if (data.curr.song === currentlyEditing) 
-        playingTitleElem.innerText = titleInput.value;
+        playingTitleElem.innerText = titleArea.value;
     
-    song__titleLive.innerText = titleInput.value;
-})
-artistInput.addEventListener("input", () => {
+    song__titleLive.innerText = titleArea.value;
+});
+artistArea.addEventListener("input", () => {
     currentlyEditing.syncStatus = "edited";
     
     allEntriesUpdated = false;
 
-    currentlyEditing.artist = artistInput.value;
+    currentlyEditing.artist = artistArea.value;
 
     if (data.curr.song === currentlyEditing) 
-        playingArtistElem.innerText = artistInput.value;
-    song__artistLive.innerText = artistInput.value;
-})
+        playingArtistElem.innerText = artistArea.value;
+    song__artistLive.innerText = artistArea.value;
+});
 
 deleteBtn.addEventListener("click", () => {
     currentlyEditing.delete();
@@ -90,7 +91,7 @@ deleteBtn.addEventListener("click", () => {
     clearCurrentlyEditing();
 
     sidebar.setSidebarOpen(false);
-})
+});
 
 /** updates all song entries to match currentlyEditing's title and artist */
 export function updateSongEntries() {
@@ -101,8 +102,8 @@ export function updateSongEntries() {
     }
 
     if (data.curr.song === currentlyEditing) {
-        playingTitleElem.innerText = titleInput.value;
-        playingArtistElem.innerText = titleInput.value;
+        playingTitleElem.innerText = titleArea.value;
+        playingArtistElem.innerText = titleArea.value;
     }   
 
     console.log("all entries updated");
