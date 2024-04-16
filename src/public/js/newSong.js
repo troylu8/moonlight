@@ -10,7 +10,6 @@ const button = document.getElementById("paste-link__btn");
 const error = document.getElementById("new__error");
 
 
-
 /** between dings from getyt and destroy, button is disabled */
 let enabled = true;
 /** if true, loading bar active. determines whether button sends getyt or destroy, and stops loading bar  */
@@ -21,22 +20,19 @@ let updateLoadingBarID;
 async function getyt(link) {
     link = link.trim();
     
-    if (!isValidLink(link)) 
-        return showErrorMsg("invalid link");
+    if (!isValidLink(link)) return error.showError("invalid link");
 
     const ytid = getYTID(link);
 
     //TODO: enable this
-    // if ( data.songs["yt" + id] !== undefined ) 
-    //     return showErrorMsg("yt video already downloaded");
+    // if ( data.songs["yt" + id] !== undefined ) return error.showError("yt video already downloaded");
 
     setButtonEnabled(false, "...");
     
     if ( !(await videoExists(ytid)) ) {
-        showErrorMsg("video doesnt exist");
+        error.showError("video doesn't exist");
         return setButtonEnabled(true, "ent");
     }
-
     
  
     tracking = true;
@@ -80,11 +76,6 @@ async function acceptSongResponse(fetchResponse) {
     const songElems = song.addToPlaylist(data.curr.viewPlaylist); 
 
     songSettings.openSongSettings(song, songElems[1], songElems[2]);
-}
-
-function showErrorMsg(msg) {
-    input.style.color = "red";
-    console.log(msg);
 }
 
 const dropdown = new Dropdown(

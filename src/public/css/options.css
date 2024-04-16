@@ -35,17 +35,29 @@
     display: none;
     flex-direction: column;
     align-items: center;
-    padding: 5px 10px;
+    padding: 10px;
+    gap: 10px;
 
     background-color: var(--background-color);
     border-radius: 10px;
 
     cursor: default;
 }
+#account__dropdown {
+    gap: 0;
+}
 
-#new__dropdown > *, #account__dropdown > * {
-    margin: 5px;
-
+#account__dropdown > * {
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    background-color: #00000000;
+    padding: 5px;
+}
+#account__dropdown > *:hover {
+    background-color: var(--accent-color);
+}
+#create-account-from:hover {
     background-color: #00000000;
 }
 

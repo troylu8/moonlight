@@ -61,6 +61,12 @@ document.body.addEventListener("keydown", async (e) => {
         case "S":
             console.log(settings);
             break;
+        case "Z":
+            const h3 = document.getElementsByTagName("h3")[0];
+            console.log(
+                h3.innerText , h3.clientHeight, h3.getBoundingClientRect()
+            );
+            break;
     }
     
 })

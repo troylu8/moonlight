@@ -126,4 +126,7 @@ h1, h2, h3, p {
 
 h3 {
     margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }

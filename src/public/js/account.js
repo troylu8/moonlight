@@ -69,8 +69,7 @@ export async function createAccData(USERNAME, PASSWORD) {
     return "success";
 }
 
-window.onload = async () => {
-    
+window.addEventListener("load", async () => {
     const cacheReq = await fetch("http://localhost:5000/files/get-cached");
     
     if (!cacheReq.ok) return console.log("no data cached");
@@ -86,7 +85,7 @@ window.onload = async () => {
     
     setTitleScreen(false);
     updateForUsername(username);
-}
+});
 
 /** @returns {Promise<"username not found" | "unauthorized" | "success">} */
 export async function fetchAccData(USERNAME, PASSWORD) {
