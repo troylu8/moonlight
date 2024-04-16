@@ -130,3 +130,23 @@ h3 {
     align-items: center;
     gap: 5px;
 }
+
+
+@property --scrollbar-color {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: #00000000;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-color);
+}
+.hiding-scroll {
+    transition: --scrollbar-color 0.2s;
+}
+.hiding-scroll:hover {
+    --scrollbar-color: var(--accent-color);
+}

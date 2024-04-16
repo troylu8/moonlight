@@ -126,9 +126,7 @@ button.onclick = () => {
 }
 
 input.onkeydown = (e) => {
-    input.style.color = "black";
-    if (e.key !== "Enter") return;
-    getyt(input.value);
+    if (e.key === "Enter") getyt(input.value);
 }
 
 const loadingBar = document.getElementById("loading-bar");
