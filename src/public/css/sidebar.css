@@ -21,7 +21,7 @@
     gap: 10px
 }
 
-#song-settings__metadata {
+#song-settings__metadata, #playlist-settings__metadata {
     font-size: smaller;
 
     display: flex;
@@ -70,13 +70,13 @@
     background-color: #00000000;
 }
 
-.song-settings__field p {
+.settings__field p {
     margin-top: 5px;
     font-size: smaller;
     color: var(--accent-color);
 }
 
-.song-settings__field textarea {
+.settings__field textarea {
     font-size: large;
 
     height: 1em;
@@ -93,11 +93,11 @@
     resize: none;
 }
 
-.song-settings__field textarea:focus, .song-settings__field textarea:hover {
+.settings__field textarea:focus, .settings__field textarea:hover {
     box-shadow: 0 2px 0 var(--accent-color);
 }
 
-#song-settings__delete {
+#song-settings__delete, #playlist-settings__delete {
     align-self: center;
     padding: 4px 5px;
     background-color: var(--error-color);

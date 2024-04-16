@@ -19,7 +19,9 @@
 }
 #playlists__nav {
     margin-top: 15px;
-    overflow-y: auto;
+    
+    height: 100%;
+    overflow-y: scroll;
     overflow-x: hidden;
 
     display: flex;
@@ -53,4 +55,6 @@
     visibility: visible;
 }
 
-
+.playlist__options:hover svg {
+    fill: var(--accent-color);
+}

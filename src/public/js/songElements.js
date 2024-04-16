@@ -111,7 +111,7 @@ export function createPlaylistEntries(playlist) {
     });
     playlist.playlistEntry = playlistElem;
 
-    const playlist__options = createElement("button", null, "playlist__options");
+    const playlist__options = createElement("div", null, "playlist__options");
     playlist__options.innerHTML = OPTIONS_SVG;
     playlist__options.addEventListener("click", (e) => {
         openPlaylistSettings(playlist);

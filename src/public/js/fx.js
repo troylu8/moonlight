@@ -108,7 +108,6 @@ for (const tArea of document.getElementsByClassName("auto-height")) {
     const resize = () => {
         tArea.style.height = '1px';
         tArea.style.height = (tArea.scrollHeight) + "px";
-        console.log("resizing with text", tArea.value, tArea.style.height);
     };
 
     // prevent newline characters and resize on input

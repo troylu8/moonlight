@@ -31,7 +31,7 @@ async function getyt(link) {
     
     if ( !(await videoExists(ytid)) ) {
         error.showError("video doesn't exist");
-        return setButtonEnabled(true, "ent");
+        return setButtonEnabled(true, "get");
     }
     
  
@@ -60,7 +60,7 @@ async function getyt(link) {
     if (res.status === 200) { // video downloaded fully
         setLoadingBar(1);
         stopLoading(true);
-        button.innerText = "ent";
+        button.innerText = "get";
 
         acceptSongResponse(res);
     }
@@ -112,7 +112,7 @@ async function destroy() {
 
     setButtonEnabled(false, "...");
     await fetch("http://localhost:5000/getyt/destroy");
-    setButtonEnabled(true, "ent");
+    setButtonEnabled(true, "get");
 }
 
 button.onclick = () => {
