@@ -7,14 +7,18 @@
     bottom: var(--play-div-height);
     padding: 15px;
 
+    display: flex;
+    flex-direction: column;
+
     transition: 0.5s;
 }
 
 .playlist__group {
     display: none;
     flex-direction: column;
-    overflow-y: auto;
     overflow-x: hidden;
+
+    height: 100%;
 
     margin-top: 15px;
     gap: 15px;

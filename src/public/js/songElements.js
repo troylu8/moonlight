@@ -128,7 +128,7 @@ export function createPlaylistEntries(playlist) {
  * @param {Playlist} playlist
  */
 function createPlaylistGroup(playlist) {
-    const playlist__group = createElement("nav", "hiding-scroll group:" + playlist.id, "playlist__group");
+    const playlist__group = createElement("nav", "group:" + playlist.id, "playlist__group hiding-scroll");
     mainDiv.appendChild(playlist__group);
     playlist.groupElem = playlist__group;
     playlist__group.playlist = playlist;

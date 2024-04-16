@@ -8,11 +8,15 @@
     bottom: var(--play-div-height);
     width: 350px;
 
+    display: flex;
+    flex-direction: column;
+
     transition: 0.5s;
 }
 
 #sidebar__content {
     padding: 20px;
+    height: 100%;
 }
 
 #song-settings, #playlist-settings {

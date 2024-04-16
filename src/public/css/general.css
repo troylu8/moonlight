@@ -146,6 +146,7 @@ h3 {
 }
 .hiding-scroll {
     transition: --scrollbar-color 0.2s;
+    overflow-y: auto;
 }
 .hiding-scroll:hover {
     --scrollbar-color: var(--accent-color);
