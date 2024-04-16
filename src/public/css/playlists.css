@@ -8,19 +8,15 @@
     top: 0;
     bottom: var(--play-div-height);
 
-    width: calc(var(--playlists-div-width) - 2 * 20px);
-    padding: 20px;
+    width: calc(var(--playlists-div-width) - 2 * 10px);
+    padding: 10px;
 }
 
 #playlists-div__header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
-
-#new-playlist {
-    cursor: pointer;
-}
-
 #playlists__nav {
     margin-top: 15px;
     overflow-y: auto;
@@ -28,6 +24,13 @@
 
     display: flex;
     flex-direction: column;
+}
+
+#new-playlist {
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+    margin: 0;
 }
 
 .playlist {
@@ -49,3 +52,5 @@
 .playlist:hover .playlist__options {
     visibility: visible;
 }
+
+

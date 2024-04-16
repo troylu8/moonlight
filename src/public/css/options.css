@@ -21,10 +21,10 @@
 
 .options-btn {
     position: relative;
-    background-color: var(--accent-color);
-    padding: 4px 5px;
-    border-radius: 5px;
     cursor: pointer;
+
+    width: 25px;
+    height: 25px;
 }
 
 #new__dropdown, #account__dropdown {    
@@ -35,30 +35,39 @@
     display: none;
     flex-direction: column;
     align-items: center;
+    padding: 5px 10px;
 
     background-color: var(--background-color);
     border-radius: 10px;
-    padding: 10px;
 
     cursor: default;
 }
 
+#new__dropdown > *, #account__dropdown > * {
+    margin: 5px;
 
-#song-upload {
-    background-color: rgb(70, 70, 255);
-    border: none;
-    color: white;
+    background-color: #00000000;
 }
+
+
 #song-upload__input {
     display: none;
 }
 
 #paste-link {
     display: flex;
+    gap: 5px;
 }
 
+#song-upload, #paste-link__btn {
+    padding: 4px 5px;
+    background-color: var(--accent-color);
+}
+#new__dropdown {
+    overflow: hidden;
+}
 #loading-bar {
-    background-color: rgb(70, 70, 255);
+    background-color: var(--accent-color);
     
     width: 0%;
     height: 6px;
@@ -66,10 +75,18 @@
     transition: 0.2s;
 
     position: absolute;
+    margin: 0;
     bottom: 0;
     left: 0;
 }
 
-#from__username, #from__password, #from__repeat-password, #from__error, #from__submit {
+#create-account-from {
     display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#from__submit {
+    align-self: center;
+    padding: 4px 5px;
 }

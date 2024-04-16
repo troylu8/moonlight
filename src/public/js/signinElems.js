@@ -53,9 +53,11 @@ function initAccCreator(options) {
 
 }
 
+const usernameDisplay = document.getElementById("username-display");
+
 /** updates DOM elements to reflect new username */
 export function updateForUsername(username) {
-    accountBtn.firstElementChild.innerText = signedInAs.innerText = username;
+    usernameDisplay.innerText = signedInAs.innerText = username;
 
     if (acc.isGuest())  accountDropdown.appendChild(fromGuestBtn);
     else                fromGuestBtn.remove();
@@ -107,9 +109,10 @@ const fromGuest = {
 }
 initAccCreator(fromGuest);
 
-const fromGuestBtn = document.getElementById("create-account-from");
+const fromGuestBtn = document.getElementById("create-account-from-btn");
+const fromGuestInputs = document.getElementById("create-account-from");
 fromGuestBtn.addEventListener("click", () => {
-    for (const elem of Object.values(fromGuest)) elem.style.display = "block";
+    fromGuestInputs.style.display = "flex";
     fromGuestBtn.style.display = "none";
 });
 
@@ -126,7 +129,7 @@ const accountDropdown = document.getElementById("account__dropdown");
 
 export const accDropdown = new Dropdown(accountBtn, accountDropdown, {
     onclose: () => {
-        for (const elem of Object.values(fromGuest)) elem.style.display = "none";
+        fromGuestInputs.style.display = "none";
         fromGuestBtn.style.display = "block";
         fromGuest.error.innerText = "";
     }

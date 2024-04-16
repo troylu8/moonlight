@@ -38,7 +38,6 @@ export function openSongSettings(song, song__title, song__artist) {
 
     filename.innerText = song.filename;
     size.innerText = (song.size / (1024 * 1000)).toFixed(2) + " MB";
-    console.log("setting title area", song.title);
     titleArea.setText(song.title);
     artistArea.setText(song.artist);
 
@@ -103,7 +102,7 @@ export function updateSongEntries() {
 
     if (data.curr.song === currentlyEditing) {
         playingTitleElem.innerText = titleArea.value;
-        playingArtistElem.innerText = titleArea.value;
+        playingArtistElem.innerText = artistArea.value;
     }   
 
     console.log("all entries updated");
