@@ -20,6 +20,7 @@ export class Song {
 
         /** @type {Set<HTMLElement>} */
         this.songEntries = new Set();
+        this.icon = "play";
         
         /** @type {Set<Playlist>} */
         this.playlists = new Set();
@@ -37,6 +38,15 @@ export class Song {
 
     /** @returns {"new" | "edited" | "synced"} */
     get syncStatus() {return this._syncStatus}
+
+    /** @param {"play" | "active" | "error"} icon  */
+    setIcon(icon) {
+        this.icon = icon;
+        for (const songEntry of this.songEntries.values()) {
+            const iconElem = songEntry.firstElementChild.firstElementChild;
+            songElements.setEntryIcon(iconElem, icon, this);
+        }
+    }
     
     update(options) {
         this.title = options.title;
@@ -48,6 +58,7 @@ export class Song {
         }
         updateSongEntries();
     }
+
 
     /** @param {Playlist} playlist */
     addToPlaylist(playlist, changeSyncStatus) {
@@ -196,9 +207,9 @@ export class Playlist {
             data.songs.get(sid).addToPlaylist(this);
 
         if (this === data.curr.viewPlaylist) {
-            songElements.playlistHeader.innerText = this.title;
-            songElements.playlistDesc.innerText = this.desc;
-            this.playlistEntry.firstElementChild.innerText = this.title;
+            songElements.playlistHeader.textContent = this.title;
+            songElements.playlistDesc.textContent = this.desc;
+            this.playlistEntry.firstElementChild.textContent = this.title;
         }
     }
     

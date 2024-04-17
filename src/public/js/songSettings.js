@@ -36,8 +36,8 @@ export function openSongSettings(song, song__title, song__artist) {
     song__titleLive = song__title;
     song__artistLive = song__artist;
 
-    filename.innerText = song.filename;
-    size.innerText = (song.size / (1024 * 1000)).toFixed(2) + " MB";
+    filename.textContent = song.filename;
+    size.textContent = (song.size / (1024 * 1000)).toFixed(2) + " MB";
     titleArea.setText(song.title);
     artistArea.setText(song.artist);
 
@@ -57,6 +57,8 @@ export function openSongSettings(song, song__title, song__artist) {
     for (const checkboxDiv of notchecked) 
         playlistCheckboxes.appendChild(checkboxDiv);
 
+    deleteBtn.textContent = "delete";
+
     sidebar.setSidebarContent(songSettings);
 }
 
@@ -68,9 +70,9 @@ titleArea.addEventListener("input", () => {
     currentlyEditing.title = titleArea.value;
 
     if (data.curr.song === currentlyEditing) 
-        playingTitleElem.innerText = titleArea.value;
+        playingTitleElem.textContent = titleArea.value;
     
-    song__titleLive.innerText = titleArea.value;
+    song__titleLive.textContent = titleArea.value;
 });
 artistArea.addEventListener("input", () => {
     currentlyEditing.syncStatus = "edited";
@@ -80,16 +82,26 @@ artistArea.addEventListener("input", () => {
     currentlyEditing.artist = artistArea.value;
 
     if (data.curr.song === currentlyEditing) 
-        playingArtistElem.innerText = artistArea.value;
-    song__artistLive.innerText = artistArea.value;
+        playingArtistElem.textContent = artistArea.value;
+    song__artistLive.textContent = artistArea.value;
 });
 
+export let shiftDown = false;
+window.addEventListener("keydown", (e) => shiftDown = e.shiftKey);
+window.addEventListener("keyup", (e) => shiftDown = e.shiftKey);
+
+const deleteError = document.getElementById("song-settings__delete__error");
+
 deleteBtn.addEventListener("click", () => {
-    currentlyEditing.delete();
-
-    clearCurrentlyEditing();
-
-    sidebar.setSidebarOpen(false);
+    if (shiftDown) {
+        currentlyEditing.delete();
+        clearCurrentlyEditing();
+        sidebar.setSidebarOpen(false);
+    }
+    else {
+        deleteBtn.textContent = "this cannot be undone";
+        deleteError.showError("[shift + click] to delete");
+    }
 });
 
 /** updates all song entries to match currentlyEditing's title and artist */
@@ -101,8 +113,8 @@ export function updateSongEntries() {
     }
 
     if (data.curr.song === currentlyEditing) {
-        playingTitleElem.innerText = titleArea.value;
-        playingArtistElem.innerText = artistArea.value;
+        playingTitleElem.textContent = titleArea.value;
+        playingArtistElem.textContent = artistArea.value;
     }   
 
     console.log("all entries updated");
@@ -111,6 +123,6 @@ export function updateSongEntries() {
 }
 
 function setTitleArtistText(songElem, title, artist) {
-    songElem.firstElementChild.lastElementChild.previousElementSibling.innerText = title;
-    songElem.firstElementChild.lastElementChild.innerText = artist;
+    songElem.firstElementChild.lastElementChild.previousElementSibling.textContent = title;
+    songElem.firstElementChild.lastElementChild.textContent = artist;
 }

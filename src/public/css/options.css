@@ -3,7 +3,7 @@
 
     position: fixed;
     top: 0;
-    left: var(--playlists-div-width);
+    left: 0;
     right: var(--sidebar-div-width);
     height: var(--options-div-height);
 
@@ -26,6 +26,7 @@
     width: 25px;
     height: 25px;
 }
+
 
 #new__dropdown, #account__dropdown {    
     position: absolute;
@@ -101,4 +102,8 @@
 #from__submit {
     align-self: center;
     padding: 4px 5px;
+}
+
+#song-settings__delete__error, #playlist-settings__delete__error {
+    align-self: center;
 }

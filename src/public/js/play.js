@@ -50,13 +50,15 @@ function inThePresent() {
  * @param {Song} song 
 */
 export function setSong(song) {
+    if (data.curr.song) data.curr.song.setIcon("play");
+
     if (!song) {
         console.log("set song to none");
         audio.src = "";
         data.curr.song = null;
 
-        titleElem.innerText = "-";
-        artistElem.innerText = "-";
+        titleElem.textContent = "-";
+        artistElem.textContent = "-";
         data.curr.song = undefined
 
         setSpin(false);
@@ -68,10 +70,13 @@ export function setSong(song) {
     audio.src = path;
     data.curr.song = song;
 
-    titleElem.innerText = song.title;
-    artistElem.innerText = song.artist;
+    titleElem.textContent = song.title;
+    artistElem.textContent = song.artist;
 
     toBeDeleted.delete();
+
+    console.log("setSong param", song);
+    song.setIcon("active");
 }
 
 export function togglePlay(song) {
@@ -82,13 +87,12 @@ export function togglePlay(song) {
         if (data.curr.song == null) return;
         if (audio.paused)   audio.play();
         else                audio.pause();
+        return;
     }
     
     // new song
-    else {
-        setSong(song);
-        audio.play();
-    }
+    setSong(song);
+    audio.play();
 
     if (inThePresent() && history[historyIndex] != song.id) {
         history.push(song.id);
@@ -132,7 +136,7 @@ audio.addEventListener("loadedmetadata", () => {
     seek.value = 0;
     seek.updateSliderColors(); 
     seek.max = Math.floor(audio.duration);
-    seekTotal.innerText = getTimeDisplay(audio.duration);
+    seekTotal.textContent = getTimeDisplay(audio.duration);
 });
 
 audio.addEventListener("timeupdate", () => {
@@ -140,11 +144,11 @@ audio.addEventListener("timeupdate", () => {
 
     seek.value = audio.currentTime;
     seek.updateSliderColors(); 
-    seekPassed.innerText = getTimeDisplay(audio.currentTime);
+    seekPassed.textContent = getTimeDisplay(audio.currentTime);
 })
 
 addSliderDragEvent(seek, () => {
-    seekPassed.innerText = getTimeDisplay(seek.value);
+    seekPassed.textContent = getTimeDisplay(seek.value);
 }); 
 
 seek.addEventListener("mouseup", () => { audio.currentTime = seek.value; });

@@ -2,6 +2,7 @@ import { setSidebarContent, setSidebarOpen } from "./sidebar.js";
 import { Playlist, data } from "./userdata.js";
 import { playlistHeader, playlistDesc } from "./songElements.js";
 import genID from "./id.js";
+import { shiftDown } from "./songSettings.js";
 
 document.getElementById("new-playlist").addEventListener("click", () => {
     new Playlist(genID(14), { title: "new playlist" });
@@ -23,6 +24,8 @@ export function openPlaylistSettings(playlist) {
     titleArea.setText(playlist.title);
     descArea.setText(playlist.desc);
 
+    deleteBtn.textContent = "delete";
+    
     setSidebarContent(playlistSettings);
 }
 
@@ -32,9 +35,10 @@ titleArea.addEventListener("input", () => {
     currentlyEditing.title = titleArea.value;
 
     if (data.curr.viewPlaylist === currentlyEditing) 
-        playlistHeader.innerText = titleArea.value;    
+        playlistHeader.textContent = titleArea.value;    
 
-    currentlyEditing.playlistEntry.firstElementChild.innerText = titleArea.value;
+    currentlyEditing.playlistEntry.firstElementChild.textContent = titleArea.value;
+    currentlyEditing.checkboxDiv.lastElementChild.textContent = titleArea.value;
 });
 descArea.addEventListener("input", () => {
     currentlyEditing.syncStatus = "edited";
@@ -42,9 +46,18 @@ descArea.addEventListener("input", () => {
     currentlyEditing.desc = descArea.value;
     
     if (data.curr.viewPlaylist === currentlyEditing) 
-        playlistDesc.innerText = descArea.value;
+        playlistDesc.textContent = descArea.value;
 });
+
+const deleteError = document.getElementById("playlist-settings__delete__error");
+
 deleteBtn.addEventListener("click", () => {
-    currentlyEditing.delete();
-    setSidebarOpen(false);
+    if (shiftDown) {
+        currentlyEditing.delete();
+        setSidebarOpen(false);
+    }
+    else {
+        deleteBtn.textContent = "this cannot be undone";
+        deleteError.showError("[shift + click] to delete");
+    }
 })

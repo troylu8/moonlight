@@ -33,7 +33,7 @@ function initAccCreator(options) {
     [username, password, repeatPassword].forEach((node) => {
         node.addEventListener("keypress", (e) => {
             if (e.key === "Enter")  submit.click();
-            else                    error.innerText = "";
+            else                    error.textContent = "";
         })
     });
 
@@ -57,7 +57,7 @@ const usernameDisplay = document.getElementById("username-display");
 
 /** updates DOM elements to reflect new username */
 export function updateForUsername(username) {
-    usernameDisplay.innerText = signedInAs.innerText = username;
+    usernameDisplay.textContent = signedInAs.textContent = username;
 
     if (acc.isGuest())  accountDropdown.appendChild(fromGuestBtn);
     else                fromGuestBtn.remove();
@@ -91,11 +91,11 @@ const toggle = document.getElementById("account__toggle");
 toggle.addEventListener("click", () => {
     const signInActive = repeatPassword.style.display !== "block";
     
-    toggle.innerText = signInActive? "already have account" : "create new account";
-    title.innerText = submit.innerText = signInActive? "create account" : "sign in" ;
+    toggle.textContent = signInActive? "already have account" : "create new account";
+    title.textContent = submit.textContent = signInActive? "create account" : "sign in" ;
 
     repeatPassword.style.display = signInActive? "block" : "none";
-    repeatPassword.value = error.innerText = "";
+    repeatPassword.value = error.textContent = "";
 });
 
 
@@ -131,6 +131,6 @@ export const accDropdown = new Dropdown(accountBtn, accountDropdown, {
     onclose: () => {
         fromGuestInputs.style.display = "none";
         fromGuestBtn.style.display = "block";
-        fromGuest.error.innerText = "";
+        fromGuest.error.textContent = "";
     }
 }); 

@@ -60,7 +60,7 @@ async function getyt(link) {
     if (res.status === 200) { // video downloaded fully
         setLoadingBar(1);
         stopLoading(true);
-        button.innerText = "get";
+        button.textContent = "get";
 
         acceptSongResponse(res);
     }
@@ -83,7 +83,7 @@ const dropdown = new Dropdown(
     document.getElementById("new__dropdown"),
     {
         allowClose: () => !tracking,
-        onclose: () => error.innerText = ""
+        onclose: () => error.textContent = ""
     }
 );
 
@@ -104,7 +104,7 @@ function stopLoading(closeDropdown) {
 
 function setButtonEnabled(val, text) {
     enabled = val;
-    button.innerText = text;
+    button.textContent = text;
 }
 
 async function destroy() {
