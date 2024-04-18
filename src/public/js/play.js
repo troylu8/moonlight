@@ -50,7 +50,7 @@ function inThePresent() {
  * @param {Song} song 
 */
 export function setSong(song) {
-    if (data.curr.song) data.curr.song.setIcon("play");
+    if (data.curr.song) data.curr.song.setState("playable");
 
     if (!song) {
         console.log("set song to none");
@@ -76,7 +76,7 @@ export function setSong(song) {
     toBeDeleted.delete();
 
     console.log("setSong param", song);
-    song.setIcon("active");
+    song.setState("active");
 }
 
 export function togglePlay(song) {

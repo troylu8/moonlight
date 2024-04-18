@@ -23,29 +23,28 @@ const ERROR_SVG =
         <path d="M12.884 2.532c-.346-.654-1.422-.654-1.768 0l-9 17A.999.999 0 0 0 3 21h18a.998.998 0 0 0 .883-1.467L12.884 2.532zM13 18h-2v-2h2v2zm-2-4V9h2l.001 5H11z"/>
     </svg>`;
 
-const iconMap = new Map([["play", PLAY_SVG], ["active", ACTIVE_SVG], ["error", ERROR_SVG]]);
+const iconMap = new Map([["playable", PLAY_SVG], ["active", ACTIVE_SVG], ["error", ERROR_SVG]]);
 
-/** @param {"play" | "active" | "error"} icon  */
-export function setEntryIcon(iconElem, icon, song) {
-    console.log(icon);
-    iconElem.innerHTML = iconMap.get(icon);
+/** 
+ * @param {HTMLElement} entry 
+ * @param {"playable" | "active" | "error"} state
+ * @param {Song} song 
+ */
+export function setEntryState(entry, state, song) {
+    console.log("set as", state);
 
-    iconElem.playHandler = iconElem.playHandler ?? (() => {
-        togglePlay(song);
+    const iconElem = entry.firstElementChild.firstElementChild;
+    iconElem.innerHTML = iconMap.get(state);
 
-        if (data.curr.viewPlaylist !== data.curr.listenPlaylist) 
-            data.updateListenPlaylist();
-        
-        data.curr.listenPlaylist.cycle.updateCurrIndex();
-    });
+    if (state === "playable")    iconElem.classList.add("playable");
+    else                         iconElem.classList.remove("playable");
 
-    if (icon === "play") {
-        iconElem.classList.add("playable");
-        iconElem.addEventListener("click", iconElem.playHandler);
-    }
-    else {
-        iconElem.classList.remove("playable");
-        iconElem.removeEventListener("click", iconElem.playHandler);
+    if (state === "error") {
+        entry.style.opacity = "0.7";
+        entry.style.textDecoration = "line-through";
+    } else {
+        entry.style.opacity = "1";
+        entry.style.textDecoration = "none";
     }
 }
     
@@ -78,7 +77,15 @@ export function createSongEntry(song, playlist) {
     songEntry.lastChild.appendChild(song__options);
     
     const song__icon = createElement("div", null, "song__icon");
-    setEntryIcon(song__icon, song.icon, song);
+    song__icon.addEventListener("click", () => {
+        if (song.state !== "playable") return;
+
+        togglePlay(song);
+
+        if (data.curr.viewPlaylist !== data.curr.listenPlaylist) data.updateListenPlaylist();
+        data.curr.listenPlaylist.cycle.updateCurrIndex();
+    });
+    
 
     songEntry.firstChild.insertBefore(song__icon, song__title);
 
@@ -87,6 +94,7 @@ export function createSongEntry(song, playlist) {
     );
 
     playlist.groupElem.appendChild(songEntry);
+    setEntryState(songEntry, "error", song);
 
     song.songEntries.add(songEntry);
     return [songEntry, song__title, song__artist];
@@ -139,7 +147,9 @@ export function createPlaylistEntries(playlist) {
     const playlistElem = createElement("div", "li:" + playlist.id, "playlist");
     playlistElem.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
     playlistElem.addEventListener("click", (e) => {
-        setViewPlaylist(playlist)
+        if (data.curr.viewPlaylist) data.curr.viewPlaylist.playlistEntry.classList.remove("view-playlist");
+        setViewPlaylist(playlist);
+        playlistElem.classList.add("view-playlist");
     });
     playlist.playlistEntry = playlistElem;
 

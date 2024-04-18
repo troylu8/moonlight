@@ -142,3 +142,43 @@ for (const h3 of document.getElementsByTagName("h3")) {
     h3.innerHTML = starSVG + h3.innerHTML;
     h3.firstElementChild.style.height = size;
 }
+
+/**
+ * 
+ * @param {HTMLElement} elem parent element
+ * @param {boolean} above `true` to display above parent, `false` for below
+ * @param {number} gap gap between parent and tooltip, in px
+ * @param {string} innerHTML 
+ */
+export function setToolTip(elem, above, gap, innerHTML) {
+    const tooltip = document.createElement("div");
+    tooltip.classList.add("tooltip");
+    tooltip.innerHTML = innerHTML;
+
+    if (above) tooltip.style.bottom = `calc(100% + ${gap}px)`;
+    else tooltip.style.top = `calc(100% + ${gap}px)`;
+
+    elem.addEventListener("mouseover", (e) => {
+        console.log("entered");
+        tooltip.style.opacity = 1;
+    });
+    elem.addEventListener("mouseleave", (e) => {
+        console.log("left");
+        tooltip.style.opacity = 0;
+    });
+    // elem.addEventListener("mouseleave", (e) => tooltip.style.opacity = 0);
+
+    // elem.addEventListener("mouseenter", (e) => tooltip.style.opacity = 1);
+    // elem.addEventListener("mouseleave", (e) => tooltip.style.opacity = 0);
+
+    elem.appendChild(tooltip);
+}
+
+[
+    ["sync", "sync&nbsp;data"],
+    ["new", "new&nbsp;song"],
+    ["account-btn", "account"],
+    ["settings-btn", "settings"]
+].forEach(pair => {
+    setToolTip(document.getElementById(pair[0]), false, 10, pair[1]);
+});

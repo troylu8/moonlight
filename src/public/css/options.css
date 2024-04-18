@@ -3,11 +3,11 @@
 
     position: fixed;
     top: 0;
-    left: 0;
+    left: var(--playlists-div-width);
     right: var(--sidebar-div-width);
     height: var(--options-div-height);
 
-    z-index: 1;
+    z-index: 2;
 
     display: flex;
     justify-content: end;
@@ -25,6 +25,10 @@
 
     width: 25px;
     height: 25px;
+}
+.options-btn svg {
+    min-width: 100%;
+    min-height: 100%;
 }
 
 

@@ -15,7 +15,6 @@ export default class Dropdown {
             this._onclose = options.onclose;
             this.allowClose = options.allowClose ?? ( () => true ); // if omitted allowClose, always true
         }
-
         
         button.addEventListener("click", (e) => {
             if (e.currentTarget !== button) return;
@@ -32,7 +31,9 @@ export default class Dropdown {
             if (this.visible && !button.contains(e.target) && this.allowClose()) {
                 this.close();
             }
-        })
+        });
+
+        dropdown.addEventListener("mouseover", (e) => e.stopPropagation());
     }
 
     open() {

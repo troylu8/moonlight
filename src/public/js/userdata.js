@@ -20,7 +20,9 @@ export class Song {
 
         /** @type {Set<HTMLElement>} */
         this.songEntries = new Set();
-        this.icon = "play";
+
+        /** @type {"playable" | "active" | "error"} */
+        this.state = "playable";
         
         /** @type {Set<Playlist>} */
         this.playlists = new Set();
@@ -39,12 +41,11 @@ export class Song {
     /** @returns {"new" | "edited" | "synced"} */
     get syncStatus() {return this._syncStatus}
 
-    /** @param {"play" | "active" | "error"} icon  */
-    setIcon(icon) {
-        this.icon = icon;
+    /** @param {"playable" | "active" | "error"} state  */
+    setState(state) {
+        this.state = state;
         for (const songEntry of this.songEntries.values()) {
-            const iconElem = songEntry.firstElementChild.firstElementChild;
-            songElements.setEntryIcon(iconElem, icon, this);
+            songElements.setEntryState(songEntry, state, this);
         }
     }
     

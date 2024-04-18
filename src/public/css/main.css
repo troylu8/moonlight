@@ -56,8 +56,8 @@
 }
 
 .song__icon {
-    min-width: 26px;
-    width: 26px;
+    min-width: 23px;
+    width: 23px;
     height: 20px;
 }
 .song__icon svg {
@@ -67,17 +67,13 @@
 
 .playable svg {
     margin-left: 0;
-    margin-right: 6px;
+    margin-right: 3px;
 
     transition: margin 0.1s;
 }
 .playable:hover svg {
     margin-left: 3px;
     margin-right: 3px;
-}
-.playable:active svg {
-    margin-left: 6px;
-    margin-right: 0;
 }
 
 .song__title, .song__artist {

@@ -151,3 +151,19 @@ h3 {
 .hiding-scroll:hover {
     --scrollbar-color: var(--accent-color);
 }
+
+.tooltip {
+    background-color: var(--background-color);
+    border-radius: 5px;
+    padding: 3px 4px;
+    font-size: smaller;
+
+    pointer-events: none;
+
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+
+    opacity: 0;
+    transition: 0.2s;
+}
