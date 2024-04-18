@@ -167,3 +167,8 @@ h3 {
     opacity: 0;
     transition: 0.2s;
 }
+#settings-btn .tooltip {
+    left: auto;
+    right: 0;
+    transform: none;
+}

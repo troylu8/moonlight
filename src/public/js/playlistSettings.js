@@ -12,6 +12,8 @@ const playlistSettings = document.getElementById("playlist-settings");
 
 const titleArea = document.getElementById("playlist-settings__title");
 const descArea = document.getElementById("playlist-settings__desc");
+descArea.allowNewline = true;
+
 const deleteBtn = document.getElementById("playlist-settings__delete");
 
 /** @type {Playlist} */
@@ -46,7 +48,7 @@ descArea.addEventListener("input", () => {
     currentlyEditing.desc = descArea.value;
     
     if (data.curr.viewPlaylist === currentlyEditing) 
-        playlistDesc.textContent = descArea.value;
+        playlistDesc.innerHTML = descArea.value;
 });
 
 const deleteError = document.getElementById("playlist-settings__delete__error");

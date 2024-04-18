@@ -146,11 +146,7 @@ export function createPlaylistEntries(playlist) {
     
     const playlistElem = createElement("div", "li:" + playlist.id, "playlist");
     playlistElem.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
-    playlistElem.addEventListener("click", (e) => {
-        if (data.curr.viewPlaylist) data.curr.viewPlaylist.playlistEntry.classList.remove("view-playlist");
-        setViewPlaylist(playlist);
-        playlistElem.classList.add("view-playlist");
-    });
+    playlistElem.addEventListener("click", () => setViewPlaylist(playlist));
     playlist.playlistEntry = playlistElem;
 
     const playlist__options = createElement("div", null, "playlist__options");
@@ -195,20 +191,22 @@ export function setViewPlaylist(playlist, setAsListenPlaylist) {
 
     if (playlist === data.curr.viewPlaylist) return;
 
+    if (data.curr.viewPlaylist) data.curr.viewPlaylist.playlistEntry.classList.remove("view-playlist");
+
     data.curr.viewPlaylist = playlist;
 
     if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
 
     if (!playlist) {
         playlistHeader.textContent = "-";
-        playlistDesc.textContent = "-";
+        playlistDesc.innerHTML = "-";
     } 
     else {
         if (!playlist.groupElem) 
             playlist.groupElem = createPlaylistGroup(playlist);
 
         playlistHeader.textContent = playlist.title;
-        playlistDesc.textContent = playlist.desc;
+        playlistDesc.innerHTML = playlist.desc;
         songSettings.updateSongEntries();
 
         activePlaylistGroup = playlist.groupElem;
@@ -219,6 +217,9 @@ export function setViewPlaylist(playlist, setAsListenPlaylist) {
     }
 
     if (setAsListenPlaylist) data.updateListenPlaylist();
+
+    console.log(playlist);
+    playlist.playlistEntry.classList.add("view-playlist");
 }
 
 /**  @returns {HTMLElement} */

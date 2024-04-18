@@ -62,10 +62,9 @@ document.body.addEventListener("keydown", async (e) => {
             console.log(settings);
             break;
         case "Z":
-            const h3 = document.getElementsByTagName("h3")[0];
-            console.log(
-                h3.textContent , h3.clientHeight, h3.getBoundingClientRect()
-            );
+            for (const e of document.getElementsByClassName("tooltip")) {
+                console.log(e.getBoundingClientRect());
+            }  
             break;
     }
     

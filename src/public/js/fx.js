@@ -112,11 +112,11 @@ for (const tArea of document.getElementsByClassName("auto-height")) {
 
     // prevent newline characters and resize on input
     tArea.addEventListener("input", () => {
-      tArea.value = tArea.value.replaceAll("\n", "");
-      resize();
+        if (tArea.allowNewline) tArea.value.replaceAll("\n", "<br>");
+        resize();
     }, false);
     tArea.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") e.preventDefault();
+        if (e.key === "Enter" && !tArea.allowNewline) e.preventDefault();
     });
 
     tArea.setText = (text) => {
@@ -158,20 +158,13 @@ export function setToolTip(elem, above, gap, innerHTML) {
     if (above) tooltip.style.bottom = `calc(100% + ${gap}px)`;
     else tooltip.style.top = `calc(100% + ${gap}px)`;
 
-    elem.addEventListener("mouseover", (e) => {
-        console.log("entered");
-        tooltip.style.opacity = 1;
-    });
-    elem.addEventListener("mouseleave", (e) => {
-        console.log("left");
-        tooltip.style.opacity = 0;
-    });
-    // elem.addEventListener("mouseleave", (e) => tooltip.style.opacity = 0);
-
-    // elem.addEventListener("mouseenter", (e) => tooltip.style.opacity = 1);
-    // elem.addEventListener("mouseleave", (e) => tooltip.style.opacity = 0);
+    elem.addEventListener("mouseover", () => tooltip.style.opacity = 1);
+    elem.addEventListener("mouseleave", () => tooltip.style.opacity = 0); 
 
     elem.appendChild(tooltip);
+
+    setTimeout(() => console.log(tooltip.getBoundingClientRect()));
+
 }
 
 [

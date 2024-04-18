@@ -209,7 +209,7 @@ export class Playlist {
 
         if (this === data.curr.viewPlaylist) {
             songElements.playlistHeader.textContent = this.title;
-            songElements.playlistDesc.textContent = this.desc;
+            songElements.playlistDesc.innerHTML = this.desc;
             this.playlistEntry.firstElementChild.textContent = this.title;
         }
     }
