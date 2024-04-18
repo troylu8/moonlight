@@ -24,7 +24,7 @@ export function openPlaylistSettings(playlist) {
     currentlyEditing = playlist;
 
     titleArea.setText(playlist.title);
-    descArea.setText(playlist.desc);
+    descArea.setText(playlist.desc.replaceAll("<br>", "\n"));
 
     deleteBtn.textContent = "delete";
     
@@ -45,10 +45,11 @@ titleArea.addEventListener("input", () => {
 descArea.addEventListener("input", () => {
     currentlyEditing.syncStatus = "edited";
 
-    currentlyEditing.desc = descArea.value;
+    currentlyEditing.desc = descArea.value.replaceAll("\n", "<br>");
+    console.log(descArea.value.replaceAll("\n", "<br>"));
     
     if (data.curr.viewPlaylist === currentlyEditing) 
-        playlistDesc.innerHTML = descArea.value;
+        playlistDesc.innerHTML = currentlyEditing.desc;
 });
 
 const deleteError = document.getElementById("playlist-settings__delete__error");

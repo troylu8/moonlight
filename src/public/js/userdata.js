@@ -45,7 +45,7 @@ export class Song {
     setState(state) {
         this.state = state;
         for (const songEntry of this.songEntries.values()) {
-            songElements.setEntryState(songEntry, state, this);
+            songElements.setEntryState(songEntry, state);
         }
     }
     

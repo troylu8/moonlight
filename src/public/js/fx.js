@@ -111,10 +111,7 @@ for (const tArea of document.getElementsByClassName("auto-height")) {
     };
 
     // prevent newline characters and resize on input
-    tArea.addEventListener("input", () => {
-        if (tArea.allowNewline) tArea.value.replaceAll("\n", "<br>");
-        resize();
-    }, false);
+    tArea.addEventListener("input", resize);
     tArea.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !tArea.allowNewline) e.preventDefault();
     });
@@ -149,6 +146,7 @@ for (const h3 of document.getElementsByTagName("h3")) {
  * @param {boolean} above `true` to display above parent, `false` for below
  * @param {number} gap gap between parent and tooltip, in px
  * @param {string} innerHTML 
+ * @returns {HTMLElement} the created tooltip
  */
 export function setToolTip(elem, above, gap, innerHTML) {
     const tooltip = document.createElement("div");
@@ -163,8 +161,7 @@ export function setToolTip(elem, above, gap, innerHTML) {
 
     elem.appendChild(tooltip);
 
-    setTimeout(() => console.log(tooltip.getBoundingClientRect()));
-
+    return tooltip;
 }
 
 [

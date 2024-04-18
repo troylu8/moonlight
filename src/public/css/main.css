@@ -44,10 +44,10 @@
     gap: 50px;
 }
 
-.playable, .song__options {
+.playable .song__icon, .song__options {
     visibility: hidden;
 }
-.song:hover .playable, .song:hover .song__options {
+.song:hover .playable .song__icon, .song:hover .song__options {
     visibility: visible;
 }
 .song__options:hover svg {
@@ -63,15 +63,17 @@
 .song__icon svg {
     width: 20px;
     height: 20px;
+
+    position: relative;
 }
 
-.playable svg {
+.playable .song__icon svg {
     margin-left: 0;
     margin-right: 3px;
 
     transition: margin 0.1s;
 }
-.playable:hover svg {
+.playable:hover .song__icon svg {
     margin-left: 3px;
     margin-right: 3px;
 }
@@ -88,6 +90,18 @@
     font-weight: 400;
 }
 
-.playable:hover svg, .song__options:hover svg {
+.playable:hover .song__icon svg, .song__options:hover svg {
     stroke: var(--accent-color);
+}
+
+.error {
+    opacity: 0.7;
+    text-decoration: line-through;
+}
+
+.playable .tooltip {
+    visibility: hidden;
+}
+.error .tooltip, .active .tooltip {
+    visibility: visible;
 }

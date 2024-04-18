@@ -2,6 +2,7 @@ import * as songSettings from "./songSettings.js";
 import { togglePlay } from "./play.js";
 import { data, Playlist, Song } from "./userdata.js";
 import { openPlaylistSettings } from "./playlistSettings.js";
+import { setToolTip } from "./fx.js";
 
 const OPTIONS_SVG = 
    `<svg fill="var(--primary-color)" width="20px" height="20px" viewBox="0 0 32 32" >
@@ -28,24 +29,22 @@ const iconMap = new Map([["playable", PLAY_SVG], ["active", ACTIVE_SVG], ["error
 /** 
  * @param {HTMLElement} entry 
  * @param {"playable" | "active" | "error"} state
- * @param {Song} song 
  */
-export function setEntryState(entry, state, song) {
+export function setEntryState(entry, state) {
     console.log("set as", state);
 
     const iconElem = entry.firstElementChild.firstElementChild;
     iconElem.innerHTML = iconMap.get(state);
 
-    if (state === "playable")    iconElem.classList.add("playable");
-    else                         iconElem.classList.remove("playable");
+    entry.classList.remove("playable", "active", "error");
+    entry.classList.add(state);
 
-    if (state === "error") {
-        entry.style.opacity = "0.7";
-        entry.style.textDecoration = "line-through";
-    } else {
-        entry.style.opacity = "1";
-        entry.style.textDecoration = "none";
-    }
+    const tooltip = setToolTip(iconElem.firstElementChild, true, 10, "");
+
+    if      (state === "error")     tooltip.textContent = "file missing";
+    else if (state === "active")    tooltip.textContent = "now playing";
+
+    console.log(tooltip);
 }
     
 /** 
@@ -85,7 +84,6 @@ export function createSongEntry(song, playlist) {
         if (data.curr.viewPlaylist !== data.curr.listenPlaylist) data.updateListenPlaylist();
         data.curr.listenPlaylist.cycle.updateCurrIndex();
     });
-    
 
     songEntry.firstChild.insertBefore(song__icon, song__title);
 
@@ -94,7 +92,7 @@ export function createSongEntry(song, playlist) {
     );
 
     playlist.groupElem.appendChild(songEntry);
-    setEntryState(songEntry, "error", song);
+    setEntryState(songEntry, "error");
 
     song.songEntries.add(songEntry);
     return [songEntry, song__title, song__artist];
