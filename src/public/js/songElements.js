@@ -2,7 +2,8 @@ import * as songSettings from "./songSettings.js";
 import { togglePlay } from "./play.js";
 import { data, Playlist, Song } from "./userdata.js";
 import { openPlaylistSettings } from "./playlistSettings.js";
-import { setToolTip } from "./fx.js";
+import { removeTooltip, setToolTip } from "./fx.js";
+import { uid } from "./account.js";
 
 const OPTIONS_SVG = 
    `<svg fill="var(--primary-color)" width="20px" height="20px" viewBox="0 0 32 32" >
@@ -39,12 +40,8 @@ export function setEntryState(entry, state) {
     entry.classList.remove("playable", "active", "error");
     entry.classList.add(state);
 
-    const tooltip = setToolTip(iconElem.firstElementChild, true, 10, "");
-
-    if      (state === "error")     tooltip.textContent = "file missing";
-    else if (state === "active")    tooltip.textContent = "now playing";
-
-    console.log(tooltip);
+    if (state === "error")  setToolTip(entry, "[click] resolve missing file", 0);
+    else                    removeTooltip(entry);
 }
     
 /** 
@@ -56,24 +53,21 @@ export function createSongEntry(song, playlist) {
     
     const className = song.id.startsWith("yt#") ? song.id.substring(3) : song.id;
 
-    const songEntry = createElement("div", null, "song " + className);
+    const songEntry = createElement("div", null, "song " + className, playlist.groupElem);
     songEntry.song = song;
     songEntry.innerHTML = 
        `<div class="song__left"></div>
 
         <div class="song__right">
-            <div class="song__duration"> ${getTimeDisplay(song.duration)} </div>
+            <span class="song__duration"> ${getTimeDisplay(song.duration)} </span>
         </div>`
-    
-    const song__title = createElement("span", null, "song__title song__title:" + song.id, song.title);
-    songEntry.firstChild.appendChild(song__title);
 
-    const song__artist = createElement("span", null, "song__artist song__artist:" + song.id, song.artist);
-    songEntry.firstChild.appendChild(song__artist);
+    const song__title = createElement("span", null, "song__title song__title:" + song.id, songEntry.firstChild, song.title);
 
-    const song__options = createElement("div", null, "song__options");
+    const song__artist = createElement("span", null, "song__artist song__artist:" + song.id, songEntry.firstChild, song.artist);
+
+    const song__options = createElement("div", null, "song__options", songEntry.lastChild);
     song__options.innerHTML = OPTIONS_SVG;
-    songEntry.lastChild.appendChild(song__options);
     
     const song__icon = createElement("div", null, "song__icon");
     song__icon.addEventListener("click", () => {
@@ -84,15 +78,53 @@ export function createSongEntry(song, playlist) {
         if (data.curr.viewPlaylist !== data.curr.listenPlaylist) data.updateListenPlaylist();
         data.curr.listenPlaylist.cycle.updateCurrIndex();
     });
-
     songEntry.firstChild.insertBefore(song__icon, song__title);
 
-    song__options.addEventListener("click", () => 
-        songSettings.openSongSettings(song, song__title, song__artist)
-    );
-
-    playlist.groupElem.appendChild(songEntry);
     setEntryState(songEntry, "error");
+
+    song__options.addEventListener("click", () => songSettings.openSongSettings(song, song__title, song__artist));
+    songEntry.addEventListener("contextmenu", (e) => {
+        songSettings.openSongSettings(song, song__title, song__artist);
+        e.preventDefault();
+    });
+
+    let menuOn = false;
+    
+    songEntry.addEventListener("click", () => {
+        if (menuOn) return;
+        menuOn = true;
+        //TODO if (song.state !== "error") return;
+
+        songEntry.tooltip.innerHTML = "";
+
+        const resolve__nav = createElement("nav", null, "resolve", songEntry.tooltip);
+        
+        const resolve__sync = createElement("button", null, "resolve__sync menu-option", resolve__nav, "get from server");
+        const resolve__link = createElement("button", null, "resolve__link menu-option", resolve__nav, "choose file");
+        const resolve__link__input = createElement("input", null, "resolve__link", resolve__nav);
+        resolve__link__input.type = "file";
+        resolve__link__input.accept = "audio/*";
+
+        resolve__link.addEventListener("click", () => resolve__link__input.click());
+        resolve__link__input.addEventListener("change", () => {
+            /** @type {string} */
+            const path = resolve__link__input.value;
+
+            
+
+            fetch("http://localhost:5000/upload/rename", {
+                method: "PUT",
+                body: {
+                    oldPath: __dirname + `/../../resources/users/${uid}/songs/`
+                }
+            })
+        });
+        
+    });
+    songEntry.addEventListener("mouseenter", () => {
+        menuOn = false;
+        songEntry.tooltip.textContent = "[click] resolve missing file";
+    });
 
     song.songEntries.add(songEntry);
     return [songEntry, song__title, song__artist];
@@ -115,10 +147,10 @@ const playlistCheckboxes = document.getElementById("song-settings__playlists");
 
 /** PLAYLIST OPTION IN SONG SETTINGS */
 export function createPlaylistCheckboxDivs(playlist) {
-    const option = createElement("div", null, "song-settings__playlists__option");
+    const option = createElement("div", null, "song-settings__playlists__option", playlistCheckboxes);
     playlist.checkboxDiv = option;
 
-    const checkbox = createElement("input", "song-settings__playlist:" + playlist.id);
+    const checkbox = createElement("input", "song-settings__playlist:" + playlist.id, option);
     checkbox.type = "checkbox";
     checkbox.playlist = playlist;
     checkbox.addEventListener("change", () => {        
@@ -127,13 +159,9 @@ export function createPlaylistCheckboxDivs(playlist) {
         else
             songSettings.currentlyEditing.removeFromPlaylist(playlist);
     })
-    option.appendChild(checkbox);
     
-    const label = createElement("label", null, null, playlist.title);
+    const label = createElement("label", null, null, option, playlist.title);
     label.setAttribute("for", "song-settings__playlist:" + playlist.id);
-    option.appendChild(label);
-
-    playlistCheckboxes.appendChild(option);
 }
 
 
@@ -142,21 +170,21 @@ export function createPlaylistCheckboxDivs(playlist) {
  */
 export function createPlaylistEntries(playlist) {
     
-    const playlistElem = createElement("div", "li:" + playlist.id, "playlist");
-    playlistElem.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
-    playlistElem.addEventListener("click", () => setViewPlaylist(playlist));
-    playlist.playlistEntry = playlistElem;
+    const playlistEntry = createElement("div", "li:" + playlist.id, "playlist", playlistsNav);
+    playlistEntry.innerHTML = `<div class="playlist__title"> ${playlist.title} </div>`;
+    playlistEntry.addEventListener("click", () => setViewPlaylist(playlist));
+    playlistEntry.addEventListener("contextmenu", (e) => {
+        openPlaylistSettings(playlist);
+        e.preventDefault();
+    });
+    playlist.playlistEntry = playlistEntry;
 
-    const playlist__options = createElement("div", null, "playlist__options");
+    const playlist__options = createElement("div", null, "playlist__options", playlistEntry);
     playlist__options.innerHTML = OPTIONS_SVG;
     playlist__options.addEventListener("click", (e) => {
         openPlaylistSettings(playlist);
         e.stopPropagation();
-    })
-
-    playlistElem.appendChild(playlist__options);
-
-    playlistsNav.appendChild(playlistElem);
+    });
 }
 
 /** 
@@ -164,8 +192,7 @@ export function createPlaylistEntries(playlist) {
  * @param {Playlist} playlist
  */
 function createPlaylistGroup(playlist) {
-    const playlist__group = createElement("nav", "group:" + playlist.id, "playlist__group hiding-scroll");
-    mainDiv.appendChild(playlist__group);
+    const playlist__group = createElement("nav", "group:" + playlist.id, "playlist__group hiding-scroll", mainDiv);
     playlist.groupElem = playlist__group;
     playlist__group.playlist = playlist;
 
@@ -216,16 +243,16 @@ export function setViewPlaylist(playlist, setAsListenPlaylist) {
 
     if (setAsListenPlaylist) data.updateListenPlaylist();
 
-    console.log(playlist);
     playlist.playlistEntry.classList.add("view-playlist");
 }
 
 /**  @returns {HTMLElement} */
-function createElement(tag, id, classes, text) {
+function createElement(tag, id, classes, parent, text) {
     const elem = document.createElement(tag);
     if (id) elem.id = id;
     if (classes) elem.classList = classes;
     if (text) elem.textContent = text;
+    if (parent) parent.appendChild(elem);
     return elem;
 }
 

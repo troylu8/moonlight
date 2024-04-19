@@ -75,7 +75,6 @@ export function setSong(song) {
 
     toBeDeleted.delete();
 
-    console.log("setSong param", song);
     song.setState("active");
 }
 
@@ -111,7 +110,6 @@ export const toBeDeleted = {
     set(playlist, song) {
         this.playlist = playlist;
         this.song = song;
-        console.log(this);
     },
 
     delete() {
@@ -251,7 +249,7 @@ export class PlaylistCycle {
      */
     _insertSongRandom(song, afterCurrent) {
 
-        console.log("adding ", song.title, "to", this.playlist.title, " after? ", afterCurrent);        
+        // console.log("adding ", song.title, "to", this.playlist.title, " after? ", afterCurrent);        
 
         // push new song to end of arr
         this.shuffleArr.push(song);
@@ -270,7 +268,7 @@ export class PlaylistCycle {
     }
 
     _reshuffle(randomizeCurrSong) {
-        console.log("reshuffling..");
+        // console.log("reshuffling..");
 
         this.shuffleArr = [];
         this.currIndex = 0;
@@ -287,7 +285,7 @@ export class PlaylistCycle {
     }
 
     updateCurrIndex() {
-        console.log("updated curr index");
+        // console.log("updated curr index");
         this.currIndex = this.songIndexes.get(data.curr.song);
     }
 
@@ -355,7 +353,6 @@ function kickAway(arr, start, banned) {
                 out = rand(door, door + space-1) % arr.length;
             }
             swap(arr, i, out);
-            console.log("kicking ", arr[i]);
         }
     }
 

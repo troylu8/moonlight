@@ -141,27 +141,41 @@ for (const h3 of document.getElementsByTagName("h3")) {
 }
 
 /**
- * 
+ * adds a tooltip to the element. if one already exists, overrides it.
  * @param {HTMLElement} elem parent element
- * @param {boolean} above `true` to display above parent, `false` for below
- * @param {number} gap gap between parent and tooltip, in px
  * @param {string} innerHTML 
+ * @param {number} gap gap between parent and tooltip, in px
  * @returns {HTMLElement} the created tooltip
  */
-export function setToolTip(elem, above, gap, innerHTML) {
-    const tooltip = document.createElement("div");
+export function setToolTip(elem, innerHTML, gap) {
+    const tooltip = elem.tooltip ?? document.createElement("div");
+    elem.tooltip = tooltip;
+
     tooltip.classList.add("tooltip");
     tooltip.innerHTML = innerHTML;
 
-    if (above) tooltip.style.bottom = `calc(100% + ${gap}px)`;
-    else tooltip.style.top = `calc(100% + ${gap}px)`;
+    if (gap !== 0) {
+        if (gap > 0)    tooltip.style.bottom = `calc(100% + ${gap}px)`;
+        else            tooltip.style.top = `calc(100% + ${-gap}px)`;
+    }
 
-    elem.addEventListener("mouseover", () => tooltip.style.opacity = 1);
-    elem.addEventListener("mouseleave", () => tooltip.style.opacity = 0); 
+    elem.addEventListener("mouseover", () => {
+        tooltip.style.opacity = 1;
+        tooltip.style.pointerEvents = "auto";
+    });
+    elem.addEventListener("mouseleave", () => {
+        tooltip.style.opacity = 0;
+        tooltip.style.pointerEvents = "none";
+    });
 
     elem.appendChild(tooltip);
-
     return tooltip;
+}
+
+export function removeTooltip(elem) {
+    if (!elem.tooltip) return;
+    elem.tooltip.remove();
+    delete elem.tooltip;
 }
 
 [
@@ -170,5 +184,5 @@ export function setToolTip(elem, above, gap, innerHTML) {
     ["account-btn", "account"],
     ["settings-btn", "settings"]
 ].forEach(pair => {
-    setToolTip(document.getElementById(pair[0]), false, 10, pair[1]);
+    setToolTip(document.getElementById(pair[0]), pair[1], -10);
 });

@@ -82,7 +82,7 @@
                         </svg>
                     </div>
 
-                    <div id="new__dropdown">
+                    <nav id="new__dropdown">
                         <button id="song-upload"> choose file </button>
                         <input id="song-upload__input" type="file" accept="audio/*">
                         
@@ -94,7 +94,7 @@
                         <p id="new__error" class="error-msg"></p>
     
                         <div id="loading-bar"></div>
-                    </div>
+                    </nav>
                 </div>
 
                 <div id="account-btn" class="options-btn">
@@ -104,12 +104,12 @@
                         </svg>
                     </div>
 
-                    <div id="account__dropdown">
-                        <button id="sign-out"> sign&nbsp;out </button>
+                    <nav id="account__dropdown">
+                        <button id="sign-out" class="menu-option"> sign&nbsp;out </button>
 
-                        <button id="user-settings-btn"> user&nbsp;settings </button>
+                        <button id="user-settings-btn" class="menu-option"> user&nbsp;settings </button>
                         
-                        <button id="create-account-from-btn"> create&nbsp;account&nbsp;from&nbsp;guest&nbsp;data </button>
+                        <button id="create-account-from-btn" class="menu-option"> create&nbsp;account&nbsp;from&nbsp;guest&nbsp;data </button>
                         
                         <div id="create-account-from">
                             <input id="from__username"  type="text" placeholder="username">
@@ -119,7 +119,7 @@
                             <button id="from__submit"> create account </button>
                         </div>
 
-                    </div>
+                    </nav>
                 </div>
                 <span id="username-display"> username </span>
 
@@ -149,7 +149,8 @@
                 
     
                 <nav id="playlists__nav" class="hiding-scroll">
-                    <!-- playlist elems here -->
+                    
+                    <!-- playlist entries here -->
                 </nav>
             </div>
     
@@ -334,5 +335,6 @@
         </div>
         
     </body>
-
 </html>
+
+

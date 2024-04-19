@@ -5,7 +5,6 @@ import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 export let guestID;
 export async function fetchGuestID() {
     const res = await fetch("http://localhost:5000/files/guest-id");
-    console.log(res.status);
     guestID = await res.text();
     return guestID;
 }

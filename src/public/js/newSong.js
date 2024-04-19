@@ -71,7 +71,7 @@ async function getyt(link) {
 async function acceptSongResponse(fetchResponse) {
     const songJSON = JSON.parse(await fetchResponse.json());
     
-    const song = new Song(songJSON.id ?? genID(14), songJSON)
+    const song = new Song(songJSON.id, songJSON)
 
     const songElems = song.addToPlaylist(data.curr.viewPlaylist); 
 
@@ -165,7 +165,7 @@ document.getElementById("song-upload").addEventListener("click", () => {
 } );
 
 fileInput.addEventListener("change", async () => {
-    const res = await fetch("http://localhost:5000/upload/" + uid, {
+    const res = await fetch(`http://localhost:5000/upload/${uid}/${genID(14)}`, {
         method: "POST",
         body: fileInput.value
     });

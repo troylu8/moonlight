@@ -81,7 +81,6 @@ export class Song {
             play.toBeDeleted.set(null, null);
         if (playlist.cycle) playlist.cycle.addSong(this, true);
 
-        console.log("songelements", songElems);
         return songElems;
     }
 

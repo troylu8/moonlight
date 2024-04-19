@@ -32,7 +32,7 @@ class DownloadProcess {
 
         if (this.destroy) return cb(500);  // destroy request comes in while getting info 
         
-        const filename = `yt#${ytid} ${cleanFileName(info.videoDetails.title)}.mp3`
+        const filename = `${cleanFileName(info.videoDetails.title)} yt#${ytid}.mp3`
         const path = `${global.resources}/users/${uid}/songs/${filename}`;
         await fs.promises.mkdir(`${global.resources}/users/${uid}/songs`, {recursive: true});
 

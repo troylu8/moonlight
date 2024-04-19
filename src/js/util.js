@@ -33,4 +33,14 @@ async function ensurePathThen(func) {
     }
 } 
 
-module.exports = {readFileOrDefault, ensurePathThen};
+async function pathExists(path) {
+    try {
+        await fs.promises.stat(path);
+        return true;
+    } catch (err) {
+        if (err.code === "ENOENT") return false;
+        throw err;
+    }
+}
+
+module.exports = {readFileOrDefault, ensurePathThen, pathExists};

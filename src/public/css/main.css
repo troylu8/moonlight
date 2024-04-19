@@ -20,7 +20,7 @@
 
     height: 100%;
 
-    margin-top: 15px;
+    padding-top: 20px;
     gap: 15px;
 }
 
@@ -29,6 +29,8 @@
     justify-content: space-between;
     align-items: center;
     margin-right: 15px;
+
+    position: relative;
 }
 
 .song__left, .song__right {
@@ -63,8 +65,6 @@
 .song__icon svg {
     width: 20px;
     height: 20px;
-
-    position: relative;
 }
 
 .playable .song__icon svg {
@@ -95,8 +95,15 @@
 }
 
 .error {
+    cursor: pointer;
+}
+.error span  {
     opacity: 0.7;
     text-decoration: line-through;
+    transition: 0.2s;
+}
+.error:hover span {
+    opacity: 0.3;
 }
 
 .playable .tooltip {
@@ -104,4 +111,9 @@
 }
 .error .tooltip, .active .tooltip {
     visibility: visible;
+}
+
+.resolve {
+    display: flex;
+    flex-direction: column;
 }
