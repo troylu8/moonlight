@@ -3,14 +3,16 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
-const db = require('better-sqlite3')(__dirname + "/../users.db");
+// const db = require('better-sqlite3')(__dirname + "/../users.db");
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database(__dirname + "/../users.db");
 
 
 const createJWT = promisify(jwt.sign);
 
 const router = express.Router();
 
-db.pragma('journal_mode = WAL');
+// db.pragma('journal_mode = WAL');  USE WITH BETTER SQLITE
 db.prepare("CREATE TABLE IF NOT EXISTS users (uid TEXT, username TEXT, hash TEXT, userdata TEXT)").run();
 
 const secretKey = fs.readFileSync(__dirname + "/../auth/secret.key", "utf8");
@@ -36,12 +38,15 @@ router.post("/create-account-dir/:uid/:username", express.text(), async (req, re
                     "songs": {}
                 }
             })}' 
-    `).run();
+    `)
+    .run( async (err) => {
+        if (err) throw err;
+        res.status(200).end(await createJWT({uid: req.params["uid"], username: req.params["username"]}, secretKey));
+    })
 
-    res.status(200).end(await createJWT({uid: req.params["uid"], username: req.params["username"]}, secretKey));
 })
 
-router.post("/get-jwt/:username", express.text(), async (req, res) => {
+router.post("/sign-in/:username", express.text(), async (req, res) => {
     const row = db.prepare(`SELECT uid, hash FROM users WHERE username=${req.params["username"]}`).get();
     if (!row) return res.status(404).end();
 

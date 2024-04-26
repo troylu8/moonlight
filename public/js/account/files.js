@@ -1,10 +1,31 @@
 import { genID } from './account.js';
+const fs = require('fs');
+const { randomBytes } = require("crypto");
+const { promisify } = require("util");
+// const sqlite3 = require('sqlite3').verbose();
+
+global.resources = __dirname + "/resources";
+console.log(global.resources);
 
 const db = require('better-sqlite3')(global.resources + "/local.db");
-const fs = require('fs');
 
-db.pragma('journal_mode = WAL');
-db.prepare("CREATE TABLE IF NOT EXISTS local (key TEXT, value TEXT)").run();
+
+// let db; 
+// let runAsync;
+// let getAsync;
+
+// setTimeout(() => {
+//     db = new sqlite3.Database(global.resources + "/local.db");
+//     db.prepare("CREATE TABLE IF NOT EXISTS local (key TEXT, value TEXT)").run();
+
+//     runAsync = promisify(db.run);
+//     getAsync = promisify(db.get);
+
+//     console.log(typeof runAsync);
+// } );
+
+db.pragma('journal_mode = WAL'); //USE WITH BETTER SQLITE
+
 
 const defaultUserData = JSON.stringify({
         "settings": {
@@ -95,21 +116,28 @@ export function setLocalData(key, value) {
 
     db.prepare(`DELETE FROM local WHERE key='${key}' `).run();
     db.prepare(`INSERT INTO local VALUES ( '${key}', ${str} ) `).run();
+    // await runAsync(`DELETE FROM local WHERE key='${key}' `);
+    // await runAsync(`INSERT INTO local VALUES ( '${key}', ${str} ) `);
 }
 
 export function getLocalData(key) {
-    const res = db.prepare(`SELECT value FROM local WHERE key='${key}' `).get();
-    return res? res.value : undefined;
+    
+    const row = db.prepare(`SELECT value FROM local WHERE key='${key}' `).get();
+    // await getAsync(`SELECT value FROM local WHERE key='${key}' `);
+    return row? row.value : undefined;
 }
 
 export function printLocalData() {
-    console.log(db.prepare("SELECT * FROM local").all());
+    db.each("SELECT * FROM local", (err, row) => {
+        console.log(row);
+    })
 }
 
 export async function readSavedJWT() {
     const hash = getLocalData("saved jwt");
-    if (hash === null) console.log("no jwt saved");
-    return hash === null? undefined : decrypt(hash);
+    console.log("saved jwt: ", hash);
+    if (hash == null) console.log("no jwt saved");
+    return hash == null? undefined : decrypt(hash);
 }
 
 export async function writeSavedJWT(jwt) { setLocalData("saved jwt", jwt? encrypt(jwt) : ""); }
@@ -172,6 +200,3 @@ function isStraggler(path, uid) {
     return false;
 }
 const inSongFolder = (path, uid) => resolve(dirname(path)) === resolve(`${global.resources}/users/${uid}/songs`);
-
-
-module.exports = router;

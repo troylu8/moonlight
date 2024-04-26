@@ -12,13 +12,10 @@ document.getElementById("user-settings-btn").addEventListener("click", () => {
     accDropdown.close();
 });
 
-
-for (const elem of document.getElementsByClassName("settings-field")) {    
-    const updateMap = () => data.settings[elem.id] = elem.checked ?? elem.value;
-
-    elem.addEventListener("change", updateMap);
-    updateMap();
+export function initSettings() {
+    for (const elem of document.getElementsByClassName("settings-field")) {    
+        const updateMap = () => data.settings[elem.id] = elem.checked ?? elem.value;
+        elem.addEventListener("change", updateMap);
+        updateMap();
+    }
 }
-
-
-console.log(data.settings);

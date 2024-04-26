@@ -4,6 +4,7 @@ import { PlaylistCycle } from "../play.js";
 import { updateSongEntries } from "../settings/songSettings.js";
 import * as acc from "./account.js";
 import { readUserdata, writeUserdata } from "./files.js";
+import { initSettings } from "../settings/settings.js";
 
 export class Song {
     constructor(id, options, initializeAsSynced) {
@@ -322,6 +323,7 @@ export async function loadLocaldata(uid) {
     songElements.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);
 
     data.settings = json.settings;
+    initSettings();
     play.setShuffle(json.settings.shuffle);
     play.audio.volume = json.settings.volume;
 

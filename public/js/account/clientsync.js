@@ -29,7 +29,7 @@ const extractAllToPromise = promisify(extractAllToAsync);
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 export async function syncToServer(uid, changes) {
-    const resourcesDir = join(global.resources, "users", req.params["uid"]);
+    const resourcesDir = join(global.resources, "users", uid);
 
     console.log("client backend got: ", changes);
 
@@ -62,7 +62,7 @@ export async function syncToServer(uid, changes) {
 
     const newSongs = await axios({
         method: 'POST',
-        url: "https://localhost:5001/sync/" + req.params["uid"], 
+        url: "https://localhost:5001/sync/" + uid, 
         data: zip.toBuffer(), 
         maxContentLength: Infinity,
         maxBodyLength: Infinity,

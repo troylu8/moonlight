@@ -61,7 +61,7 @@ export async function fetchGuestData() {
 export function isGuest() { return uid === guestID; }
 
 window.addEventListener("load", async () => {
-    const jwt = readSavedJWT();
+    const jwt = await readSavedJWT();
     console.log("cache is", jwt);
 
     if (jwt === "guest") await fetchGuestData();

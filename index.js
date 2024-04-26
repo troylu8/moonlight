@@ -2,14 +2,9 @@ const { app, BrowserWindow } = require('electron/main')
 const express = require("express");
 const cors = require('cors');
 
-
-global.resources = __dirname + "/../public/resources";
-
-
-
 console.log("ready!");
 
-app.whenReady().then(() => {
+app.whenReady().then( async () => {
     const win = new BrowserWindow({
         width: 800,
         height: 600,
@@ -21,8 +16,12 @@ app.whenReady().then(() => {
 
     win.setMenu(null);
 
-    win.loadFile('./public/index.html');
-    win.webContents.openDevTools();
+    try {
+        await win.loadFile('./public/index.html');
+        win.webContents.openDevTools();    
+    } catch (err) {
+        console.log(err);
+    }
 });
 
 app.on('window-all-closed', () => app.quit());
