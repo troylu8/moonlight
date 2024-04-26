@@ -2,16 +2,32 @@
     "name": "yue",
     "version": "0.0.1",
     "description": "",
-    "main": "index.js",
-    "scripts": {
-        "ui": "nw src/",
-        "prod": "nwbuild -p win64 --buildDir dist/ src/"
+    "// use this as the main field with nw:": "public/index.html",
+    "// for nw   window": {
+        "title": "window title",
+        "width": 500,
+        "height": 500,
+        "position": "center"
     },
+    "main": "index.js",
     "keywords": [],
     "author": "",
     "license": "ISC",
+    "scripts": {
+        "start": "electron ."
+    },
     "dependencies": {
-        "nw": "^0.44.1-sdk",
-        "nw-builder": "^3.5.7"
+        "adm-zip": "^0.5.6",
+        "axios": "^1.6.8",
+        "bcrypt": "^5.1.1",
+        "better-sqlite3": "^9.5.0",
+        "cors": "^2.8.5",
+        "express": "^4.18.3",
+        "jsonwebtoken": "^9.0.2",
+        "music-metadata": "^7.14.0",
+        "ytdl-core": "^4.11.5"
+    },
+    "devDependencies": {
+        "electron": "^30.0.1"
     }
 }

@@ -1,0 +1,29 @@
+{
+    "settings": {
+        "shuffle": false,
+        "volume": 0.5
+    },
+    "curr": {},
+    "trashqueue": [],
+    "playlists": {
+        "mZrQnYeiuAfuOw": {
+            "title": "new playlist",
+            "desc": "",
+            "_syncStatus": "new",
+            "songs": [
+                "yt#LaEgpNBt-bQ"
+            ]
+        }
+    },
+    "songs": {
+        "yt#LaEgpNBt-bQ": {
+            "title": "【MV】M@GICAL☆CURE! LOVE ♥ SHOT! / SAWTOWNE feat. Hatsune Miku",
+            "artist": "SAWTOWNE",
+            "filename": "【MV】M@GICAL☆CURE! LOVE ♥ SHOT! - SAWTOWNE feat. Hatsune Miku yt#LaEgpNBt-bQ.mp3",
+            "size": 3471362,
+            "duration": 218,
+            "_syncStatus": "new",
+            "state": "error"
+        }
+    }
+}

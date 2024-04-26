@@ -1,0 +1,119 @@
+#main-div {
+    background-color: var(--background-color-main);
+    position: fixed;
+    left: var(--playlists-div-width);
+    right: var(--sidebar-div-width);
+    top: var(--options-div-height);
+    bottom: var(--play-div-height);
+    padding: 15px;
+
+    display: flex;
+    flex-direction: column;
+
+    transition: 0.5s;
+}
+
+.playlist__group {
+    display: none;
+    flex-direction: column;
+    overflow-x: hidden;
+
+    height: 100%;
+
+    padding-top: 20px;
+    gap: 15px;
+}
+
+.song {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 15px;
+
+    position: relative;
+}
+
+.song__left, .song__right {
+    display: flex;
+    align-items: center;
+}
+.song__left {
+    gap: 15px;
+    overflow: hidden;
+}
+.song__right {
+    justify-content: end;
+    gap: 50px;
+}
+
+.playable .song__icon, .song__options {
+    visibility: hidden;
+}
+.playable:hover .song__icon, .song:hover .song__options {
+    visibility: visible;
+}
+.song__options:hover svg {
+    stroke: var(--accent-color);
+    fill: var(--accent-color);
+}
+
+.song__icon {
+    min-width: 23px;
+    width: 23px;
+    height: 20px;
+}
+.song__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.playable .song__icon svg {
+    margin-left: 0;
+    margin-right: 3px;
+
+    transition: margin 0.1s;
+}
+.playable .song__icon:hover svg {
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+.song__title, .song__artist {
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+}
+.song__title {
+    font-weight: bold;
+}
+.song__artist {
+    font-weight: 400;
+}
+
+.playable .song__icon:hover svg, .song__options:hover svg {
+    stroke: var(--accent-color);
+}
+
+.error {
+    cursor: pointer;
+}
+.error span  {
+    opacity: 0.7;
+    text-decoration: line-through;
+    transition: 0.2s;
+}
+.error:hover span {
+    opacity: 0.3;
+}
+
+.playable .tooltip {
+    visibility: hidden;
+}
+.error .tooltip, .active .tooltip {
+    visibility: visible;
+}
+
+.resolve {
+    display: flex;
+    flex-direction: column;
+}

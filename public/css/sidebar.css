@@ -1,0 +1,114 @@
+#sidebar-div {
+
+    background-color: var(--background-color-side);
+
+    position: fixed;
+    right:  calc(var(--sidebar-div-width) - 350px); 
+    top: 0;
+    bottom: var(--play-div-height);
+    width: 350px;
+
+    display: flex;
+    flex-direction: column;
+
+    transition: 0.5s;
+}
+
+#sidebar__content {
+    padding: 20px;
+    height: 100%;
+}
+
+#song-settings, #playlist-settings {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+
+    height:100%;
+}
+
+#song-settings__metadata, #playlist-settings__metadata {
+    font-size: smaller;
+
+    display: flex;
+    margin-bottom: 20px;
+
+    opacity: 80%;
+    transition: 0.2s;
+}
+#song-settings__metadata:hover {
+    cursor: pointer;
+    opacity: 100%;
+}
+
+#song-settings__filename {
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+#song-settings__size {
+    text-wrap: nowrap;
+}
+
+#settings {
+    display: none;
+    flex-direction: column;
+}
+
+#song-settings__playlists {
+    display: flex;
+    flex-direction: column;
+
+    min-height: 60px;
+    height: 100%;
+    overflow-y: auto;
+
+    border: solid 2px white;
+}
+
+#user-settings {
+    display: none;
+    flex-direction: column;
+}
+
+#sidebar__collapse {
+    margin: 10px;
+    width: 25px;
+    height: 25px;
+    background-color: #00000000;
+}
+
+.settings__field p {
+    margin-top: 5px;
+    font-size: smaller;
+    color: var(--accent-color);
+}
+
+.settings__field textarea {
+    font-size: large;
+
+    height: 1em;
+    width: 100%;
+    
+    padding: 0;
+    background-color: var(--background-color-side);
+    color: var(--accent-color);
+    border-radius: 0;
+    outline: none;
+    border: none;
+
+    overflow-y: hidden;
+    resize: none;
+}
+
+.settings__field textarea:focus, .settings__field textarea:hover {
+    box-shadow: 0 2px 0 var(--accent-color);
+}
+
+#song-settings__delete, #playlist-settings__delete {
+    align-self: center;
+    padding: 4px 5px;
+    background-color: var(--error-color);
+}

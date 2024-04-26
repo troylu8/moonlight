@@ -1,0 +1,94 @@
+#options-div {
+    background-color: var(--background-color-main);
+
+    position: fixed;
+    top: 0;
+    left: var(--playlists-div-width);
+    right: var(--sidebar-div-width);
+    height: var(--options-div-height);
+
+    z-index: 2;
+
+    display: flex;
+    justify-content: end;
+    align-items: center;
+
+    padding-right: 10px;
+    gap: 10px;
+
+    transition: 0.5s;
+}
+
+.options-btn {
+    position: relative;
+    cursor: pointer;
+
+    width: 25px;
+    height: 25px;
+}
+.options-btn svg {
+    min-width: 100%;
+    min-height: 100%;
+}
+
+
+#new__dropdown, #account__dropdown {    
+    position: absolute;
+    top: 30px;
+    right: 0;
+
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+
+    background-color: var(--background-color);
+    border-radius: 10px;
+
+    cursor: default;
+}
+#account__dropdown {
+    gap: 0;
+}
+
+#paste-link {
+    display: flex;
+    gap: 5px;
+}
+
+#song-upload, #paste-link__btn {
+    padding: 4px 5px;
+    background-color: var(--accent-color);
+}
+#new__dropdown {
+    overflow: hidden;
+}
+#loading-bar {
+    background-color: var(--accent-color);
+    
+    width: 0%;
+    height: 6px;
+
+    transition: 0.2s;
+
+    position: absolute;
+    margin: 0;
+    bottom: 0;
+    left: 0;
+}
+
+#create-account-from {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#from__submit {
+    align-self: center;
+    padding: 4px 5px;
+}
+
+#song-settings__delete__error, #playlist-settings__delete__error {
+    align-self: center;
+}
