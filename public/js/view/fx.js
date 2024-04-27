@@ -135,7 +135,6 @@ for (const h3 of document.getElementsByTagName("h3")) {
  * @returns {HTMLElement} the created tooltip
  */
 export function setToolTip(elem, innerHTML, gap) {
-    console.log("tooltip set!");
     const tooltip = elem.tooltip ?? document.createElement("div");
     elem.tooltip = tooltip;
 
@@ -178,7 +177,6 @@ export function removeTooltip(elem) {
 
 // ERROR DISPLAYS
 for (const errorElem of document.getElementsByClassName("error-msg")) {
-    console.log(document.getElementsByClassName("error-msg"));
     errorElem.showError = (text) => {
         // blink effect if we get the error repeatedly 
         if (errorElem.innerHTML !== "") {

@@ -305,7 +305,6 @@ export async function loadLocaldata(uid) {
     }
     data = new Data();
     
-    
     const json = await readUserdata(uid);
     
     data.trashqueue = new Map(json.trashqueue);
@@ -327,7 +326,7 @@ export async function loadLocaldata(uid) {
     play.setShuffle(json.settings.shuffle);
     play.audio.volume = json.settings.volume;
 
-    if (Array.from(data.songs)[0])
+    // TODO: remove
+    if (Array.from(data.songs)[0]) 
         Array.from(data.songs)[0][1].setState("error");
-    console.log(Array.from(data.songs)[0][1]);   
 }

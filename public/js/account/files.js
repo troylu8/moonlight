@@ -1,11 +1,11 @@
 import { genID } from './account.js';
+const { dirname, basename, resolve } = require("path");
 const fs = require('fs');
-const { randomBytes } = require("crypto");
+const { randomBytes, createCipheriv, createDecipheriv } = require("crypto");
 const { promisify } = require("util");
 // const sqlite3 = require('sqlite3').verbose();
 
 global.resources = __dirname + "/resources";
-console.log(global.resources);
 
 const db = require('better-sqlite3')(global.resources + "/local.db");
 
@@ -25,17 +25,19 @@ const db = require('better-sqlite3')(global.resources + "/local.db");
 // } );
 
 db.pragma('journal_mode = WAL'); //USE WITH BETTER SQLITE
+db.prepare("CREATE TABLE IF NOT EXISTS local (key TEXT, value TEXT)").run();
 
 
 const defaultUserData = JSON.stringify({
+        // other default settings should be indicated in index.html - theyre applied in initSettings() 
         "settings": {
             "shuffle": false,
-            "volume": 0.5
+            "volume": 0.5,
         },
         "curr": {},
-        "trashqueue": [],
         "playlists": {},
-        "songs": {}
+        "songs": {},
+        "trashqueue": [],
     }, 
     undefined, 4
 );
@@ -49,12 +51,10 @@ async function readFileOrDefault(path, defaultData, encoding) {
         return await fs.promises.readFile(path, encoding);
     } catch (err) {
         if (err.code === "ENOENT") {
-                
-            console.log("writing as ", encoding);
             
             await fs.promises.mkdir(dirname(path), {recursive: true});
             await fs.promises.writeFile(path, defaultData, encoding);
-
+            
             return defaultData;
         }
         else throw err;
@@ -85,29 +85,36 @@ async function pathExists(path) {
 }
 
 let secretKey;
-readFileOrDefault(global.resources + "/client.key", randomBytes(32), "hex")
-    .then(data => {
-        secretKey = data instanceof Buffer? data : Buffer.from(data, "hex");
-        console.log("client secret key:", secretKey, secretKey.byteLength);
-    })
+export async function readKey() {
+    const data = await readFileOrDefault(global.resources + "/client.key", randomBytes(32), "hex");
+    return secretKey = data instanceof Buffer? data : Buffer.from(data, "hex");
+}
+
 
 function encrypt(text) {
+    if (!text) return;
+
     const iv = randomBytes(16);
-    
-    const cipher = createCipheriv("aes256", secretKey, iv);
+
+    const cipher = createCipheriv("aes-256-gcm", secretKey, iv);
 
     return  iv.toString("hex") + ":" + 
-            cipher.update(text, "utf8", "hex") +
-            cipher.final("hex")
+            cipher.update(text, "utf8", "hex") + cipher.final("hex") + ":" +
+            cipher.getAuthTag().toString("hex");
 }
 
 function decrypt(text) {
-    [ iv, ciphertext ] = text.split(":");
+    if (!text) return;
 
-    const decipher = createDecipheriv("aes256", secretKey, Buffer.from(iv, "hex"));
+
+    const [ iv, ciphertext, authTag ] = text.split(":");
+
+    const decipher = createDecipheriv("aes-256-gcm", secretKey, Buffer.from(iv, "hex"));
+    decipher.setAuthTag(Buffer.from(authTag, "hex"));
 
     return decipher.update(ciphertext, "hex", "utf8") + decipher.final("utf8");
 }
+    
 
 export function setLocalData(key, value) {
 
@@ -121,7 +128,6 @@ export function setLocalData(key, value) {
 }
 
 export function getLocalData(key) {
-    
     const row = db.prepare(`SELECT value FROM local WHERE key='${key}' `).get();
     // await getAsync(`SELECT value FROM local WHERE key='${key}' `);
     return row? row.value : undefined;
@@ -133,14 +139,12 @@ export function printLocalData() {
     })
 }
 
-export async function readSavedJWT() {
-    const hash = getLocalData("saved jwt");
-    console.log("saved jwt: ", hash);
-    if (hash == null) console.log("no jwt saved");
-    return hash == null? undefined : decrypt(hash);
+export function readSavedJWT() {
+    return decrypt(getLocalData("saved jwt"));
 }
-
-export async function writeSavedJWT(jwt) { setLocalData("saved jwt", jwt? encrypt(jwt) : ""); }
+export async function writeSavedJWT(jwt) { 
+    setLocalData("saved jwt", encrypt(jwt)); 
+}
 
 export async function readUserdata(uid) {
     return JSON.parse( await readFileOrDefault(
@@ -171,9 +175,9 @@ function insertSID(path, sid) {
 }
 
 
-export async function uploadSongFile(uid, path, createSongData) {
-    let dest = `${global.resources}/users/${req.params["uid"]}/songs/${basename(path)}`;
-    if (pathExists(dest)) dest = insertSID(dest, req.params["sid"]);
+export async function uploadSongFile(uid, sid, path, createSongData) {
+    let dest = `${global.resources}/users/${uid}/songs/${basename(path)}`;
+    if (pathExists(dest)) dest = insertSID(dest, sid);
 
     const songData = createSongData ? {
         id: genID(14),
@@ -184,8 +188,8 @@ export async function uploadSongFile(uid, path, createSongData) {
         duration: (await parseFile(req.body)).format.duration
     } : undefined;
 
-    if (inSongFolder(path, req.params["uid"])) {
-        if (isStraggler(path, req.params["uid"])) return songData;
+    if (inSongFolder(path, uid)) {
+        if (isStraggler(path, uid)) return songData;
         return "another song is using this file!";
     } 
 

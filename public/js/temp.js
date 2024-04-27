@@ -14,8 +14,7 @@ document.getElementById("info__title").onclick = () => {
     userdata.data.saveDataLocal();
 }
 document.getElementById("info__artist").onclick = () => {
-    
-    if (acc.username && settings.get("stay-signed-in")) {
+    if (userdata.data.settings["stay-signed-in"]) {
         console.log("caching jwt");
         writeSavedJWT(acc.isGuest()? "guest" : acc.jwt);
     }

@@ -1,6 +1,8 @@
 import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
-import { readSavedJWT, getLocalData, setLocalData } from "./files.js";
+import { readSavedJWT, getLocalData, setLocalData, readKey } from "./files.js";
+import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
+
 
 /**
  * @param {number} len 
@@ -33,7 +35,7 @@ export let username;
 /** @type {string} */
 export let jwt;
 
-async function setAccInfo(JWT, UID, USERNAME) {
+function setAccInfo(JWT, UID, USERNAME) {
     if (JWT === "guest") {
         if (!guestID && !fetchGuestID() ) {
             console.log("no guest id, making one");
@@ -53,7 +55,7 @@ async function setAccInfo(JWT, UID, USERNAME) {
 export function clearAccInfo() { jwt = uid = username = null; }
 
 export async function fetchGuestData() {
-    await setAccInfo("guest");
+    setAccInfo("guest");
     console.log("loading", guestID);
     await loadLocaldata(guestID);
 }
@@ -61,13 +63,16 @@ export async function fetchGuestData() {
 export function isGuest() { return uid === guestID; }
 
 window.addEventListener("load", async () => {
-    const jwt = await readSavedJWT();
-    console.log("cache is", jwt);
+    await readKey();
+
+    const jwt = readSavedJWT();
+    console.log("saved jwt: ", jwt);
+    if (!jwt) return;
 
     if (jwt === "guest") await fetchGuestData();
     else {
         const info = parseJWT(jwt);
-        await setAccInfo(jwt, info.uid, info.username);
+        setAccInfo(jwt, info.uid, info.username);
         await loadLocaldata(uid);
     }
     
@@ -109,7 +114,7 @@ export async function fetchAccData(USERNAME, PASSWORD) {
     if (jwtReq.status === 401) return "wrong password"
     const jwt = await jwtReq.text();
 
-    await setAccInfo(jwt, parseJWT(jwt).uid, USERNAME);
+    setAccInfo(jwt, parseJWT(jwt).uid, USERNAME);
     await loadLocaldata(uid);
 
     return "success";

@@ -1,8 +1,9 @@
 node_modules
-src/node_modules
-src/public/resources
-src/server/users
-src/server/auth
+public/resources
+server/users
+server/auth
 *.key
-src/server/*.sqlite
-src/server/userfiles
+server/*.db
+server/*.db-shm
+server/*.db-wal
+server/userfiles

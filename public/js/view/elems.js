@@ -108,7 +108,7 @@ export function createSongEntry(song, playlist) {
 
         resolve__link.addEventListener("click", () => resolve__link__input.click());
         resolve__link__input.addEventListener("change", async () => {
-            uploadSongFile(uid, resolve__link__input.value);
+            uploadSongFile(uid, song.id, resolve__link__input.value);
             song.filename = basename(resolve__link__input.value);
             song.setState("playable");
         });
@@ -146,7 +146,7 @@ export function createPlaylistCheckboxDivs(playlist) {
     const option = createElement("div", null, "song-settings__playlists__option", playlistCheckboxes);
     playlist.checkboxDiv = option;
 
-    const checkbox = createElement("input", "song-settings__playlist:" + playlist.id, option);
+    const checkbox = createElement("input", "song-settings__playlist:" + playlist.id, null, option);
     checkbox.type = "checkbox";
     checkbox.playlist = playlist;
     checkbox.addEventListener("change", () => {        

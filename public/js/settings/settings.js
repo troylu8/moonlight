@@ -3,6 +3,11 @@ import { accDropdown } from "../view/signinElems.js";
 import {data} from "../account/userdata.js";
 
 
+const defaultSettings = {
+    
+}
+
+
 const generalSettings = document.getElementById("settings");
 document.getElementById("settings-btn").addEventListener("click", () => setSidebarContent(generalSettings));
 
@@ -18,4 +23,5 @@ export function initSettings() {
         elem.addEventListener("change", updateMap);
         updateMap();
     }
+    console.log(data.settings);
 }

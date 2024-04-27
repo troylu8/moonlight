@@ -11,17 +11,15 @@ app.whenReady().then( async () => {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
-        }
+        },
+        show: false
     });
 
     win.setMenu(null);
 
-    try {
-        await win.loadFile('./public/index.html');
-        win.webContents.openDevTools();    
-    } catch (err) {
-        console.log(err);
-    }
+    await win.loadFile('./public/index.html');
+    win.webContents.openDevTools();    
+    win.maximize();
 });
 
 app.on('window-all-closed', () => app.quit());
