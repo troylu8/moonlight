@@ -27,26 +27,28 @@
     height:100%;
 }
 
-#song-settings__metadata, #playlist-settings__metadata {
+#song-settings__metadata, #playlist-settings__metadata, .straggler__basename {
     font-size: smaller;
-
-    display: flex;
-    margin-bottom: 20px;
-
     opacity: 80%;
     transition: 0.2s;
 }
-#song-settings__metadata:hover {
+#song-settings__metadata, #playlist-settings__metadata {
+    display: flex;
+    margin-bottom: 20px;
+}
+#song-settings__metadata:hover, .straggler__basename:hover {
     cursor: pointer;
     opacity: 100%;
 }
 
-#song-settings__filename {
+#song-settings__filename, .straggler__basename {
     overflow: hidden;
     text-wrap: nowrap;
     text-overflow: ellipsis;
 }
-
+.straggler__basename {
+    width: 100%;
+}
 
 #song-settings__size {
     text-wrap: nowrap;
@@ -63,19 +65,22 @@
 
     height: 100%;
 }
-#stragglers__list {
-    max-height: 150px;
-}
 
 #song-settings__playlists, #stragglers__list {
     display: flex;
     flex-direction: column;
 
-    min-height: 60px;
-    height: 100%;
     overflow-y: auto;
 
     border: solid 2px white;
+}
+#song-settings__playlists {
+    height: 100%;
+    min-height: 60px;
+}
+#stragglers__list {
+    padding: 5px;
+    max-height: 150px;
 }
 
 #user-settings {
@@ -128,13 +133,7 @@
     flex-direction: row-reverse;
 }
 
-.straggler__basename {
-    overflow: hidden;
-    text-wrap: nowrap;
-    text-overflow: ellipsis;
 
-    width: 100%;
-}
 
 .straggler__size {
     white-space: nowrap;

@@ -1,4 +1,5 @@
-import { genID } from './account.js';
+import { deleteStraggler } from '../view/elems.js';
+import * as acc from './account.js';
 import { data } from './userdata.js';
 const { dirname, basename, resolve } = require("path");
 const fs = require('fs');
@@ -75,7 +76,7 @@ async function ensurePathThen(func) {
     }
 } 
 
-async function pathExists(path) {
+export async function pathExists(path) {
     try {
         await fs.promises.stat(path);
         return true;
@@ -164,11 +165,13 @@ export async function writeUserdata(uid, userdataStr) {
     );
 }
 
-export async function deleteSong(uid, basename) {
-    await fs.promises.unlink(`${global.resources}/users/${uid}/songs/${basename}`);
+
+
+export async function deleteSong(basename) {
+    await fs.promises.unlink(global.userDir + "/songs/" + basename);
 }
-export async function getSongSize(uid, basename) {
-    return (await fs.promises.stat(`${global.resources}/users/${uid}/songs/${basename}`)).size;
+export async function getSongSize(path) {
+    return (await fs.promises.stat(path)).size;
 }
 
 
@@ -188,33 +191,40 @@ function insertSID(path, sid) {
  */
 
 export async function uploadSongFile(uid, sid, path, createSongData) {
-    let dest = `${global.resources}/users/${uid}/songs/${basename(path)}`;
+    const originalBase = basename(path);
+
+
+    let dest = global.userDir + "/songs/" + originalBase;
     if (await pathExists(dest)) dest = insertSID(dest, sid);
     
-    const base = basename(dest);
+    const newBase = basename(dest);
 
     const songData = createSongData ? {
-        id: genID(14),
-        filename: base,
-        title: base.replace(/\.[^\/.]+$/, ""), // regex to remove extensions
+        id: acc.genID(14),
+        filename: newBase,
+        title: newBase.replace(/\.[^\/.]+$/, ""), // regex to remove extensions
         artist: "uploaded by you",
-        size: await getSongSize(uid),
+        size: await getSongSize(path),
         duration: (await parseFile(req.body)).format.duration
     } : undefined;
 
-    if (inSongFolder(path, uid)) 
-        return fileInUse(base)? "file in use" : songData ?? base;
+    if (inSongFolder(path)) {
+        if (fileInUse(originalBase)) return "file in use";
+
+        deleteStraggler(originalBase);
+        return songData ?? originalBase;
+    }
 
     const data = await fs.promises.readFile(path);
     await ensurePathThen(async () => await fs.promises.writeFile(dest, data));
 
-    return songData ?? base;
+    return songData ?? newBase;
 }
 
 function fileInUse(basename) {
     for (const song of data.songs.values()) 
         if (song.filename === basename) return true;
-    return true;
+    return false;
 }
 
-const inSongFolder = (path, uid) => resolve(dirname(path)) === resolve(`${global.resources}/users/${uid}/songs`);
+const inSongFolder = (path) => resolve(dirname(path)) === resolve(global.userDir + "/songs");

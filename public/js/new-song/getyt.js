@@ -35,8 +35,8 @@ class DownloadProcess {
         if (this.destroy) return cb();  // destroy request comes in while getting info 
         
         const filename = `${cleanFileName(info.videoDetails.title)} yt#${ytid}.mp3`
-        const path = `${global.resources}/users/${uid}/songs/${filename}`;
-        await fs.promises.mkdir(`${global.resources}/users/${uid}/songs`, {recursive: true});
+        const path = global.userDir + "/songs/" + filename;
+        await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
 
         const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
         const writeStream = fs.createWriteStream(path);

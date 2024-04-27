@@ -3,9 +3,11 @@ import { titleElem as playingTitleElem, artistElem as playingArtistElem } from "
 import { data, Song } from "../account/userdata.js";
 import { initDeleteBtn } from "../view/fx.js";
 import { getSizeDisplay } from "../view/elems.js";
-
+import { uid } from "../account/account.js";
+const { ipcRenderer } = require("electron");
 
 export const songSettings = document.getElementById("song-settings");
+
 
 const filename = document.getElementById("song-settings__filename");
 const size = document.getElementById("song-settings__size");
@@ -89,6 +91,10 @@ artistArea.addEventListener("input", () => {
     song__artistLive.textContent = artistArea.value;
 });
 
+document.getElementById("song-settings__metadata").addEventListener("click", () => {
+    
+    ipcRenderer.invoke("show-file", global.userDir + "/songs/" + currentlyEditing.filename); 
+});
 
 initDeleteBtn(deleteBtn, deleteErr, () => {
     currentlyEditing.delete();

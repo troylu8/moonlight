@@ -324,8 +324,4 @@ export async function loadLocaldata(uid) {
     initSettings();
     play.setShuffle(json.settings.shuffle);
     play.audio.volume = json.settings.volume;
-
-    // TODO: remove
-    if (Array.from(data.songs)[0]) 
-        Array.from(data.songs)[0][1].setState("error");
 }

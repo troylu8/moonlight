@@ -52,6 +52,8 @@ function setAccInfo(JWT, UID, USERNAME) {
         uid = UID ?? uid;
         username = USERNAME ?? username;
     }
+    
+    global.userDir = global.resources + "/users/" + uid;
 }
 export function clearAccInfo() { jwt = uid = username = null; }
 
