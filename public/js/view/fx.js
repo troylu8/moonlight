@@ -176,18 +176,14 @@ export function removeTooltip(elem) {
 });
 
 // ERROR DISPLAYS
-for (const errorElem of document.getElementsByClassName("error-msg")) {
-    errorElem.showError = (text) => {
-        // blink effect if we get the error repeatedly 
-        if (errorElem.innerHTML !== "") {
-            errorElem.style.opacity = "0";
-            setTimeout(() => errorElem.style.opacity = "1", 50);        
-        }
-        errorElem.innerHTML = text;
+export function showError(errorElem, text) {
+    // blink effect if we get the error repeatedly 
+    if (errorElem.innerHTML !== "") {
+        errorElem.style.opacity = "0";
+        setTimeout(() => errorElem.style.opacity = "1", 50);        
     }
+    errorElem.innerHTML = text;
 }
-
-
 
 for (const s of document.getElementsByClassName("slider")) {
     setSliderColors(s, "var(--accent-color)", "var(--primary-color)");

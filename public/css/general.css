@@ -60,13 +60,6 @@ input[type='range'] {
     -webkit-appearance: none;
 }
 
-.error-msg {
-    font-size: small;
-    color: var(--error-color);
-
-    margin-top: 0;
-}
-
 input[type="text"] {
     background-color: var(--primary-color);
     color: var(--accent-color);
@@ -190,4 +183,12 @@ input[type="file"] {
     text-decoration: underline;
     text-underline-offset: 5px;
     text-decoration-thickness: 2px;
+}
+
+.error-msg {
+    font-size: small;
+    color: var(--error-color);
+
+    margin-top: 0;
+    padding: 0;
 }

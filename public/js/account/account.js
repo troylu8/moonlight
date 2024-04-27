@@ -2,6 +2,7 @@ import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
 import { readSavedJWT, getLocalData, setLocalData, readKey } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
+import { showError } from "../view/fx.js";
 
 
 /**
@@ -134,10 +135,10 @@ function parseJWT(jwt) {
 const syncBtn = document.getElementById("sync");
 
 syncBtn.addEventListener("click", () => syncData());
-syncBtn.addEventListener("mouseenter", () => syncBtn.tooltip.lastElementChild.showError(""));
+syncBtn.addEventListener("mouseenter", () => showError(syncBtn.tooltip.lastElementChild, ""));
 
 export async function syncData() {
-    if (isGuest()) return syncBtn.tooltip.lastElementChild.showError("not&nbsp;signed&nbsp;in!")
+    if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not&nbsp;signed&nbsp;in!")
 
     const serverJSON = await getData(jwt);
     

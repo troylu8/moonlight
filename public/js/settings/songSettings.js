@@ -1,6 +1,7 @@
 import * as sidebar from "../view/sidebar.js";
 import { titleElem as playingTitleElem, artistElem as playingArtistElem } from "../play.js";
 import { data, Song } from "../account/userdata.js";
+import { showError } from "../view/fx.js";
 
 
 export const songSettings = document.getElementById("song-settings");
@@ -100,7 +101,7 @@ deleteBtn.addEventListener("click", () => {
     }
     else {
         deleteBtn.textContent = "this cannot be undone";
-        deleteError.showError("[shift + click] to delete");
+        showError(deleteError, "[shift + click] to delete");
     }
 });
 

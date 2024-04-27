@@ -174,10 +174,18 @@ function insertSID(path, sid) {
     return path.substring(0, i) + " " + sid + path.substring(i);
 }
 
+/**
+ * 
+ * @param {string} uid 
+ * @param {string} sid 
+ * @param {string} path 
+ * @param {boolean} createSongData 
+ * @returns {Promise<object | string | "file in use">} if `createSongData == true` returns song data object, else returns the final path inside resources folder
+ */
 
 export async function uploadSongFile(uid, sid, path, createSongData) {
     let dest = `${global.resources}/users/${uid}/songs/${basename(path)}`;
-    if (pathExists(dest)) dest = insertSID(dest, sid);
+    if (await pathExists(dest)) dest = insertSID(dest, sid);
 
     const songData = createSongData ? {
         id: genID(14),
@@ -189,18 +197,19 @@ export async function uploadSongFile(uid, sid, path, createSongData) {
     } : undefined;
 
     if (inSongFolder(path, uid)) {
-        if (isStraggler(path, uid)) return songData;
-        return "another song is using this file!";
+        if (isStraggler(path, uid)) return songData ?? basename(dest);
+        return "file in use";
     } 
 
     const data = await fs.promises.readFile(path);
     await ensurePathThen(async () => await fs.promises.writeFile(dest, data));
 
-    return songData;
+    return songData ?? basename(dest);
 }
 
 
 function isStraggler(path, uid) {
+    // fs.promises.readdir(global.resources + "/")
     return false;
 }
 const inSongFolder = (path, uid) => resolve(dirname(path)) === resolve(`${global.resources}/users/${uid}/songs`);

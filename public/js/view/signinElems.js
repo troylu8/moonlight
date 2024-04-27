@@ -2,6 +2,7 @@ import * as acc from "../account/account.js"
 import Dropdown from "./dropdown.js";
 import { audio } from "../play.js";
 import { writeSavedJWT } from "../account/files.js";
+import { showError } from "./fx.js";
 
 const titlescreen = document.getElementById("titlescreen");
 const primary = document.getElementById("primary");
@@ -49,7 +50,7 @@ function initAccCreator(options) {
             setTitleScreen(false);
             updateForUsername(username.value);
         }
-        else error.showError(res);
+        else showError(error, res);
     });
 
 }

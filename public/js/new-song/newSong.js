@@ -4,6 +4,7 @@ import { data, Song } from "../account/userdata.js";
 import { uid, genID } from "../account/account.js";
 import * as yt from "./getyt.js";
 import { uploadSongFile } from "../account/files.js";
+import { showError } from "../view/fx.js";
 
 
 const input = document.getElementById("paste-link__input");
@@ -21,17 +22,18 @@ let updateLoadingBarID;
 async function getyt(link) {
     link = link.trim();
     
-    if (!isValidLink(link)) return error.showError("invalid link");
+    if (!isValidLink(link)) return showError(error, "invalid link");
 
     const ytid = getYTID(link);
 
+    
     //TODO: enable this
-    // if ( data.songs["yt" + id] !== undefined ) return error.showError("yt video already downloaded");
+    // if ( data.songs["yt" + id] !== undefined ) return showError(error, "yt video already downloaded");
 
     setButtonEnabled(false, "...");
     
     if ( !(await videoExists(ytid)) ) {
-        error.showError("video doesn't exist");
+        showError(error, "video doesn't exist");
         return setButtonEnabled(true, "get");
     }
     
@@ -111,7 +113,7 @@ button.onclick = () => {
 
     if (tracking) destroy();
     else {
-        if (!data.curr.viewPlaylist) return error.showError("select a playlist to add song");
+        if (!data.curr.viewPlaylist) return showError(error, "select a playlist to add song");
         getyt(input.value);
     } 
 }
@@ -151,7 +153,7 @@ const fileInput = document.getElementById("song-upload__input");
 
 
 document.getElementById("song-upload").addEventListener("click", () => {
-    if (!data.curr.viewPlaylist) return error.showError("select a playlist to add song");
+    if (!data.curr.viewPlaylist) return showError(error, "select a playlist to add song");
     fileInput.click()
 } );
 

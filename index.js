@@ -1,6 +1,7 @@
 const { app, BrowserWindow } = require('electron/main')
 const express = require("express");
 const cors = require('cors');
+const { ipcMain, dialog } = require('electron');
 
 console.log("ready!");
 
@@ -23,6 +24,10 @@ app.whenReady().then( async () => {
 });
 
 app.on('window-all-closed', () => app.quit());
+
+
+ipcMain.handle("show-dialog", async (e, dialogOptions) => await dialog.showOpenDialog(dialogOptions));
+
 
 const server = express();
 server.use(cors());

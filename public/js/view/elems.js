@@ -2,10 +2,11 @@ import * as songSettings from "../settings/songSettings.js";
 import { togglePlay } from "../play.js";
 import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
-import { removeTooltip, setToolTip } from "./fx.js";
+import { removeTooltip, setToolTip, showError } from "./fx.js";
 import { uid } from "../account/account.js";
 import { uploadSongFile } from "../account/files.js";
-const { basename } = require('path');
+const { ipcRenderer } = require("electron");
+
 
 const OPTIONS_SVG = 
    `<svg fill="var(--primary-color)" width="20px" height="20px" viewBox="0 0 32 32" >
@@ -34,7 +35,7 @@ const iconMap = new Map([["playable", PLAY_SVG], ["active", ACTIVE_SVG], ["error
  * @param {"playable" | "active" | "error"} state
  */
 export function setEntryState(entry, state) {
-    console.log("AAAAAAA set as", state);
+    console.log("set as", state);
 
     const iconElem = entry.firstElementChild.firstElementChild;
     iconElem.innerHTML = iconMap.get(state);
@@ -44,7 +45,6 @@ export function setEntryState(entry, state) {
 
     if (state === "error")  setToolTip(entry, "[click] resolve missing file", 0);
     else                    removeTooltip(entry);
-    console.log("set tooltip to", entry.tooltip);
 }
     
 
@@ -102,16 +102,39 @@ export function createSongEntry(song, playlist) {
         
         const resolve__sync = createElement("button", null, "resolve__sync menu-option", resolve__nav, "get from server");
         const resolve__link = createElement("button", null, "resolve__link menu-option", resolve__nav, "choose file");
-        const resolve__link__input = createElement("input", null, "resolve__link", resolve__nav);
-        resolve__link__input.type = "file";
-        resolve__link__input.accept = "audio/*";
+        const resolve__err = createElement("p", null, "error-msg menu-option", resolve__nav, "");
 
-        resolve__link.addEventListener("click", () => resolve__link__input.click());
-        resolve__link__input.addEventListener("change", async () => {
-            uploadSongFile(uid, song.id, resolve__link__input.value);
-            song.filename = basename(resolve__link__input.value);
+        resolve__link.addEventListener("click", async () => {
+
+            const dialog = await ipcRenderer.invoke("show-dialog", {
+                title: "link file to song - " + song.title,
+                properties: ['openFile'],
+                filters: [
+                    { name: 'Songs', extensions: ["mp3", "wav", "m4a", "avi"] },
+                ],
+            });
+            if (dialog.canceled) return;
+
+            console.log("uploaded ", dialog.filePaths[0]);
+            
+            const res = await uploadSongFile(uid, song.id, dialog.filePaths[0]);
+            if (res === "file in use") return showError(resolve__err, "file in use");
+            
+            song.filename = res;
             song.setState("playable");
         });
+        
+        //INFO: for NW
+        // const resolve__link__input = createElement("input", null, "resolve__link", resolve__nav);
+        // resolve__link__input.type = "file";
+        // resolve__link__input.accept = "audio/*";
+
+        // resolve__link.addEventListener("click", () => resolve__link__input.click());
+        // resolve__link__input.addEventListener("change", async () => {
+        //     uploadSongFile(uid, song.id, resolve__link__input.value);
+        //     song.filename = basename(resolve__link__input.value);
+        //     song.setState("playable");
+        // });
         
     });
     songEntry.addEventListener("mouseenter", () => {

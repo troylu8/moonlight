@@ -3,6 +3,7 @@ import { Playlist, data } from "../account/userdata.js";
 import { playlistHeader, playlistDesc } from "../view/elems.js";
 import { genID } from "../account/account.js";
 import { shiftDown } from "./songSettings.js";
+import { showError } from "../view/fx.js";
 
 document.getElementById("new-playlist").addEventListener("click", () => {
     new Playlist(genID(14), { title: "new playlist" });
@@ -61,6 +62,6 @@ deleteBtn.addEventListener("click", () => {
     }
     else {
         deleteBtn.textContent = "this cannot be undone";
-        deleteError.showError("[shift + click] to delete");
+        showError(deleteError, "[shift + click] to delete");
     }
 })

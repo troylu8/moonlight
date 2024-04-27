@@ -46,7 +46,6 @@ export class Song {
     /** @param {"playable" | "active" | "error"} state  */
     setState(state) {
         this.state = state;
-        console.log("setting state of", this.songEntries);
         for (const songEntry of this.songEntries.values()) {
             songElements.setEntryState(songEntry, state);
         }
