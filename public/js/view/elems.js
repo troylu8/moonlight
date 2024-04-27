@@ -4,8 +4,9 @@ import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
 import { removeTooltip, setToolTip, showError } from "./fx.js";
 import { uid } from "../account/account.js";
-import { uploadSongFile } from "../account/files.js";
+import { deleteSong, getSongSize, uploadSongFile } from "../account/files.js";
 const { ipcRenderer } = require("electron");
+const fs = require("fs");
 
 
 const OPTIONS_SVG = 
@@ -102,7 +103,6 @@ export function createSongEntry(song, playlist) {
         
         const resolve__sync = createElement("button", null, "resolve__sync menu-option", resolve__nav, "get from server");
         const resolve__link = createElement("button", null, "resolve__link menu-option", resolve__nav, "choose file");
-        const resolve__err = createElement("p", null, "error-msg menu-option", resolve__nav, "");
 
         resolve__link.addEventListener("click", async () => {
 
@@ -118,10 +118,15 @@ export function createSongEntry(song, playlist) {
             console.log("uploaded ", dialog.filePaths[0]);
             
             const res = await uploadSongFile(uid, song.id, dialog.filePaths[0]);
-            if (res === "file in use") return showError(resolve__err, "file in use");
-            
-            song.filename = res;
-            song.setState("playable");
+            if (res === "file in use") {
+                //TODO: error notification
+
+                console.log("file in use");
+            }
+            else {
+                song.filename = res;
+                song.setState("playable");
+            }
         });
         
         //INFO: for NW
@@ -165,7 +170,7 @@ const playlistsNav = document.getElementById("playlists__nav");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
 
 /** PLAYLIST OPTION IN SONG SETTINGS */
-export function createPlaylistCheckboxDivs(playlist) {
+export function createPlaylistCheckboxEntry(playlist) {
     const option = createElement("div", null, "song-settings__playlists__option", playlistCheckboxes);
     playlist.checkboxDiv = option;
 
@@ -266,6 +271,40 @@ export function setViewPlaylist(playlist, setAsListenPlaylist) {
     
 }
 
+
+const OPEN_FOLDER_SVG = 
+   `<svg fill="var(--primary-color)" viewBox="0 0 24 24" >
+        <path d="M20 9.50195V8.74985C20 7.50721 18.9926 6.49985 17.75 6.49985H12.0247L9.64368 4.51995C9.23959 4.18393 8.73063 3.99997 8.20509 3.99997H4.24957C3.00724 3.99997 2 5.00686 1.99957 6.24919L1.99561 17.7492C1.99518 18.9921 3.00266 20 4.24561 20H4.27196C4.27607 20 4.28019 20 4.28431 20H18.4693C19.2723 20 19.9723 19.4535 20.167 18.6745L21.9169 11.6765C22.1931 10.5719 21.3577 9.50195 20.2192 9.50195H20ZM4.24957 5.49997H8.20509C8.38027 5.49997 8.54993 5.56129 8.68462 5.6733L11.2741 7.82652C11.4088 7.93852 11.5784 7.99985 11.7536 7.99985H17.75C18.1642 7.99985 18.5 8.33563 18.5 8.74985V9.50195H6.42385C5.39136 9.50195 4.49137 10.2047 4.241 11.2064L3.49684 14.1837L3.49957 6.24971C3.49971 5.8356 3.83546 5.49997 4.24957 5.49997ZM5.69623 11.5701C5.77969 11.2362 6.07969 11.002 6.42385 11.002H20.2192C20.3819 11.002 20.5012 11.1548 20.4617 11.3126L18.7119 18.3107C18.684 18.4219 18.584 18.5 18.4693 18.5H4.28431C4.12167 18.5 4.00233 18.3472 4.04177 18.1894L5.69623 11.5701Z"/>
+    </svg>`;
+
+const DELETE_SVG = 
+   `<svg viewBox="0 0 24 24" >
+        <path  stroke="var(--error-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4,6h16M16,6l-.2706-.81193c-.2623-.78682-.3935-1.18023-.6367-1.47109-.2148-.25685-.4906-.45566-.8022-.5782C13.9376,3,13.523,3,12.6936,3h-1.3872c-.8294,0-1.244,0-1.59689.13878-.31159.12254-.58743.32135-.80222.5782-.24324.29086-.37437.68427-.63665,1.47109L8,6M18,6v10.2c0,1.6802,0,2.5202-.327,3.162-.2876.5645-.7465,1.0234-1.311,1.311C15.7202,21,14.8802,21,13.2,21h-2.4c-1.68016,0-2.52024,0-3.16197-.327-.56449-.2876-1.02343-.7465-1.31105-1.311C6,18.7202,6,17.8802,6,16.2L6,6m4,4.593941L14,16.2m0-5.606059L10,16.2"/>
+    </svg>`;
+
+export const stragglersList = document.getElementById("stragglers__list");
+
+export async function createStragglerEntry(basename) {
+    const stragglerEntry = createElement("div", null, "straggler", stragglersList);    
+
+    const straggler__delete = createElement("div", null, "straggler__delete", stragglerEntry);
+    straggler__delete.addEventListener("click", async () => {
+        await deleteSong(uid, basename);
+        stragglerEntry.remove();
+    });
+    createElement("div", null, "svg-cont", straggler__delete).innerHTML = DELETE_SVG;
+
+    const straggler__open = createElement("div", null, "straggler__open", stragglerEntry);
+    straggler__open.addEventListener("click", () => {
+        ipcRenderer.invoke("show-file", `${global.resources}/users/${uid}/songs/${basename}`); 
+    });
+    createElement("div", null, "svg-cont", straggler__open).innerHTML = OPEN_FOLDER_SVG;
+
+    createElement("div", null, "straggler__size", stragglerEntry, getSizeDisplay(await getSongSize(uid, basename)));
+    createElement("div", null, "straggler__basename", stragglerEntry, basename);
+
+}
+
 /**  @returns {HTMLElement} */
 function createElement(tag, id, classes, parent, text) {
     const elem = document.createElement(tag);
@@ -281,4 +320,8 @@ export function getTimeDisplay(totalSeconds) {
     const minutes = ("" + Math.floor(totalSeconds / 60));
     const seconds = ("" + Math.floor(totalSeconds % 60)).padStart(2, "0");
     return minutes + ":" + seconds;
+}
+
+export function getSizeDisplay(totalBytes) {
+    return (totalBytes / (1024 * 1000)).toFixed(2) + " KB";
 }

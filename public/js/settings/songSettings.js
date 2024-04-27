@@ -1,7 +1,8 @@
 import * as sidebar from "../view/sidebar.js";
 import { titleElem as playingTitleElem, artistElem as playingArtistElem } from "../play.js";
 import { data, Song } from "../account/userdata.js";
-import { showError } from "../view/fx.js";
+import { initDeleteBtn } from "../view/fx.js";
+import { getSizeDisplay } from "../view/elems.js";
 
 
 export const songSettings = document.getElementById("song-settings");
@@ -12,6 +13,7 @@ const titleArea = document.getElementById("song-settings__title");
 const artistArea = document.getElementById("song-settings__artist");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
 const deleteBtn = document.getElementById("song-settings__delete");
+const deleteErr = document.getElementById("song-settings__delete__error");
 
 /** @type {Song} */
 export let currentlyEditing;
@@ -38,7 +40,7 @@ export function openSongSettings(song, song__title, song__artist) {
     song__artistLive = song__artist;
 
     filename.textContent = song.filename;
-    size.textContent = (song.size / (1024 * 1000)).toFixed(2) + " MB";
+    size.textContent = getSizeDisplay(song.size);
     titleArea.setText(song.title);
     artistArea.setText(song.artist);
 
@@ -58,7 +60,7 @@ export function openSongSettings(song, song__title, song__artist) {
     for (const checkboxDiv of notchecked) 
         playlistCheckboxes.appendChild(checkboxDiv);
 
-    deleteBtn.textContent = "delete";
+    deleteBtn.reset();
 
     sidebar.setSidebarContent(songSettings);
 }
@@ -87,22 +89,11 @@ artistArea.addEventListener("input", () => {
     song__artistLive.textContent = artistArea.value;
 });
 
-export let shiftDown = false;
-window.addEventListener("keydown", (e) => shiftDown = e.shiftKey);
-window.addEventListener("keyup", (e) => shiftDown = e.shiftKey);
 
-const deleteError = document.getElementById("song-settings__delete__error");
-
-deleteBtn.addEventListener("click", () => {
-    if (shiftDown) {
-        currentlyEditing.delete();
-        clearCurrentlyEditing();
-        sidebar.setSidebarOpen(false);
-    }
-    else {
-        deleteBtn.textContent = "this cannot be undone";
-        showError(deleteError, "[shift + click] to delete");
-    }
+initDeleteBtn(deleteBtn, deleteErr, () => {
+    currentlyEditing.delete();
+    clearCurrentlyEditing();
+    sidebar.setSidebarOpen(false);
 });
 
 /** updates all song entries to match currentlyEditing's title and artist */

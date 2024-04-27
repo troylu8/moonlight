@@ -273,7 +273,7 @@
                         <h3> playlists </h3>
                         <div id="song-settings__playlists"></div>
     
-                        <button id="song-settings__delete"> delete </button>
+                        <button id="song-settings__delete" class="delete-btn"> delete </button>
                         <p id="song-settings__delete__error" class="error-msg"></p>
                     </div>
     
@@ -294,7 +294,7 @@
                             <p>desc</p>
                         </div>
     
-                        <button id="playlist-settings__delete"> delete </button>
+                        <button id="playlist-settings__delete" class="delete-btn"> delete </button>
                         <p id="playlist-settings__delete__error" class="error-msg"></p>
                     </div>
 
@@ -313,6 +313,15 @@
                     </div>
     
                     <div id="settings">
+
+                        <div id="stragglers">
+                            <h3> usused files  </h3>
+
+                            <div id="stragglers__list"></div>
+                            
+                            <button id="stragglers__delete-all" class="delete-btn"> delete all </button>
+                            <p id="stragglers__delete-all__error" class="error-msg"></p>
+                        </div>
                         
                         <div>
                             <input type="checkbox" id="show-logo" class="settings-field">

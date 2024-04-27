@@ -56,8 +56,18 @@
     display: none;
     flex-direction: column;
 }
+#stragglers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 
-#song-settings__playlists {
+    height: 100%;
+}
+#stragglers__list {
+    max-height: 150px;
+}
+
+#song-settings__playlists, #stragglers__list {
     display: flex;
     flex-direction: column;
 
@@ -107,8 +117,35 @@
     box-shadow: 0 2px 0 var(--accent-color);
 }
 
-#song-settings__delete, #playlist-settings__delete {
+.delete-btn {
     align-self: center;
     padding: 4px 5px;
     background-color: var(--error-color);
+}
+
+.straggler {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.straggler__basename {
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+
+    width: 100%;
+}
+
+.straggler__size {
+    white-space: nowrap;
+    font-size: smaller;
+
+    margin: 0 15px;
+}
+
+.straggler__open, .straggler__delete {
+    min-width: 20px;
+    min-height: 20px;
+    width: 20px;
+    height: 20px;
 }

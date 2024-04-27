@@ -1,7 +1,7 @@
 const { app, BrowserWindow } = require('electron/main')
 const express = require("express");
 const cors = require('cors');
-const { ipcMain, dialog } = require('electron');
+const { ipcMain, dialog, shell } = require('electron');
 
 console.log("ready!");
 
@@ -26,7 +26,8 @@ app.whenReady().then( async () => {
 app.on('window-all-closed', () => app.quit());
 
 
-ipcMain.handle("show-dialog", async (e, dialogOptions) => await dialog.showOpenDialog(dialogOptions));
+ipcMain.handle("show-dialog", async (e, options) => await dialog.showOpenDialog(options));
+ipcMain.handle("show-file", async (e, path) => shell.showItemInFolder(path));
 
 
 const server = express();

@@ -2,8 +2,7 @@ import { setSidebarContent, setSidebarOpen } from "../view/sidebar.js";
 import { Playlist, data } from "../account/userdata.js";
 import { playlistHeader, playlistDesc } from "../view/elems.js";
 import { genID } from "../account/account.js";
-import { shiftDown } from "./songSettings.js";
-import { showError } from "../view/fx.js";
+import { initDeleteBtn } from "../view/fx.js";
 
 document.getElementById("new-playlist").addEventListener("click", () => {
     new Playlist(genID(14), { title: "new playlist" });
@@ -16,6 +15,7 @@ const descArea = document.getElementById("playlist-settings__desc");
 descArea.allowNewline = true;
 
 const deleteBtn = document.getElementById("playlist-settings__delete");
+const deleteErr = document.getElementById("playlist-settings__delete__error");
 
 /** @type {Playlist} */
 let currentlyEditing;
@@ -27,7 +27,7 @@ export function openPlaylistSettings(playlist) {
     titleArea.setText(playlist.title);
     descArea.setText(playlist.desc.replaceAll("<br>", "\n"));
 
-    deleteBtn.textContent = "delete";
+    deleteBtn.reset();
     
     setSidebarContent(playlistSettings);
 }
@@ -53,15 +53,8 @@ descArea.addEventListener("input", () => {
         playlistDesc.innerHTML = currentlyEditing.desc;
 });
 
-const deleteError = document.getElementById("playlist-settings__delete__error");
 
-deleteBtn.addEventListener("click", () => {
-    if (shiftDown) {
-        currentlyEditing.delete();
-        setSidebarOpen(false);
-    }
-    else {
-        deleteBtn.textContent = "this cannot be undone";
-        showError(deleteError, "[shift + click] to delete");
-    }
-})
+initDeleteBtn(deleteBtn, deleteErr, () => {
+    currentlyEditing.delete();
+    setSidebarOpen(false);
+});

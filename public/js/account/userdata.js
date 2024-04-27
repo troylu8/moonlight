@@ -145,7 +145,7 @@ export class Playlist {
         if (initializeAsSynced) this._syncStatus = "synced"
 
         songElements.createPlaylistEntries(this);
-        songElements.createPlaylistCheckboxDivs(this);
+        songElements.createPlaylistCheckboxEntry(this);
 
         /** @type {Set<Song>} */
         this.songs = new Set();

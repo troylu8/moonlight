@@ -185,6 +185,24 @@ export function showError(errorElem, text) {
     errorElem.innerHTML = text;
 }
 
+export let shiftDown = false;
+window.addEventListener("keydown", (e) => shiftDown = e.shiftKey);
+window.addEventListener("keyup", (e) => shiftDown = e.shiftKey);
+
+export function initDeleteBtn(btn, errElem, onShiftClick) {
+    btn.reset = (text) => {
+        btn.textContent = text ?? "delete";
+        errElem.textContent = "";
+    }
+    btn.addEventListener("click", () => {
+        if (shiftDown) onShiftClick();
+        else {
+            btn.textContent = "this cannot be undone";
+            showError(errElem, "[shift + click] to delete");
+        }
+    });
+}
+
 for (const s of document.getElementsByClassName("slider")) {
     setSliderColors(s, "var(--accent-color)", "var(--primary-color)");
 }
