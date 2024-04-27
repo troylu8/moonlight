@@ -36,7 +36,6 @@ const iconMap = new Map([["playable", PLAY_SVG], ["active", ACTIVE_SVG], ["error
  * @param {"playable" | "active" | "error"} state
  */
 export function setEntryState(entry, state) {
-    console.log("set as", state);
 
     const iconElem = entry.firstElementChild.firstElementChild;
     iconElem.innerHTML = iconMap.get(state);

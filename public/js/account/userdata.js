@@ -46,6 +46,8 @@ export class Song {
     /** @param {"playable" | "active" | "error"} state  */
     setState(state) {
         this.state = state;
+        console.log("set as", state, this.title);
+
         for (const songEntry of this.songEntries.values()) {
             songElements.setEntryState(songEntry, state);
         }
@@ -105,7 +107,10 @@ export class Song {
     delete() {
         //TODO: test this
         if (data.curr.listenPlaylist && data.curr.listenPlaylist.songs.size === 1) play.setSong(null);
-        else if (this === data.curr.song) play.setSongNext(!play.audio.paused);
+        else if (this === data.curr.song) {
+            play.setSongNext();
+            if (!play.audio.paused) play.audio.play();
+        }
 
         if (this.syncStatus !== "new")
             data.trashqueue.set("songs." + this.id, "songs/" + this.filename);

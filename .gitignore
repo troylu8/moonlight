@@ -3,7 +3,7 @@ public/resources
 server/users
 server/auth
 *.key
-server/*.db
-server/*.db-shm
-server/*.db-wal
+*.db
+*.db-shm
+*.db-wal
 server/userfiles
