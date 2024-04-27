@@ -3,7 +3,7 @@ import * as play from "../play.js";
 import { PlaylistCycle } from "../play.js";
 import { updateSongEntries } from "../settings/songSettings.js";
 import * as acc from "./account.js";
-import { readUserdata, writeUserdata } from "./files.js";
+import { deleteSong, readUserdata, writeUserdata } from "./files.js";
 import { initSettings } from "../settings/settings.js";
 
 export class Song {
@@ -108,8 +108,7 @@ export class Song {
         //TODO: test this
         if (data.curr.listenPlaylist && data.curr.listenPlaylist.songs.size === 1) play.setSong(null);
         else if (this === data.curr.song) {
-            play.setSongNext();
-            if (!play.audio.paused) play.audio.play();
+            data.curr.listenPlaylist.cycle.setSongNext(!play.audio.paused);
         }
 
         if (this.syncStatus !== "new")
@@ -121,9 +120,7 @@ export class Song {
         play.toBeDeleted.delete();
         data.songs.delete(this.id);
 
-        console.log("deleted " + this.title);
-        //TODO: enable file delete
-        // deleteSong(acc.uid, this.filename);
+        deleteSong(this.filename);
     }
 }
 

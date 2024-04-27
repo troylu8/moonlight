@@ -1,3 +1,5 @@
+import { makeUnique } from '../account/files.js';
+
 const ytdl = require('ytdl-core');
 const fs = require("fs");
 
@@ -11,7 +13,7 @@ function cleanFileName(str) {
     return str.replace(/[/\\?%*:|"<>]/g, '-')
 }
 
-const tracker = {
+export const tracker = {
     downloaded: 0,
     total: 1,
     reset: function () {
@@ -24,19 +26,17 @@ class DownloadProcess {
 
     /**  download mp3, then call `cb()` with song data
      * @param {string} ytid 
-     * @param {string} uid 
      * @param {function(object)} cb 
      */
-    async download(ytid, uid, cb) {
-        if (this.destroy) return cb(); // destroy request comes in before getyt request
+    async download(ytid, cb) {
+        await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
 
         const info = await ytdl.getInfo(ytid);
 
         if (this.destroy) return cb();  // destroy request comes in while getting info 
         
-        const filename = `${cleanFileName(info.videoDetails.title)} yt#${ytid}.mp3`
+        const filename = await makeUnique(cleanFileName(info.videoDetails.title) + ".mp3", ytid);
         const path = global.userDir + "/songs/" + filename;
-        await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
 
         const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
         const writeStream = fs.createWriteStream(path);
@@ -77,14 +77,11 @@ let currentDP;
  * @param {string} uid 
  * @param {function(object)} cb 
  */
-export async function download(ytid, uid, cb) {
+export async function download(ytid, cb) {
     currentDP = new DownloadProcess();
-    currentDP.download(ytid, uid, cb);
+    currentDP.download(ytid, cb);
 }
 
-export function loaded() {
-    return tracker.downloaded / tracker.total;
-}
 
 export async function destroy() {
     if (!currentDP) return "no process running";

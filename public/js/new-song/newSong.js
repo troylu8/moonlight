@@ -44,7 +44,7 @@ async function getyt(link) {
 
     updateLoadingBarID = setInterval( async () => {
 
-        const percent = yt.loaded();
+        const percent = yt.tracker.downloaded / yt.tracker.total;
 
         console.log("received " + percent);
         setLoadingBar(Math.max(percent, 0.05));
@@ -53,7 +53,7 @@ async function getyt(link) {
     
     setButtonEnabled(true, "x");
     
-    yt.download(ytid, uid, (songData) => {
+    yt.download(ytid, (songData) => {
         if (songData) { // video downloaded fully
             setLoadingBar(1);
             stopLoading(true);

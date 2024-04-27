@@ -8,6 +8,14 @@ import { pathExists } from "./account/files.js";
 
 class SpinningAudio extends Audio {
     play() {
+        if (this.src === "") return;
+        
+        // add to history
+        if (inThePresent() && history[historyIndex] != data.curr.song.id) {
+            history.push(data.curr.song.id);
+            historyIndex++;
+        }
+
         setSpin(true);
         return super.play();
     }
@@ -71,8 +79,12 @@ export async function setSong(song) {
 
     if (song.state === "error") return false;
 
+    console.log("song", song);
+    if (!(song instanceof Song)) throw new Error("not a song");
+
     // if file doesnt exist
     if ( !(await pathExists(global.userDir + "/songs/" + song.filename))) {
+        console.log(song.title + " doesnt exist");
         song.setState("error");
         return false;
     }
@@ -99,7 +111,7 @@ export async function setSong(song) {
 export async function togglePlay(song) {
     song = song ?? data.curr.song;
 
-    if (song.state === "error") return false;
+    if (!song || song.state === "error") return false;
 
     // same song
     if (song === data.curr.song) {
@@ -113,11 +125,6 @@ export async function togglePlay(song) {
     if ( !(await setSong(song)) ) return false;
     audio.play();
 
-    // a song must be played (not just set as curr song) to be added to history
-    if (inThePresent() && history[historyIndex] != song.id) {
-        history.push(song.id);
-        historyIndex++;
-    }
     return true;
 }
 
@@ -310,36 +317,54 @@ export class PlaylistCycle {
         this.currIndex = this.songIndexes.get(data.curr.song);
     }
 
-    /** @returns {Song | undefined} */
-    async setSongNext() {
+    async setSongNext(playSong) {
+        if (!data.curr.song) return;
+        if (data.curr.listenPlaylist.songs.size <= 1 && !toBeDeleted.playlist) return;
 
-        const firstNode = this.nodes.get(data.curr.song).next;
+        // if not at the top of history stack, play next in stack
+        if (!inThePresent()) {
+            console.log("not at top of history yet");
+            console.log(historyIndex, history.map(id => data.songs.get(id).title));
+            
+            setSong( data.songs.get(history[++historyIndex]) );
+
+            if (playSong) audio.play();
+            return;
+        }
+
+        // SHUFFLE OFF
         if (!data.settings.shuffle) {
+            const firstNode = this.nodes.get(data.curr.song).next;
             let node = firstNode;
             
             while ( !(await setSong(node.song)) ) {
                 node = node.next;
-                if (node === firstNode) return; // if every single song cannot be played
+                if (node === firstNode) return setSong(null); // if every single song cannot be played
             };
-
-            return node.song;
         }
+        // SHUFFLE ON
+        else {
+            let c = 0;
+            let song;
+            do {
+                if (c++ === this.shuffleArr.length) return setSong(null); // if every single song cannot be played
+
+                song = this.shuffleArr[++this.currIndex];
+
+                if (!song) {
+                    this._reshuffle(true);
+                    song = this.shuffleArr[0];
+                    c = 0;
+                }
+
+                // nullify songs we just played so that we reshuffle upon encountering an already played segment
+                this.shuffleArr[this.currIndex - 1] = null;
+
+            } while ( !(await setSong(song)) );
         
-        let song;
-        do {
-            song = this.shuffleArr[++this.currIndex];
+        }
 
-            if (!song) {
-                this._reshuffle(true);
-                song = this.shuffleArr[0];
-            }
-
-            // nullify songs we just played so that we reshuffle upon encountering an already played segment
-            this.shuffleArr[this.currIndex - 1] = null; 
-
-        } while ( !(await setSong(song)) );
-        
-        return song;
+        if (playSong) audio.play();
     }
 
     print() {
@@ -394,30 +419,12 @@ function kickAway(arr, start, banned) {
     return arr;
 }
 
-export async function setSongNext() {
-    if (data.curr.listenPlaylist.songs.size <= 1 && !toBeDeleted.playlist) return;
-
-    // if not at the top of history stack, play next in stack
-    if (!inThePresent()) {
-        console.log("not at top of history yet");
-        console.log(historyIndex, history.map(id => data.songs.get(id).title));
-        
-        setSong( data.songs.get(history[++historyIndex]) );
-        return;
-    }
-
-    let node = data.curr.listenPlaylist.cycle.nodes.get(data.curr.song).next;
-    while ( !(await setSong(node.song)) ) node = node.next;
-
-    setSong( data.curr.listenPlaylist.cycle.setSongNext() );
-}
-
-document.getElementById("next").addEventListener("click", () => {
-    setSongNext();
-    audio.play();
-});
+document.getElementById("next").addEventListener("click", async () => 
+    data.curr.listenPlaylist.cycle.setSongNext(true)
+);
 
 document.getElementById("prev").addEventListener("click", async () => {
+    if (!data.curr.song) return;
     if (data.curr.listenPlaylist.songs.size <= 1 && !toBeDeleted.playlist) return;
     
     if (!data.settings.shuffle) {

@@ -3,15 +3,19 @@ import { accDropdown } from "../view/signinElems.js";
 import {data} from "../account/userdata.js";
 import { initDeleteBtn } from "../view/fx.js";
 import { createStragglerEntry, stragglersElem, stragglersList } from "../view/elems.js";
-import { uid } from "../account/account.js";
 const fs = require("fs");
 
 
 async function getStragglers() {
-    const songFiles = new Set(await fs.promises.readdir(global.userDir + "/songs"));
-    data.songs.forEach(s => songFiles.delete(s.filename));
+    try {
+        const songFiles = new Set(await fs.promises.readdir(global.userDir + "/songs"));
+        data.songs.forEach(s => songFiles.delete(s.filename));
 
-    return songFiles;
+        return songFiles;
+    }
+    catch (err) {
+        if (err.code === "ENOENT") return new Set();
+    }
 }
 
 const generalSettings = document.getElementById("settings");
@@ -24,6 +28,7 @@ document.getElementById("settings-btn").addEventListener("click", async () => {
     // update stragglers list
     stragglersList.innerHTML = "";
     const stragglers = await getStragglers();
+    console.log("stragglers", stragglers);
     stragglersElem.style.display = (stragglers.size === 0)? "none" : "flex";
     stragglers.forEach(basename => createStragglerEntry(basename));
 

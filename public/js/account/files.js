@@ -175,8 +175,11 @@ export async function getSongSize(path) {
 }
 
 
-/**  add the sid to end of filename */
-function insertSID(path, sid) {
+/**  insert sid into end of path if path already exists*/
+export async function makeUnique(path, sid) {
+
+    if (!(await pathExists(path))) return path;
+
     const i = path.lastIndexOf(".");
     return path.substring(0, i) + " " + sid + path.substring(i);
 }
@@ -191,11 +194,12 @@ function insertSID(path, sid) {
  */
 
 export async function uploadSongFile(uid, sid, path, createSongData) {
+    await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
+
+
     const originalBase = basename(path);
 
-
-    let dest = global.userDir + "/songs/" + originalBase;
-    if (await pathExists(dest)) dest = insertSID(dest, sid);
+    const dest = await makeUnique(global.userDir + "/songs/" + originalBase, sid);
     
     const newBase = basename(dest);
 
