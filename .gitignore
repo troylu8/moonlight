@@ -1,9 +1,8 @@
 node_modules
-public/resources
-server/users
-server/auth
+resources
+userfiles
+auth
 *.key
 *.db
 *.db-shm
 *.db-wal
-server/userfiles

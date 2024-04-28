@@ -171,7 +171,6 @@ export async function deleteSongFile(basename) {
     await fs.promises.unlink(global.userDir + "/songs/" + basename);
 }
 export async function getFileSize(path) {
-    console.log("checking", basename(path), (await fs.promises.stat(path)).size);
     return (await fs.promises.stat(path)).size;
 }
 
@@ -213,7 +212,7 @@ export async function uploadSongFile(uid, sid, path, createSongData) {
     } : undefined;
 
     if (inSongFolder(path)) {
-        if ( !(allFiles.get(path) instanceof HTMLElement) ) return "file in use";
+        if ( !(allFiles.get(originalBase) instanceof HTMLElement) ) return "file in use";
 
         deleteStragglerEntry(originalBase);
         return songData ?? originalBase;
@@ -235,7 +234,7 @@ const inSongFolder = (path) => resolve(dirname(path)) === resolve(global.userDir
 export const allFiles = new Map();
 
 /** @type {Map<string, Song>} filename -> song in `error` state */
-const missingFiles = new Map();
+export const missingFiles = new Map();
 
 
 /** reserved filenames are not considered stragglers when added to songs folder
@@ -255,7 +254,7 @@ export async function watchFiles(dir) {
 
     // scan songs and add them to allFiles or mark them as error
     data.songs.forEach(async (s) => {
-        if ( !(await pathExists(s.filename)) ) {
+        if ( !(await pathExists(global.userDir + "/songs/" + s.filename)) ) {
             missingFiles.set(s.filename, s);
             s.setState("error");
         }
@@ -300,7 +299,6 @@ export async function watchFiles(dir) {
         }
 
         else /* if (eventType === "change") */ {
-            console.log("changed", filename);
             // update size display
             allFiles.get(filename).querySelector(".straggler__size").textContent = 
                 getSizeDisplay(await getFileSize(global.userDir + "/songs/" + filename));

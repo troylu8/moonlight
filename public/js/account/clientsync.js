@@ -3,6 +3,8 @@ const axios = require('axios');
 const { join } = require("path");
 const { promisify } = require('util');
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 
 /**
  * @param {import('adm-zip')} zip 
@@ -24,9 +26,6 @@ function extractAllToAsync(zip, targetPath, cb) {
     });
 }
 const extractAllToPromise = promisify(extractAllToAsync);
-
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 export async function syncToServer(uid, changes) {
     const resourcesDir = join(global.resources, "users", uid);
@@ -55,12 +54,11 @@ export async function syncToServer(uid, changes) {
     for (const song of changes["unsynced-songs"]) {
         if (song._syncStatus === "new") 
             zip.addLocalFile( join(resourcesDir, "songs", song.filename), "songs/" );
-            
     }
     //TODO: add playlist files here!!!!!  ! 
 
 
-    const newSongs = await axios({
+    const newItems = await axios({
         method: 'POST',
         url: "https://localhost:5001/sync/" + uid, 
         data: zip.toBuffer(), 
@@ -68,9 +66,8 @@ export async function syncToServer(uid, changes) {
         maxBodyLength: Infinity,
         responseType: "arraybuffer"
     });
-    console.log("returned buffer", Buffer.from(newSongs.data));
+    console.log("returned buffer", Buffer.from(newItems.data));
 
-    await extractAllToPromise(new Zip(Buffer.from(newSongs.data)), resourcesDir);
-    console.log("added new songs");
+    await extractAllToPromise(new Zip(Buffer.from(newItems.data)), resourcesDir);
 
 }

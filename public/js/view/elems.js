@@ -3,7 +3,7 @@ import { togglePlay } from "../play.js";
 import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
 import { removeTooltip, setToolTip } from "./fx.js";
-import { uid } from "../account/account.js";
+import { syncData, uid } from "../account/account.js";
 import { allFiles, deleteSongFile, getFileSize, uploadSongFile } from "../account/files.js";
 const { ipcRenderer } = require("electron");
 const fs = require("fs");
@@ -99,10 +99,16 @@ export function createSongEntry(song, playlist) {
         songEntry.tooltip.innerHTML = "";
 
         const resolve__nav = createElement("nav", null, "resolve", songEntry.tooltip);
-        
-        const resolve__sync = createElement("button", null, "resolve__sync menu-option", resolve__nav, "get from server");
-        const resolve__link = createElement("button", null, "resolve__link menu-option", resolve__nav, "choose file");
 
+        const resolve__sync = createElement("button", null, "resolve__sync menu-option", resolve__nav, "get from server");
+        // can only resolve via sync if songfile exists on server (song isnt new) and TODO: if theres wifi
+        if (song.syncStatus !== "new") {
+            resolve__sync.addEventListener("click", handler);
+        }
+        else resolve__sync.classList.add("menu-option__disabled");
+        
+
+        const resolve__link = createElement("button", null, "resolve__link menu-option", resolve__nav, "choose file");
         resolve__link.addEventListener("click", async () => {
 
             const dialog = await ipcRenderer.invoke("show-dialog", {
@@ -328,6 +334,5 @@ export function getSizeDisplay(totalBytes) {
     for (i = 0; displayValue >= 100 && i < 4; i++) {
         displayValue /= 1000;
     }
-    console.log(i);
     return displayValue.toFixed((i === 0)? 0 : 2) + " " + units[i];
 }

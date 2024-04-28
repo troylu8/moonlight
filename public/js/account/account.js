@@ -1,9 +1,8 @@
 import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
-import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles } from "./files.js";
+import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles, missingFiles, reserved } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
 import { showError } from "../view/fx.js";
-
 
 /**
  * @param {number} len 
@@ -110,14 +109,15 @@ export async function createAccData(USERNAME, PASSWORD) {
 /** @returns {Promise<"username not found" | "unauthorized" | "success">} */
 export async function fetchAccData(USERNAME, PASSWORD) {
 
-    const jwtReq = await fetch("https://localhost:5001/get-jwt/" + USERNAME, {
+    const res = await fetch("https://localhost:5001/sign-in/" + USERNAME, {
         method: "POST",
         body: PASSWORD
-    });
-    if (jwtReq.status === 404) return "username not found";
-    if (jwtReq.status === 401) return "wrong password"
+    })
 
-    await loadAcc(await jwtReq.text());
+    if (res.status === 404) return "username not found";
+    if (res.status === 401) return "wrong password"
+
+    await loadAcc(await res.text());
 
     return "success";
 }
@@ -164,8 +164,8 @@ export async function syncData() {
         /** @type {Array<Playlist>} playlists to be merged with server's data.json  */
         "unsynced-playlists": [],
 
-        /** @type {Array<string>} all files that client wants from server */
-        "requestedFiles": [],
+        /** @type {Array<string>} all files that client wants from server: error state songs + songs that server has client doesnt*/
+        "requestedFiles": Array.from(missingFiles.keys()),
 
         /** @type {Array<string>} files that the client deleted, so the server should too */
         "trash": Array.from(data.trashqueue),
@@ -175,12 +175,10 @@ export async function syncData() {
     const addCategoryToChanges = (category) => {
 
         for (const item of data[category].values()) {
-            if (item.syncStatus !== "synced") 
-                changes["unsynced-" + category].push(item);
+            if (item.syncStatus !== "synced") changes["unsynced-" + category].push(item);
 
             // syncstatus === "synced" && song/playlist isnt in server
-            else if (!serverJSON[category][item.id]) 
-                item.delete();
+            else if (!serverJSON[category][item.id]) item.delete();
         }
 
         for (const id of Object.keys(serverJSON[category])) {
@@ -214,11 +212,10 @@ export async function syncData() {
     console.log("changes ", changes);
 
     try {
-        syncToServer(uid, changes);
+        for (const { filename } of newItems.songs)      reserved.add(filename);
+        for (const { filename } of newItems.playlists)  reserved.add(filename);
 
-        console.log("frontend received", response.status);
-
-        if (!response.ok) return;
+        await syncToServer(uid, changes);
 
         console.log("newitems", newItems);
         
@@ -237,8 +234,7 @@ export async function syncData() {
 
 export async function getData(jwt) {
     const res = await fetch(`https://localhost:5001/get-data/${jwt}`);
-    if (res.ok) return await res.json();
-    return res.status;
+    if (res.ok) return (await res.json());
 }
 
 export async function uploadData() {

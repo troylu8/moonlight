@@ -25,11 +25,15 @@ app.whenReady().then( async () => {
 
 app.on('window-all-closed', () => app.quit());
 
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+    console.log("url bad cert", url);
+    event.preventDefault();
+    callback(true);
+});
 
 ipcMain.handle("show-dialog", async (e, options) => await dialog.showOpenDialog(options));
 ipcMain.handle("show-file", (e, path) => shell.showItemInFolder(path));
 ipcMain.handle("show-folder", (e, path) => shell.openPath(path));
-
 
 const server = express();
 server.use(cors());

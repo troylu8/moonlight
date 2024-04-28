@@ -184,6 +184,13 @@ input[type="file"] {
     text-underline-offset: 5px;
     text-decoration-thickness: 2px;
 }
+.menu-option__disabled {
+    opacity: 0.5;
+}
+.menu-option__disabled:hover {
+    text-decoration: none;
+    filter: none;
+}
 
 .error-msg {
     font-size: small;

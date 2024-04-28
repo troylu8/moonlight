@@ -48,9 +48,10 @@ export class Song {
         this.state = state;
         console.log("set as", state, this.title);
 
-        for (const songEntry of this.songEntries.values()) {
+        if (state === "error") this.syncStatus = "edited";
+
+        for (const songEntry of this.songEntries.values()) 
             songElements.setEntryState(songEntry, state);
-        }
     }
     
     update(options) {
@@ -120,7 +121,7 @@ export class Song {
         play.toBeDeleted.delete();
         data.songs.delete(this.id);
 
-        deleteSongFile(this.filename);
+        if (this.state !== "error") deleteSongFile(this.filename);
     }
 }
 

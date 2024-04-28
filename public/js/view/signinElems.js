@@ -40,7 +40,8 @@ function initAccCreator(options) {
     });
 
     submit.addEventListener("click", async () => {
-        const signingIn = repeatPassword.style.display !== "block";
+        const signingIn = getComputedStyle(repeatPassword).display === "none";
+
         const res = inputErrors(username.value, password.value, repeatPassword.value, signingIn) ??
                     (signingIn? 
                     await acc.fetchAccData(username.value, password.value) :
@@ -56,7 +57,7 @@ function initAccCreator(options) {
 }
 
 document.getElementById("account__continue").addEventListener("click", async () => {
-    await acc.loadGuestAcc();
+    await acc.loadAcc("guest");
 
     setTitleScreen(false);
     updateForUsername("[guest]");
