@@ -318,6 +318,16 @@ export function getTimeDisplay(totalSeconds) {
     return minutes + ":" + seconds;
 }
 
+
 export function getSizeDisplay(totalBytes) {
-    return (totalBytes / (1024 * 1000)).toFixed(2) + " KB";
+    let displayValue = totalBytes;
+    
+    const units = [" b", "kb", "mb", "gb", "tb"];
+
+    let i;
+    for (i = 0; displayValue >= 100 && i < 4; i++) {
+        displayValue /= 1000;
+    }
+    console.log(i);
+    return displayValue.toFixed((i === 0)? 0 : 2) + " " + units[i];
 }

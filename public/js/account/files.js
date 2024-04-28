@@ -1,4 +1,4 @@
-import { createStragglerEntry, deleteStragglerEntry } from '../view/elems.js';
+import { createStragglerEntry, deleteStragglerEntry, getSizeDisplay } from '../view/elems.js';
 import * as acc from './account.js';
 import { data, Song } from './userdata.js';
 const { dirname, basename, resolve } = require("path");
@@ -171,6 +171,7 @@ export async function deleteSongFile(basename) {
     await fs.promises.unlink(global.userDir + "/songs/" + basename);
 }
 export async function getFileSize(path) {
+    console.log("checking", basename(path), (await fs.promises.stat(path)).size);
     return (await fs.promises.stat(path)).size;
 }
 
@@ -196,7 +197,6 @@ export async function makeUnique(path, sid) {
 export async function uploadSongFile(uid, sid, path, createSongData) {
     await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
 
-
     const originalBase = basename(path);
 
     const dest = await makeUnique(global.userDir + "/songs/" + originalBase, sid);
@@ -213,11 +213,13 @@ export async function uploadSongFile(uid, sid, path, createSongData) {
     } : undefined;
 
     if (inSongFolder(path)) {
-        if (fileInUse(originalBase)) return "file in use";
+        if ( !(allFiles.get(path) instanceof HTMLElement) ) return "file in use";
 
         deleteStragglerEntry(originalBase);
         return songData ?? originalBase;
     }
+
+    reserved.add(newBase);
 
     const data = await fs.promises.readFile(path);
     await ensurePathThen(async () => await fs.promises.writeFile(dest, data));
@@ -225,14 +227,7 @@ export async function uploadSongFile(uid, sid, path, createSongData) {
     return songData ?? newBase;
 }
 
-function fileInUse(basename) {
-    for (const song of data.songs.values()) 
-        if (song.filename === basename) return true;
-    return false;
-}
-
 const inSongFolder = (path) => resolve(dirname(path)) === resolve(global.userDir + "/songs");
-
 
 
 
@@ -243,6 +238,11 @@ export const allFiles = new Map();
 const missingFiles = new Map();
 
 
+/** reserved filenames are not considered stragglers when added to songs folder
+ * @type {Set<string>} 
+ */
+export const reserved = new Set();
+
 
 /** @type {fs.FSWatcher} */
 let watcher;
@@ -251,6 +251,7 @@ export async function watchFiles(dir) {
     if (watcher) watcher.close();
     allFiles.clear();
     missingFiles.clear();
+    reserved.clear();
 
     // scan songs and add them to allFiles or mark them as error
     data.songs.forEach(async (s) => {
@@ -267,7 +268,7 @@ export async function watchFiles(dir) {
         if (!allFiles.has(filename)) createStragglerEntry(filename);
     });
 
-    watcher = fs.watch(dir, (eventType, filename) => {
+    watcher = fs.watch(dir, async (eventType, filename) => {
     
         if (eventType === "rename") {
 
@@ -290,9 +291,19 @@ export async function watchFiles(dir) {
             else {
                 console.log(filename, " added!");
 
-                if (!allFiles.has(filename)) createStragglerEntry(filename);
+                console.log("reserved", reserved);
+
+                // if filename wasnt reserved, create straggler entry
+                if (!reserved.delete(filename)) createStragglerEntry(filename);
                 
             }
+        }
+
+        else /* if (eventType === "change") */ {
+            console.log("changed", filename);
+            // update size display
+            allFiles.get(filename).querySelector(".straggler__size").textContent = 
+                getSizeDisplay(await getFileSize(global.userDir + "/songs/" + filename));
         }
     });
 }

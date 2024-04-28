@@ -136,7 +136,7 @@
 
 
 .straggler__size {
-    white-space: nowrap;
+    white-space: pre;
     font-size: smaller;
 
     margin: 0 15px;

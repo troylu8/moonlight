@@ -1,4 +1,4 @@
-import {  makeUnique } from '../account/files.js';
+import {  allFiles, makeUnique, reserved } from '../account/files.js';
 
 const ytdl = require('ytdl-core');
 const fs = require("fs");
@@ -37,7 +37,8 @@ class DownloadProcess {
         
         const filename = await makeUnique(cleanFileName(info.videoDetails.title) + ".mp3", ytid);
         const path = global.userDir + "/songs/" + filename;
-
+        reserved.add(filename);
+        
         const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
         const writeStream = fs.createWriteStream(path);
         dlstream.pipe(writeStream);

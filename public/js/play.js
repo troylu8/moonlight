@@ -79,9 +79,6 @@ export async function setSong(song) {
 
     if (song.state === "error") return false;
 
-    console.log("song", song);
-    if (!(song instanceof Song)) throw new Error("not a song");
-
     const path = `resources/users/${uid}/songs/${encodeURIComponent(song.filename)}`;
 
     audio.src = path;
@@ -121,7 +118,7 @@ export async function togglePlay(song) {
     return true;
 }
 
-/** remove song from playlist cycle when playing next song */
+/** if song is removed from playlist while it is playing, remove song from playlist cycle upon next song */
 export const toBeDeleted = {
     /** @type {Playlist} */
     playlist: null,
