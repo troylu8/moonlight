@@ -1,6 +1,6 @@
-import { deleteStraggler } from '../view/elems.js';
+import { createStragglerEntry, deleteStragglerEntry } from '../view/elems.js';
 import * as acc from './account.js';
-import { data } from './userdata.js';
+import { data, Song } from './userdata.js';
 const { dirname, basename, resolve } = require("path");
 const fs = require('fs');
 const { randomBytes, createCipheriv, createDecipheriv } = require("crypto");
@@ -167,10 +167,10 @@ export async function writeUserdata(uid, userdataStr) {
 
 
 
-export async function deleteSong(basename) {
+export async function deleteSongFile(basename) {
     await fs.promises.unlink(global.userDir + "/songs/" + basename);
 }
-export async function getSongSize(path) {
+export async function getFileSize(path) {
     return (await fs.promises.stat(path)).size;
 }
 
@@ -208,14 +208,14 @@ export async function uploadSongFile(uid, sid, path, createSongData) {
         filename: newBase,
         title: newBase.replace(/\.[^\/.]+$/, ""), // regex to remove extensions
         artist: "uploaded by you",
-        size: await getSongSize(path),
+        size: await getFileSize(path),
         duration: (await parseFile(req.body)).format.duration
     } : undefined;
 
     if (inSongFolder(path)) {
         if (fileInUse(originalBase)) return "file in use";
 
-        deleteStraggler(originalBase);
+        deleteStragglerEntry(originalBase);
         return songData ?? originalBase;
     }
 
@@ -232,3 +232,67 @@ function fileInUse(basename) {
 }
 
 const inSongFolder = (path) => resolve(dirname(path)) === resolve(global.userDir + "/songs");
+
+
+
+
+/** @type {Map<string, Song | HTMLElement>} filename -> song | straggler elem (if its a straggler) */
+export const allFiles = new Map();
+
+/** @type {Map<string, Song>} filename -> song in `error` state */
+const missingFiles = new Map();
+
+
+
+/** @type {fs.FSWatcher} */
+let watcher;
+
+export async function watchFiles(dir) {
+    if (watcher) watcher.close();
+    allFiles.clear();
+    missingFiles.clear();
+
+    // scan songs and add them to allFiles or mark them as error
+    data.songs.forEach(async (s) => {
+        if ( !(await pathExists(s.filename)) ) {
+            missingFiles.set(s.filename, s);
+            s.setState("error");
+        }
+
+        else allFiles.set(s.filename, s); 
+    });
+    
+    // create stragglers from files that dont have songs
+    (await fs.promises.readdir(dir)).forEach(filename => {
+        if (!allFiles.has(filename)) createStragglerEntry(filename);
+    });
+
+    watcher = fs.watch(dir, (eventType, filename) => {
+    
+        if (eventType === "rename") {
+
+            // FILE REMOVED
+            if (allFiles.has(filename)) {
+                console.log(filename, " removed!");
+
+                const obj = allFiles.get(filename);
+
+                // if removed file was a straggler
+                if (obj instanceof HTMLElement) deleteStragglerEntry(filename);
+                
+                // otherwise set song to error state
+                else obj.setState("error");
+
+                allFiles.delete(filename);
+            }
+
+            // FILE ADDED
+            else {
+                console.log(filename, " added!");
+
+                if (!allFiles.has(filename)) createStragglerEntry(filename);
+                
+            }
+        }
+    });
+}

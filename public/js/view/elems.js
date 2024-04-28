@@ -2,9 +2,9 @@ import * as songSettings from "../settings/songSettings.js";
 import { togglePlay } from "../play.js";
 import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
-import { removeTooltip, setToolTip, showError } from "./fx.js";
+import { removeTooltip, setToolTip } from "./fx.js";
 import { uid } from "../account/account.js";
-import { deleteSong, getSongSize, uploadSongFile } from "../account/files.js";
+import { allFiles, deleteSongFile, getFileSize, uploadSongFile } from "../account/files.js";
 const { ipcRenderer } = require("electron");
 const fs = require("fs");
 
@@ -273,30 +273,32 @@ const DELETE_SVG =
         <path  stroke="var(--error-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4,6h16M16,6l-.2706-.81193c-.2623-.78682-.3935-1.18023-.6367-1.47109-.2148-.25685-.4906-.45566-.8022-.5782C13.9376,3,13.523,3,12.6936,3h-1.3872c-.8294,0-1.244,0-1.59689.13878-.31159.12254-.58743.32135-.80222.5782-.24324.29086-.37437.68427-.63665,1.47109L8,6M18,6v10.2c0,1.6802,0,2.5202-.327,3.162-.2876.5645-.7465,1.0234-1.311,1.311C15.7202,21,14.8802,21,13.2,21h-2.4c-1.68016,0-2.52024,0-3.16197-.327-.56449-.2876-1.02343-.7465-1.31105-1.311C6,18.7202,6,17.8802,6,16.2L6,6m4,4.593941L14,16.2m0-5.606059L10,16.2"/>
     </svg>`;
 
-export const stragglersElem = document.getElementById("stragglers");
+export const stragglers = document.getElementById("stragglers");
 export const stragglersList = document.getElementById("stragglers__list");
 
-const stragglersMap = new Map();
 
 export async function createStragglerEntry(basename) {
-    const stragglerEntry = createElement("div", null, "straggler", stragglersList);    
-    stragglersMap.set(basename, stragglerEntry);
+    stragglers.style.display = "flex";
+
+    const stragglerEntry = createElement("div", null, "straggler", stragglersList);
+    allFiles.set(basename, stragglerEntry);
 
     const straggler__delete = createElement("div", null, "straggler__delete", stragglerEntry);
-    straggler__delete.addEventListener("click", () => deleteStraggler(basename));
+    straggler__delete.addEventListener("click", async () => {
+        await deleteSongFile(basename);
+    });
     createElement("div", null, "svg-cont", straggler__delete).innerHTML = DELETE_SVG;
 
-    createElement("div", null, "straggler__size", stragglerEntry, getSizeDisplay(await getSongSize(global.userDir + "/songs/" + basename)));
-    createElement("div", null, "straggler__basename", stragglerEntry, basename)
+    createElement("div", null, "straggler__size", stragglerEntry, getSizeDisplay(await getFileSize(global.userDir + "/songs/" + basename)));
+    createElement("div", null, "straggler__basename soft-link", stragglerEntry, basename)
         .addEventListener("click", () => {
             ipcRenderer.invoke("show-file", global.userDir + "/songs/" + basename); 
         });
 }
-export async function deleteStraggler(basename) {
-    await deleteSong(basename);
-    stragglersMap.get(basename).remove();
-    stragglersMap.delete(basename);
-    if (stragglersMap.size === 0) stragglersElem.remove();
+export async function deleteStragglerEntry(basename) {
+    allFiles.get(basename).remove();
+    allFiles.delete(basename);
+    if (!stragglersList.hasChildNodes()) stragglers.style.display = "none";
 }
 
 /**  @returns {HTMLElement} */

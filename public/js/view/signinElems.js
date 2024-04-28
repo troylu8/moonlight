@@ -56,7 +56,7 @@ function initAccCreator(options) {
 }
 
 document.getElementById("account__continue").addEventListener("click", async () => {
-    await acc.fetchGuestData();
+    await acc.loadGuestAcc();
 
     setTitleScreen(false);
     updateForUsername("[guest]");

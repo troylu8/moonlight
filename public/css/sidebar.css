@@ -27,16 +27,16 @@
     height:100%;
 }
 
-#song-settings__metadata, #playlist-settings__metadata, .straggler__basename {
-    font-size: smaller;
-    opacity: 80%;
-    transition: 0.2s;
-}
 #song-settings__metadata, #playlist-settings__metadata {
     display: flex;
     margin-bottom: 20px;
 }
-#song-settings__metadata:hover, .straggler__basename:hover {
+.soft-link, #playlist-settings__metadata {
+    font-size: smaller;
+    opacity: 80%;
+    transition: 0.2s;
+}
+.soft-link:hover {
     cursor: pointer;
     opacity: 100%;
 }

@@ -3,7 +3,7 @@ import * as play from "../play.js";
 import { PlaylistCycle } from "../play.js";
 import { updateSongEntries } from "../settings/songSettings.js";
 import * as acc from "./account.js";
-import { deleteSong, readUserdata, writeUserdata } from "./files.js";
+import { deleteSongFile, readUserdata, writeUserdata } from "./files.js";
 import { initSettings } from "../settings/settings.js";
 
 export class Song {
@@ -120,7 +120,7 @@ export class Song {
         play.toBeDeleted.delete();
         data.songs.delete(this.id);
 
-        deleteSong(this.filename);
+        deleteSongFile(this.filename);
     }
 }
 

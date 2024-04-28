@@ -3,7 +3,6 @@ import { titleElem as playingTitleElem, artistElem as playingArtistElem } from "
 import { data, Song } from "../account/userdata.js";
 import { initDeleteBtn } from "../view/fx.js";
 import { getSizeDisplay } from "../view/elems.js";
-import { uid } from "../account/account.js";
 const { ipcRenderer } = require("electron");
 
 export const songSettings = document.getElementById("song-settings");

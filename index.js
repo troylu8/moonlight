@@ -27,7 +27,8 @@ app.on('window-all-closed', () => app.quit());
 
 
 ipcMain.handle("show-dialog", async (e, options) => await dialog.showOpenDialog(options));
-ipcMain.handle("show-file", async (e, path) => shell.showItemInFolder(path));
+ipcMain.handle("show-file", (e, path) => shell.showItemInFolder(path));
+ipcMain.handle("show-folder", (e, path) => shell.openPath(path));
 
 
 const server = express();

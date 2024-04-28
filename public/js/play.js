@@ -82,13 +82,6 @@ export async function setSong(song) {
     console.log("song", song);
     if (!(song instanceof Song)) throw new Error("not a song");
 
-    // if file doesnt exist
-    if ( !(await pathExists(global.userDir + "/songs/" + song.filename))) {
-        console.log(song.title + " doesnt exist");
-        song.setState("error");
-        return false;
-    }
-
     const path = `resources/users/${uid}/songs/${encodeURIComponent(song.filename)}`;
 
     audio.src = path;
@@ -334,27 +327,20 @@ export class PlaylistCycle {
 
         // SHUFFLE OFF
         if (!data.settings.shuffle) {
-            const firstNode = this.nodes.get(data.curr.song).next;
-            let node = firstNode;
+            let node = this.nodes.get(data.curr.song).next;
             
-            while ( !(await setSong(node.song)) ) {
-                node = node.next;
-                if (node === firstNode) return setSong(null); // if every single song cannot be played
-            };
+            while ( !(await setSong(node.song)) ) node = node.next;
         }
         // SHUFFLE ON
         else {
-            let c = 0;
             let song;
             do {
-                if (c++ === this.shuffleArr.length) return setSong(null); // if every single song cannot be played
 
                 song = this.shuffleArr[++this.currIndex];
 
                 if (!song) {
                     this._reshuffle(true);
                     song = this.shuffleArr[0];
-                    c = 0;
                 }
 
                 // nullify songs we just played so that we reshuffle upon encountering an already played segment

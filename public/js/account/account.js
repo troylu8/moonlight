@@ -1,6 +1,6 @@
 import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
-import { readSavedJWT, getLocalData, setLocalData, readKey } from "./files.js";
+import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
 import { showError } from "../view/fx.js";
 
@@ -57,10 +57,15 @@ function setAccInfo(JWT, UID, USERNAME) {
 }
 export function clearAccInfo() { jwt = uid = username = null; }
 
-export async function fetchGuestData() {
-    setAccInfo("guest");
-    console.log("loading", guestID);
-    await loadLocaldata(guestID);
+export async function loadAcc(jwt) {
+    if (jwt === "guest") setAccInfo("guest");
+    else {
+        const info = parseJWT(jwt);
+        setAccInfo(jwt, info.uid, info.username);
+    }
+    
+    await loadLocaldata(uid);
+    watchFiles(global.userDir + "/songs");
 }
 
 export function isGuest() { return uid === guestID; }
@@ -72,12 +77,7 @@ window.addEventListener("load", async () => {
     console.log("saved jwt: ", jwt);
     if (!jwt) return;
 
-    if (jwt === "guest") await fetchGuestData();
-    else {
-        const info = parseJWT(jwt);
-        setAccInfo(jwt, info.uid, info.username);
-        await loadLocaldata(uid);
-    }
+    await loadAcc(jwt, info.uid, info.username);
     
     setTitleScreen(false);
     updateForUsername(username, isGuest());
@@ -100,8 +100,9 @@ export async function createAccData(USERNAME, PASSWORD) {
     // i was going to clear guest id here, but might as well save a new one
     if (fromGuest) saveNewGuestID();
 
-    setAccInfo(await jwtReq.text(), uid, USERNAME);
     if (!fromGuest) await loadLocaldata(uid);
+    setAccInfo(await jwtReq.text(), uid, USERNAME);
+    watchFiles(global.userDir + "/songs")
 
     return "success";
 }
@@ -115,16 +116,14 @@ export async function fetchAccData(USERNAME, PASSWORD) {
     });
     if (jwtReq.status === 404) return "username not found";
     if (jwtReq.status === 401) return "wrong password"
-    const jwt = await jwtReq.text();
 
-    setAccInfo(jwt, parseJWT(jwt).uid, USERNAME);
-    await loadLocaldata(uid);
+    await loadAcc(await jwtReq.text());
 
     return "success";
 }
 
 /** [stack overflow link](https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library) */
-function parseJWT(jwt) {
+function parseJWT(jwt) {    
     const base64Url = jwt.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
