@@ -3,6 +3,7 @@ import Dropdown from "./dropdown.js";
 import { audio } from "../play.js";
 import { writeSavedJWT } from "../account/files.js";
 import { showError } from "./fx.js";
+import { nullifyData } from "../account/userdata.js";
 
 const titlescreen = document.getElementById("titlescreen");
 const primary = document.getElementById("primary");
@@ -60,16 +61,17 @@ document.getElementById("account__continue").addEventListener("click", async () 
     await acc.loadAcc("guest");
 
     setTitleScreen(false);
-    updateForUsername("[guest]");
+    updateForUsername("[guest]", true);
 });
 
 document.getElementById("sign-out").addEventListener("click", () => {
     setTitleScreen(true);
     acc.clearAccInfo();
+    nullifyData();
 
     console.log("clearing cache");
     
-    writeSavedJWT(); // clear saved jwt
+    writeSavedJWT(null); // clear saved jwt
 });
 
 const usernameDisplay = document.getElementById("username-display");

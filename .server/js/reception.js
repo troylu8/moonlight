@@ -70,8 +70,7 @@ router.get("/get-data/:jwt", express.text(), (req, res) => {
         const row = db.prepare("SELECT userdata FROM users WHERE uid=?").get(decoded.uid);
         if (!row) return res.status(404).end();
 
-        console.log(row);
-        res.status(200).json(row.userdata);
+        res.status(200).json(JSON.parse(row.userdata));
     })
 
 });
@@ -88,4 +87,4 @@ router.put("/upload-data/:jwt", express.json(), (req, res) => {
 })
 
 
-module.exports = router;
+module.exports = { router, db };

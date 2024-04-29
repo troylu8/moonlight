@@ -1,9 +1,9 @@
 import Dropdown from "../view/dropdown.js"
 import * as songSettings from "../settings/songSettings.js"
 import { data, Song } from "../account/userdata.js";
-import { uid, genID } from "../account/account.js";
+import { uid } from "../account/account.js";
 import * as yt from "./getyt.js";
-import { uploadSongFile } from "../account/files.js";
+import { allFiles, uploadSongFile } from "../account/files.js";
 import { showError } from "../view/fx.js";
 
 
@@ -69,6 +69,8 @@ async function initNewSong(songData) {
     const song = new Song(songData.id, songData);
     const songElems = song.addToPlaylist(data.curr.viewPlaylist); 
     songSettings.openSongSettings(song, songElems[1], songElems[2]);
+
+    allFiles.set(song.filename, song);
 }
 
 const dropdown = new Dropdown(
@@ -119,7 +121,7 @@ button.onclick = () => {
 }
 
 input.onkeydown = (e) => {
-    if (e.key === "Enter") getyt(input.value);
+    if (e.key === "Enter") button.onclick()
 }
 
 const loadingBar = document.getElementById("loading-bar");

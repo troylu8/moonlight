@@ -161,7 +161,8 @@ audio.addEventListener("timeupdate", () => {
     seek.value = audio.currentTime;
     seek.updateSliderColors(); 
     seekPassed.textContent = getTimeDisplay(audio.currentTime);
-})
+});
+audio.addEventListener("ended", () => nextBtn.dispatchEvent(new Event("click")));
 
 addSliderDragEvent(seek, () => {
     seekPassed.textContent = getTimeDisplay(seek.value);
@@ -404,8 +405,8 @@ function kickAway(arr, start, banned) {
 
     return arr;
 }
-
-document.getElementById("next").addEventListener("click", async () => 
+const nextBtn = document.getElementById("next");
+nextBtn.addEventListener("click", async () => 
     data.curr.listenPlaylist.cycle.setSongNext(true)
 );
 

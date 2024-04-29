@@ -54,15 +54,12 @@
     text-wrap: nowrap;
 }
 
-#settings {
+#settings, #stragglers {
     display: none;
     flex-direction: column;
 }
 #stragglers {
-    display: flex;
-    flex-direction: column;
     gap: 10px;
-
     height: 100%;
 }
 

@@ -6,7 +6,7 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-app.use("/", require("./reception.js"));
+app.use("/", require("./reception.js").router);
 app.use("/sync", require("./sync.js"));
 
 https.createServer({

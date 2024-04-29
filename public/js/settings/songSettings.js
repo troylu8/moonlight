@@ -91,7 +91,6 @@ artistArea.addEventListener("input", () => {
 });
 
 document.getElementById("song-settings__metadata").addEventListener("click", () => {
-    
     ipcRenderer.invoke("show-file", global.userDir + "/songs/" + currentlyEditing.filename); 
 });
 

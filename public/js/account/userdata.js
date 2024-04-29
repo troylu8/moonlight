@@ -1,10 +1,11 @@
-import * as songElements from "../view/elems.js";
+import * as elems from "../view/elems.js";
 import * as play from "../play.js";
 import { PlaylistCycle } from "../play.js";
 import { updateSongEntries } from "../settings/songSettings.js";
 import * as acc from "./account.js";
 import { deleteSongFile, readUserdata, writeUserdata } from "./files.js";
 import { initSettings } from "../settings/settings.js";
+const { ipcRenderer } = require("electron");
 
 export class Song {
     constructor(id, options, initializeAsSynced) {
@@ -51,7 +52,7 @@ export class Song {
         if (state === "error") this.syncStatus = "edited";
 
         for (const songEntry of this.songEntries.values()) 
-            songElements.setEntryState(songEntry, state);
+            elems.setEntryState(songEntry, state);
     }
     
     update(options) {
@@ -80,7 +81,7 @@ export class Song {
         playlist.songs.add(this);
         this.playlists.add(playlist);
 
-        const songElems = songElements.createSongEntry(this, playlist);
+        const songElems = elems.createSongEntry(this, playlist);
 
         if (this === data.curr.song && playlist === data.curr.listenPlaylist && playlist.songs.size !== 0) 
             play.toBeDeleted.set(null, null);
@@ -98,7 +99,7 @@ export class Song {
 
         playlist.songs.delete(this);
         this.playlists.delete(playlist);
-        if (playlist.groupElem) songElements.deleteSongEntry(this, playlist);
+        if (playlist.groupElem) elems.deleteSongEntry(this, playlist);
 
         if (this === data.curr.song && playlist === data.curr.listenPlaylist && playlist.songs.size !== 0) 
             play.toBeDeleted.set(playlist, this);
@@ -107,9 +108,10 @@ export class Song {
 
     delete() {
         //TODO: test this
-        if (data.curr.listenPlaylist && data.curr.listenPlaylist.songs.size === 1) play.setSong(null);
-        else if (this === data.curr.song) {
-            data.curr.listenPlaylist.cycle.setSongNext(!play.audio.paused);
+        
+        if (this === data.curr.song) {
+            if (data.curr.listenPlaylist.songs.size === 1) play.setSong(null);
+            else data.curr.listenPlaylist.cycle.setSongNext(!play.audio.paused);
         }
 
         if (this.syncStatus !== "new")
@@ -147,8 +149,8 @@ export class Playlist {
         this._syncStatus = options.syncStatus ?? "new";
         if (initializeAsSynced) this._syncStatus = "synced"
 
-        songElements.createPlaylistEntries(this);
-        songElements.createPlaylistCheckboxEntry(this);
+        elems.createPlaylistEntries(this);
+        elems.createPlaylistCheckboxEntry(this);
 
         /** @type {Set<Song>} */
         this.songs = new Set();
@@ -175,11 +177,11 @@ export class Playlist {
             data.trashqueue.set("playlists." + this.id, "playlists/ dummy value");
 
         // if only playlist, nullify view and listen playlists 
-        if (data.playlists.size === 1) songElements.setViewPlaylist(null, true);
+        if (data.playlists.size === 1) elems.setViewPlaylist(null, true);
 
         else if (this === data.curr.viewPlaylist) {
             const prevID = this.playlistEntry.previousElementSibling.id.substring(3);
-            songElements.setViewPlaylist(data.playlists.get(prevID), true);
+            elems.setViewPlaylist(data.playlists.get(prevID), true);
         }
         else if (this === data.curr.listenPlaylist) {
             data.curr.listenPlaylist = null;
@@ -211,8 +213,8 @@ export class Playlist {
             data.songs.get(sid).addToPlaylist(this);
 
         if (this === data.curr.viewPlaylist) {
-            songElements.playlistHeader.textContent = this.title;
-            songElements.playlistDesc.innerHTML = this.desc;
+            elems.playlistHeader.textContent = this.title;
+            elems.playlistDesc.innerHTML = this.desc;
             this.playlistEntry.firstElementChild.textContent = this.title;
         }
     }
@@ -300,10 +302,11 @@ class Data {
 /** @type {Data}  */
 export let data;
 
+ipcRenderer.on("cleanup", () => {if (data) data.saveDataLocal()} );
+
 export async function loadLocaldata(uid) {
     if (data) {
-        for (const playlist of data.playlists.values()) 
-            playlist.removeElements()
+        for (const playlist of data.playlists.values()) playlist.removeElements();
     }
     data = new Data();
     
@@ -321,10 +324,12 @@ export async function loadLocaldata(uid) {
 
     play.setSong( data.songs.get(json.curr.song) );
 
-    songElements.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);
+    elems.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);
 
     data.settings = json.settings;
     initSettings();
     play.setShuffle(json.settings.shuffle);
     play.audio.volume = json.settings.volume;
 }
+
+export function nullifyData() { data = null; }

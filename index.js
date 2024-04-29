@@ -16,6 +16,8 @@ app.whenReady().then( async () => {
         show: false
     });
 
+    win.on("close", () => win.webContents.send("cleanup"));
+
     win.setMenu(null);
 
     await win.loadFile('./public/index.html');

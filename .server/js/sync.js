@@ -3,6 +3,7 @@ const fs = require('fs');
 const Zip = require("adm-zip");
 const { join } = require("path");
 const { promisify } = require('util');
+const { db } = require("./reception.js");
 
 fs.mkdir(__dirname + "/../userfiles", {recursive: true}, () => {});
 
@@ -51,10 +52,7 @@ router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, 
 
     // add songs to zip
     for (const entry of arrived.getEntries()) {
-        if (entry.name === "changes.json") {
-            console.log("ignored changes entry");
-            continue;
-        }
+        if (entry.name === "changes.json") continue;
 
         try {
             const data = await getDataPromise(entry);
@@ -91,8 +89,8 @@ router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, 
         userfiles.deleteFile(info[1]);
         console.log("deleted", info[0], info[1]);
     }
-
-    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(data. req.params["uid"]);
+    console.log("UID??", req.params["uid"]);
+    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(data, req.params["uid"]);
     console.log("finished writing json");
     
     await writeZipPromise(userfiles, zipPath);

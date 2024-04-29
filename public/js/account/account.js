@@ -1,6 +1,6 @@
 import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
-import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles, missingFiles, reserved } from "./files.js";
+import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles, missingFiles, reserved, pathExists } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
 import { showError } from "../view/fx.js";
 
@@ -135,7 +135,10 @@ function parseJWT(jwt) {
 
 const syncBtn = document.getElementById("sync");
 
-syncBtn.addEventListener("click", () => syncData());
+syncBtn.addEventListener("click", () => {
+    data.saveDataLocal();
+    syncData();
+});
 syncBtn.addEventListener("mouseenter", () => showError(syncBtn.tooltip.lastElementChild, ""));
 
 export async function syncData() {
@@ -143,7 +146,7 @@ export async function syncData() {
 
     const serverJSON = await getData(jwt);
     
-    console.log(serverJSON);
+    console.log(serverJSON, typeof serverJSON);
     console.log("server", Object.values(serverJSON.songs).map(s => s.filename ));
     console.log("client", Array.from(data.songs).map(s => { return {syncStatus: s[1].syncStatus, filename: s[1].filename} } ));
 
@@ -233,8 +236,8 @@ export async function syncData() {
 } 
 
 export async function getData(jwt) {
-    const res = await fetch(`https://localhost:5001/get-data/${jwt}`);
-    if (res.ok) return (await res.json());
+    const res = await fetch(`https://localhost:5001/get-data/${jwt}`); 
+    if (res.ok) return await res.json();
 }
 
 export async function uploadData() {

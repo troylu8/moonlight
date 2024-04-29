@@ -1,6 +1,7 @@
 import { createStragglerEntry, deleteStragglerEntry, getSizeDisplay } from '../view/elems.js';
 import * as acc from './account.js';
 import { data, Song } from './userdata.js';
+const { ipcRenderer } = require("electron");
 const { dirname, basename, resolve } = require("path");
 const fs = require('fs');
 const { randomBytes, createCipheriv, createDecipheriv } = require("crypto");
@@ -28,21 +29,6 @@ const db = require('better-sqlite3')(global.resources + "/local.db");
 
 db.pragma('journal_mode = WAL'); //USE WITH BETTER SQLITE
 db.prepare("CREATE TABLE IF NOT EXISTS local (key TEXT, value TEXT)").run();
-
-
-const defaultUserData = JSON.stringify({
-        // other default settings should be indicated in index.html - theyre applied in initSettings() 
-        "settings": {
-            "shuffle": false,
-            "volume": 0.5,
-        },
-        "curr": {},
-        "playlists": {},
-        "songs": {},
-        "trashqueue": [],
-    }, 
-    undefined, 4
-);
 
 
 /** read file, or create file with default text if doesnt exist */
@@ -147,6 +133,26 @@ export function readSavedJWT() {
 export async function writeSavedJWT(jwt) { 
     setLocalData("saved jwt", encrypt(jwt)); 
 }
+ipcRenderer.on("cleanup", () => {
+    if (data && data.settings["stay-signed-in"]) {
+        console.log("saving", acc.isGuest()? "guest" : acc.jwt);
+        writeSavedJWT(acc.isGuest()? "guest" : acc.jwt);
+    } 
+});
+
+const defaultUserData = JSON.stringify({
+    // other default settings should be indicated in index.html - theyre applied in initSettings() 
+    "settings": {
+        "shuffle": false,
+        "volume": 0.5,
+    },
+    "curr": {},
+    "playlists": {},
+    "songs": {},
+    "trashqueue": [],
+    }, 
+    undefined, 4
+);
 
 export async function readUserdata(uid) {
     return JSON.parse( await readFileOrDefault(
@@ -251,6 +257,8 @@ export async function watchFiles(dir) {
     allFiles.clear();
     missingFiles.clear();
     reserved.clear();
+    
+    await fs.promises.mkdir(dir, {recursive: true});
 
     // scan songs and add them to allFiles or mark them as error
     data.songs.forEach(async (s) => {
@@ -268,12 +276,14 @@ export async function watchFiles(dir) {
     });
 
     watcher = fs.watch(dir, async (eventType, filename) => {
+
+        console.log(eventType, filename);
     
         if (eventType === "rename") {
 
             // FILE REMOVED
             if (allFiles.has(filename)) {
-                console.log(filename, " removed!");
+                console.log(filename, " REMOVED!");
 
                 const obj = allFiles.get(filename);
 
@@ -288,20 +298,24 @@ export async function watchFiles(dir) {
 
             // FILE ADDED
             else {
-                console.log(filename, " added!");
+                console.log(filename, " ADDED!");
 
                 console.log("reserved", reserved);
 
                 // if filename wasnt reserved, create straggler entry
                 if (!reserved.delete(filename)) createStragglerEntry(filename);
-                
             }
         }
 
         else /* if (eventType === "change") */ {
+
+
             // update size display
-            allFiles.get(filename).querySelector(".straggler__size").textContent = 
-                getSizeDisplay(await getFileSize(global.userDir + "/songs/" + filename));
+            const obj = allFiles.get(filename);
+            if (obj instanceof HTMLElement) {
+                obj.querySelector(".straggler__size").textContent = 
+                    getSizeDisplay(await getFileSize(global.userDir + "/songs/" + filename));
+            }
         }
     });
 }
