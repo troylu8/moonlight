@@ -14,7 +14,7 @@
     "author": "",
     "license": "ISC",
     "scripts": {
-        "start": "electronmon .",
+        "start": "electron .",
         "rebuild": "electron-rebuild -f -w better-sqlite3"
     },
     "electronmon": {

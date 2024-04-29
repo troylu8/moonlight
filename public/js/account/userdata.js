@@ -3,7 +3,7 @@ import * as play from "../play.js";
 import { PlaylistCycle } from "../play.js";
 import { updateSongEntries } from "../settings/songSettings.js";
 import * as acc from "./account.js";
-import { deleteSongFile, readUserdata, writeUserdata } from "./files.js";
+import { deleteSongFile, missingFiles, readUserdata, writeUserdata } from "./files.js";
 import { initSettings } from "../settings/settings.js";
 const { ipcRenderer } = require("electron");
 
@@ -124,6 +124,7 @@ export class Song {
         data.songs.delete(this.id);
 
         if (this.state !== "error") deleteSongFile(this.filename);
+        missingFiles.delete(filename);
     }
 }
 

@@ -30,8 +30,6 @@ const extractAllToPromise = promisify(extractAllToAsync);
 export async function syncToServer(uid, changes) {
     const resourcesDir = join(global.resources, "users", uid);
 
-    console.log("client backend got: ", changes);
-
     const zip = new Zip();
     zip.addFile("changes.json", Buffer.from(
         JSON.stringify(changes, 
@@ -52,7 +50,7 @@ export async function syncToServer(uid, changes) {
     ));
 
     for (const song of changes["unsynced-songs"]) {
-        if (song._syncStatus === "new") 
+        if (song._syncStatus === "new" && song.state !== "error") 
             zip.addLocalFile( join(resourcesDir, "songs", song.filename), "songs/" );
     }
     //TODO: add playlist files here!!!!!  ! 

@@ -256,7 +256,6 @@ export async function watchFiles(dir) {
     if (watcher) watcher.close();
     allFiles.clear();
     missingFiles.clear();
-    reserved.clear();
     
     await fs.promises.mkdir(dir, {recursive: true});
 
@@ -291,7 +290,10 @@ export async function watchFiles(dir) {
                 if (obj instanceof HTMLElement) deleteStragglerEntry(filename);
                 
                 // otherwise set song to error state
-                else obj.setState("error");
+                else {
+                    missingFiles.set(filename, obj);
+                    obj.setState("error");
+                } 
 
                 allFiles.delete(filename);
             }
@@ -301,14 +303,16 @@ export async function watchFiles(dir) {
                 console.log(filename, " ADDED!");
 
                 console.log("reserved", reserved);
-
-                // if filename wasnt reserved, create straggler entry
-                if (!reserved.delete(filename)) createStragglerEntry(filename);
+            
+                if (missingFiles.has(filename)) {
+                    missingFiles.get(filename).setState("playable");
+                    missingFiles.delete(filename);
+                } 
+                else if (!reserved.has(filename)) createStragglerEntry(filename);
             }
         }
 
         else /* if (eventType === "change") */ {
-
 
             // update size display
             const obj = allFiles.get(filename);

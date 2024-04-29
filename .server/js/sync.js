@@ -40,6 +40,8 @@ function writeZip(zip, targetfilename, cb) {
 }
 const writeZipPromise = promisify(writeZip);
 
+
+//TODO: use jwt
 router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, res) => {
 
     const zipPath = join(__dirname, "../userfiles", req.params["uid"] + ".zip");
@@ -50,7 +52,7 @@ router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, 
     const userfiles = new Zip(createdNewFile? undefined : zipPath);
     const arrived = new Zip(req.body);
 
-    // add songs to zip
+    // add new files to zip
     for (const entry of arrived.getEntries()) {
         if (entry.name === "changes.json") continue;
 
@@ -82,22 +84,22 @@ router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, 
     }
     // clear trash
     for (const info of changes.trash) {
-        //info:  [ "songs.sid" or "playlists.pid", filename]
         const objPath = info[0].split(".");
         delete data[ objPath[0] ][ objPath[1] ];
 
         userfiles.deleteFile(info[1]);
         console.log("deleted", info[0], info[1]);
     }
-    console.log("UID??", req.params["uid"]);
-    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(data, req.params["uid"]);
-    console.log("finished writing json");
+
+    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(JSON.stringify(data), req.params["uid"]);
+    console.log("finished editing data");
     
     await writeZipPromise(userfiles, zipPath);
     console.log("finished writing zip");
 
     const toClient = new Zip();
 
+    // send back requested files
     for (const filepath of changes.requestedFiles) {
         console.log("packing ", filepath);
         const entry = userfiles.getEntry(filepath);

@@ -67,7 +67,7 @@ export async function loadAcc(jwt) {
     watchFiles(global.userDir + "/songs");
 }
 
-export function isGuest() { return uid === guestID; }
+export function isGuest() { return data && uid === guestID; }
 
 window.addEventListener("load", async () => {
     await readKey();
@@ -135,10 +135,7 @@ function parseJWT(jwt) {
 
 const syncBtn = document.getElementById("sync");
 
-syncBtn.addEventListener("click", () => {
-    data.saveDataLocal();
-    syncData();
-});
+syncBtn.addEventListener("click", () => syncData());
 syncBtn.addEventListener("mouseenter", () => showError(syncBtn.tooltip.lastElementChild, ""));
 
 export async function syncData() {
@@ -168,7 +165,9 @@ export async function syncData() {
         "unsynced-playlists": [],
 
         /** @type {Array<string>} all files that client wants from server: error state songs + songs that server has client doesnt*/
-        "requestedFiles": Array.from(missingFiles.keys()),
+        "requestedFiles": Array.from(missingFiles.keys())
+                            .filter(fn => missingFiles.get(fn).state !== "new")
+                            .map(fn => "songs/" + fn),
 
         /** @type {Array<string>} files that the client deleted, so the server should too */
         "trash": Array.from(data.trashqueue),

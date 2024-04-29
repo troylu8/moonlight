@@ -103,7 +103,7 @@ export function createSongEntry(song, playlist) {
         const resolve__sync = createElement("button", null, "resolve__sync menu-option", resolve__nav, "get from server");
         // can only resolve via sync if songfile exists on server (song isnt new) and TODO: if theres wifi
         if (song.syncStatus !== "new") {
-            resolve__sync.addEventListener("click", handler);
+            resolve__sync.addEventListener("click", () => syncData());
         }
         else resolve__sync.classList.add("menu-option__disabled");
         

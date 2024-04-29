@@ -2,6 +2,8 @@ const { app, BrowserWindow } = require('electron/main')
 const express = require("express");
 const cors = require('cors');
 const { ipcMain, dialog, shell } = require('electron');
+const fs = require('fs');
+const { dirname } = require('path');
 
 console.log("ready!");
 
@@ -28,13 +30,21 @@ app.whenReady().then( async () => {
 app.on('window-all-closed', () => app.quit());
 
 app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
-    console.log("url bad cert", url);
     event.preventDefault();
     callback(true);
 });
 
+
 ipcMain.handle("show-dialog", async (e, options) => await dialog.showOpenDialog(options));
-ipcMain.handle("show-file", (e, path) => shell.showItemInFolder(path));
+ipcMain.handle("show-file", async (e, path) => {
+    try {
+        await fs.promises.stat(path);
+        shell.showItemInFolder(path);
+    }
+    catch (err) {
+        if (err.code === "ENOENT") shell.openPath(dirname(path));
+    }
+});
 ipcMain.handle("show-folder", (e, path) => shell.openPath(path));
 
 const server = express();
