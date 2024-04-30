@@ -14,31 +14,35 @@
     transition: 0.2s;
 }
 
-#sidebar__content {
-    padding: 20px;
+#sidebar__container {
+    position: relative;
     height: 100%;
     overflow-x: hidden;
 }
 .sidebar__item {
-    position: relative;
+    position: absolute;
+    display: flex;
+    overflow-y: auto;
+    padding: 20px;
+    top: 20px;
+    bottom: 20px;
+    
     left: 50px;
+    right: -50px;
     opacity: 0;
-    display: none;
-
-    transition: 2s;
+    pointer-events: none;
+    transition: 0.2s;    
 }
 .sidebar__active {
-    left: 0;
-    opacity: 1;
-    display: flex;
-    
+    left: 0px;
+    right: 0px;
+    opacity: 1;    
+    pointer-events: auto;
 }
 
 #song-settings, #playlist-settings {
     flex-direction: column;
     gap: 10px;
-
-    height:100%;
 }
 
 #song-settings__metadata, #playlist-settings__metadata {
@@ -68,19 +72,18 @@
     text-wrap: nowrap;
 }
 
-#settings, #stragglers {
+#settings {
     flex-direction: column;
 }
 #stragglers {
+    display: none;
+    flex-direction: column;
     gap: 10px;
-    height: 100%;
 }
 
 #song-settings__playlists, #stragglers__list {
     display: flex;
     flex-direction: column;
-
-    overflow-y: auto;
 
     border: solid 2px white;
 }
