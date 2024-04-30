@@ -76,11 +76,11 @@ router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, 
     // merge json data
     for (const song of changes["unsynced-songs"]) {
         data.songs[song.id] = song;
-        console.log("added", song.title);
+        console.log("added", song.title, " to data");
     }
     for (const playlist of changes["unsynced-playlists"]) {
         data.playlists[playlist.id] = playlist;
-        console.log("added", playlist.title);
+        console.log("added", playlist.title, " to data");
     }
     // clear trash
     for (const info of changes.trash) {
@@ -103,11 +103,11 @@ router.post('/:uid', express.raw( {type: "*/*", limit: Infinity} ), async (req, 
     for (const filepath of changes.requestedFiles) {
         console.log("packing ", filepath);
         const entry = userfiles.getEntry(filepath);
+        if (!entry) console.log("couldnt find ", filepath);
         toClient.addFile(entry.entryName, await getDataPromise(entry));
-        console.log("returning", entry.entryName);
     }
     
-    res.send(toClient.toBuffer())
+    res.send(toClient.toBuffer());
 });
 
 module.exports = router;

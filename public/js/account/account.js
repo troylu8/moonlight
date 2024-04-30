@@ -1,6 +1,6 @@
 import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
-import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles, missingFiles, reserved, pathExists } from "./files.js";
+import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles, missingFiles, reserved } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
 import { showError } from "../view/fx.js";
 
@@ -143,19 +143,18 @@ export async function syncData() {
 
     const serverJSON = await getData(jwt);
     
-    console.log(serverJSON, typeof serverJSON);
     console.log("server", Object.values(serverJSON.songs).map(s => s.filename ));
     console.log("client", Array.from(data.songs).map(s => { return {syncStatus: s[1].syncStatus, filename: s[1].filename} } ));
 
     /** if syncing is successful, these items will be created */
     const newItems = {
-        /** @type {Array<Song>} new songs client will receive from server */
+        /** @type {Array<object>} array of song data client will receive from server */
         songs: [],
 
-        /** @type {Array<Playlist>} new playlists client will receive from server */
+        /** @type {Array<object>} array of playlist data client will receive from server */
         playlists: []
     }
-    
+        
     /** sent to server */
     const changes = {
         /** @type {Array<Song>} songs to be merged with server's data.json*/
@@ -170,13 +169,19 @@ export async function syncData() {
                             .map(fn => "songs/" + fn),
 
         /** @type {Array<string>} files that the client deleted, so the server should too */
-        "trash": Array.from(data.trashqueue),
-    };
+        "trash": Array.from(data.trashqueue)
+    }
 
+    console.log("unfiltered: ", Array.from(missingFiles.keys()));
+    console.log("filtered: ", Array.from(missingFiles.keys())
+                                .filter(fn => missingFiles.get(fn).state !== "new")
+                                .map(fn => "songs/" + fn));
+    
     /** @param {"songs" | "playlists"} category */
     const addCategoryToChanges = (category) => {
 
         for (const item of data[category].values()) {
+            if (item.syncStatus === "new" && item.state === "error") continue;
             if (item.syncStatus !== "synced") changes["unsynced-" + category].push(item);
 
             // syncstatus === "synced" && song/playlist isnt in server
@@ -186,6 +191,8 @@ export async function syncData() {
         for (const id of Object.keys(serverJSON[category])) {
             const itemData = serverJSON[category][id];
             const item = data[category].get(id);
+
+            console.log("the server has ", itemData.title, ", but do we want it? ", !item);
 
             // WANTS - if client doesnt have this song/playlist && not in trash queue
             if (!item) {
@@ -212,6 +219,7 @@ export async function syncData() {
     addCategoryToChanges("playlists");
     
     console.log("changes ", changes);
+    console.log("newitems", newItems);
 
     try {
         for (const { filename } of newItems.songs)      reserved.add(filename);
@@ -219,13 +227,19 @@ export async function syncData() {
 
         await syncToServer(uid, changes);
 
-        console.log("newitems", newItems);
+        
         
         for (const song of changes["unsynced-songs"])           song._syncStatus = "synced";
         for (const playlists of changes["unsynced-playlists"])  playlists._syncStatus = "synced";
 
-        for (const songData of newItems.songs) new Song(songData.id, songData, true);
-        for (const playlistData of newItems.playlists) new Playlist(playlistData.id, playlistData, true);
+        for (const songData of newItems.songs) {
+            songData._syncStatus = "synced";
+            new Song(songData.id, songData);
+        } 
+        for (const playlistData of newItems.playlists) {
+            playlistData._syncStatus = "synced";
+            new Playlist(playlistData.id, playlistData);
+        } 
         
         
         data.trashqueue.clear();

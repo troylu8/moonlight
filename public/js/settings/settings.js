@@ -27,7 +27,6 @@ export async function initSettings() {
         elem.addEventListener("change", updateMap);
         updateMap();
     }
-    console.log(data.settings);
 }
 
 const deleteAllBtn = document.getElementById("stragglers__delete-all");

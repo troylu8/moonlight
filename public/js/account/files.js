@@ -275,8 +275,6 @@ export async function watchFiles(dir) {
     });
 
     watcher = fs.watch(dir, async (eventType, filename) => {
-
-        console.log(eventType, filename);
     
         if (eventType === "rename") {
 
@@ -313,7 +311,8 @@ export async function watchFiles(dir) {
         }
 
         else /* if (eventType === "change") */ {
-
+            console.log(filename, "CHANGED!");
+            
             // update size display
             const obj = allFiles.get(filename);
             if (obj instanceof HTMLElement) {

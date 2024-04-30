@@ -8,7 +8,8 @@ import { initSettings } from "../settings/settings.js";
 const { ipcRenderer } = require("electron");
 
 export class Song {
-    constructor(id, options, initializeAsSynced) {
+    constructor(id, options) {
+        console.log("creating new song", options.title);
         data.songs.set(id, this);
         this.id = id;
         this.title = options.title;
@@ -18,8 +19,7 @@ export class Song {
         this.duration = options.duration;
 
         /** @type {"new" | "edited" | "synced"} */
-        this._syncStatus = options.syncStatus ?? "new";
-        if (initializeAsSynced) this._syncStatus = "synced";
+        this._syncStatus = options._syncStatus ?? "new";
 
         /** @type {Set<HTMLElement>} */
         this.songEntries = new Set();
@@ -31,7 +31,7 @@ export class Song {
         this.playlists = new Set();
         if (options.playlists) {
             for (const pid of options.playlists) 
-                this.addToPlaylist(pid, !initializeAsSynced);
+                this.addToPlaylist(pid, options._syncStatus && options._syncStatus === "synced");
         }
     }
 
@@ -39,6 +39,7 @@ export class Song {
     set syncStatus(val) { 
         if (val === "edited" && this._syncStatus === "new") return;
         this._syncStatus = val;
+        console.log(this.title, "set to ", val);
     }
 
     /** @returns {"new" | "edited" | "synced"} */
@@ -47,10 +48,12 @@ export class Song {
     /** @param {"playable" | "active" | "error"} state  */
     setState(state) {
         this.state = state;
-        console.log("set as", state, this.title);
 
-        if (state === "error") this.syncStatus = "edited";
-
+        if (state === "error") {
+            this.syncStatus = "edited";
+            if (data.curr.song === this) play.setSong(null);
+        } 
+        
         for (const songEntry of this.songEntries.values()) 
             elems.setEntryState(songEntry, state);
     }
@@ -67,15 +70,18 @@ export class Song {
     }
 
 
-    /** @param {Playlist} playlist */
+    /** 
+     * @param {Playlist} playlist
+     * @param {boolean} changeSyncStatus `true` if adding to playlist should set `.syncStatus` of song and playlist to `"edited"`
+     */
     addToPlaylist(playlist, changeSyncStatus) {
         if ( !(playlist instanceof Playlist) ) playlist = data.playlists.get(playlist);
-
+        
         if (!playlist || playlist.songs.has(this)) return;
         
-        if (changeSyncStatus ?? true) {
+        if (!changeSyncStatus) {
             this.syncStatus = "edited";
-            playlist.syncStatus = "edited";    
+            playlist.syncStatus = "edited";
         }
 
         playlist.songs.add(this);
@@ -124,13 +130,14 @@ export class Song {
         data.songs.delete(this.id);
 
         if (this.state !== "error") deleteSongFile(this.filename);
-        missingFiles.delete(filename);
+        missingFiles.delete(this.filename);
     }
 }
 
 export class Playlist {
     
-    constructor(id, options, initializeAsSynced) {
+    constructor(id, options) {
+        console.log("creating new song", options.title);
         data.playlists.set(id, this);
         this.id = id;
         this.title = options.title;
@@ -146,18 +153,19 @@ export class Playlist {
         /** @type {PlaylistCycle} */
         this.cycle = null;
 
+
         /** @type {"new" | "edited" | "synced"} */
-        this._syncStatus = options.syncStatus ?? "new";
-        if (initializeAsSynced) this._syncStatus = "synced"
+        this._syncStatus = options._syncStatus ?? "new";
 
         elems.createPlaylistEntries(this);
         elems.createPlaylistCheckboxEntry(this);
 
         /** @type {Set<Song>} */
         this.songs = new Set();
+
         if (options.songs) {
             for (const sid of options.songs) 
-                data.songs.get(sid).addToPlaylist(this, !initializeAsSynced);
+                data.songs.get(sid).addToPlaylist(this, options._syncStatus && options._syncStatus === "synced");
         }
         
     }

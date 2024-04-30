@@ -3,7 +3,6 @@ import { getTimeDisplay } from "./view/elems.js";
 import { setSpin, updateVolumeIcon } from "./view/fx.js";
 import { data, Playlist, Song } from "./account/userdata.js";
 import { uid } from "./account/account.js";
-import { pathExists } from "./account/files.js";
 
 
 class SpinningAudio extends Audio {
@@ -61,8 +60,8 @@ function inThePresent() {
 */
 export function setSong(song) {
     
-    // set previous song to "playable" state - songs whose states === "error" should never be set as curr song 
-    if (data.curr.song) data.curr.song.setState("playable");
+    // set previous song to "playable" state
+    if (data.curr.song && data.curr.song.state !== "error") data.curr.song.setState("playable");
 
     // if setting song to none
     if (!song) {
