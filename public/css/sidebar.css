@@ -11,16 +11,30 @@
     display: flex;
     flex-direction: column;
 
-    transition: 0.5s;
+    transition: 0.2s;
 }
 
 #sidebar__content {
     padding: 20px;
     height: 100%;
+    overflow-x: hidden;
+}
+.sidebar__item {
+    position: relative;
+    left: 50px;
+    opacity: 0;
+    display: none;
+
+    transition: 2s;
+}
+.sidebar__active {
+    left: 0;
+    opacity: 1;
+    display: flex;
+    
 }
 
 #song-settings, #playlist-settings {
-    display: none;
     flex-direction: column;
     gap: 10px;
 
@@ -55,7 +69,6 @@
 }
 
 #settings, #stragglers {
-    display: none;
     flex-direction: column;
 }
 #stragglers {
@@ -81,7 +94,6 @@
 }
 
 #user-settings {
-    display: none;
     flex-direction: column;
 }
 

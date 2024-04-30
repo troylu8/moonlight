@@ -39,7 +39,6 @@ export class Song {
     set syncStatus(val) { 
         if (val === "edited" && this._syncStatus === "new") return;
         this._syncStatus = val;
-        console.log(this.title, "set to ", val);
     }
 
     /** @returns {"new" | "edited" | "synced"} */
@@ -79,7 +78,7 @@ export class Song {
         
         if (!playlist || playlist.songs.has(this)) return;
         
-        if (!changeSyncStatus) {
+        if ( changeSyncStatus ?? true ) {
             this.syncStatus = "edited";
             playlist.syncStatus = "edited";
         }
@@ -165,7 +164,7 @@ export class Playlist {
 
         if (options.songs) {
             for (const sid of options.songs) 
-                data.songs.get(sid).addToPlaylist(this, options._syncStatus && options._syncStatus === "synced");
+                data.songs.get(sid).addToPlaylist(this,  !(options._syncStatus && options._syncStatus === "synced"));
         }
         
     }
@@ -219,7 +218,7 @@ export class Playlist {
 
         this.songs = new Set();
         for (const sid of options.songs) 
-            data.songs.get(sid).addToPlaylist(this);
+            data.songs.get(sid).addToPlaylist(this, false);
 
         if (this === data.curr.viewPlaylist) {
             elems.playlistHeader.textContent = this.title;

@@ -16,10 +16,15 @@ function extractAllToAsync(zip, targetPath, cb) {
     let done = 0;
     
     if (total === 0) return cb();
-    
-    zip.extractAllToAsync(targetPath, true, (err) => {
-        if (++done === total) cb();
-    });
+
+    zip.extractAllTo(targetPath);
+    cb();
+
+    //TODO: change back to async when its fixed: https://github.com/cthackers/adm-zip/issues/484
+    // zip.extractAllToAsync(targetPath, false, false, (err) => {
+    //     console.log(done, "/", total);
+    //     if (++done === total) cb();
+    // });
 }
 const extractAllToPromise = promisify(extractAllToAsync);
 
@@ -63,5 +68,4 @@ export async function syncToServer(uid, changes) {
     });
 
     await extractAllToPromise(new Zip(Buffer.from(newItems.data)), resourcesDir);
-
 }

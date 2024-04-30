@@ -49,23 +49,19 @@ export function setEntryState(entry, state) {
 
 
 function getSongEntry(groupElem, sid) {
-    console.log("looking for ", sid.startsWith("yt#") ? sid.substring(3) : sid);
     return groupElem.querySelector("." + (sid.startsWith("yt#") ? sid.substring(3) : sid));
 }
 
 /** 
  * @param {Song} song
- * @@param {Playlist} playlist 
+ * @param {Playlist} playlist 
  */
 export function createSongEntry(song, playlist) {
     if (!playlist.groupElem) return;
 
     // if songEntry already exists
     const e = getSongEntry(playlist.groupElem, song.id);
-    if (e) {
-        console.log("songentry already exists");
-        return e;
-    } 
+    if (e) return e;
 
     const className = song.id.startsWith("yt#") ? song.id.substring(3) : song.id;
 

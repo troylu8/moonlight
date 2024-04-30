@@ -8,18 +8,19 @@ export function setSidebarOpen(val) {
     open = val;
 }
 
-
-let currentContent = null;
+/** @type {HTMLElement} */
+let currentContent;
 
 export function setSidebarContent(elem) {
     // if switching away from songsettings or to different song, update song entries of song we were just editing
     if (currentContent === songSettings) updateSongEntries();
     if (currentContent === elem) return setSidebarOpen(true);
 
-    if (currentContent !== null) currentContent.style.display = "none";
+    if (currentContent) currentContent.classList.remove("sidebar__active");
     
     currentContent = elem;
-    currentContent.style.display = "flex";
+    currentContent.classList.add("sidebar__active");
+    console.log(currentContent, currentContent.classList);
 
     setSidebarOpen(true);
 }

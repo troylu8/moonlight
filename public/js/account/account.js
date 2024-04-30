@@ -181,7 +181,9 @@ export async function syncData() {
     const addCategoryToChanges = (category) => {
 
         for (const item of data[category].values()) {
+            // if this song is new and missing a file, then the file will not be at the server.
             if (item.syncStatus === "new" && item.state === "error") continue;
+
             if (item.syncStatus !== "synced") changes["unsynced-" + category].push(item);
 
             // syncstatus === "synced" && song/playlist isnt in server
@@ -218,19 +220,20 @@ export async function syncData() {
     addCategoryToChanges("songs");
     addCategoryToChanges("playlists");
     
-    console.log("changes ", changes);
-    console.log("newitems", newItems);
-
     try {
         for (const { filename } of newItems.songs)      reserved.add(filename);
         for (const { filename } of newItems.playlists)  reserved.add(filename);
-
+        
         await syncToServer(uid, changes);
-
         
+        console.log("changes ", changes);
+        console.log("newitems", newItems);
         
-        for (const song of changes["unsynced-songs"])           song._syncStatus = "synced";
-        for (const playlists of changes["unsynced-playlists"])  playlists._syncStatus = "synced";
+        for (const song of changes["unsynced-songs"]) {
+            console.log("setting back to synced");
+            song.syncStatus = "synced";
+        }          
+        for (const playlists of changes["unsynced-playlists"])  playlists.syncStatus = "synced";
 
         for (const songData of newItems.songs) {
             songData._syncStatus = "synced";
@@ -240,7 +243,6 @@ export async function syncData() {
             playlistData._syncStatus = "synced";
             new Playlist(playlistData.id, playlistData);
         } 
-        
         
         data.trashqueue.clear();
         
