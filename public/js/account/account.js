@@ -139,7 +139,7 @@ syncBtn.addEventListener("click", () => syncData());
 syncBtn.addEventListener("mouseenter", () => showError(syncBtn.tooltip.lastElementChild, ""));
 
 export async function syncData() {
-    if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not&nbsp;signed&nbsp;in!")
+    if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not signed in!")
 
     const serverJSON = await getData(jwt);
     

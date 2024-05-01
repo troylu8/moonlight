@@ -64,10 +64,9 @@ export function setEntrySyncStatus(entry, syncStatus) {
     if (syncStatus === "new" || syncStatus === "edited") svg = icons.unsynced;
     else svg = icons[syncStatus] ?? "";
 
-    // const svgElem = song__syncStatus.querySelector("svg");
-    // if (svgElem) song__syncStatus.removeChild(svgElem);
-    // song__syncStatus.insertAdjacentHTML("afterbegin", svg);
-    song__syncStatus.innerHTML = svg;
+    const svgElem = song__syncStatus.querySelector("svg");
+    if (svgElem) song__syncStatus.removeChild(svgElem);
+    song__syncStatus.insertAdjacentHTML("afterbegin", svg);
 
     let tooltipText = "";
     if (svg === icons.unsynced)         tooltipText = "not synced with server";
@@ -107,12 +106,19 @@ export function createSongEntry(song, playlist) {
     const song__artist = createElement("span", null, "song__artist song__artist:" + song.id, songEntry.firstChild, song.artist);
 
     const song__syncStatus = createElement("div", null, "song__syncStatus", songEntry.lastChild);
-    setToolTip(song__syncStatus, "", 10);
+    setToolTip(song__syncStatus, "", 10).style.whiteSpace = "nowrap";
     setEntrySyncStatus(songEntry, "new");
 
     const song__options = createElement("div", null, "song__options", songEntry.lastChild);
     song__options.innerHTML = icons.options;
-
+    song__options.addEventListener("click", (e) => {
+        songSettings.openSongSettings(song, song__title, song__artist);
+        e.stopPropagation();
+    } );
+    songEntry.addEventListener("contextmenu", (e) => {
+        songSettings.openSongSettings(song, song__title, song__artist);
+        e.preventDefault();
+    });
     
     const song__state = createElement("div", null, "song__state");
     song__state.addEventListener("click", () => {
@@ -125,11 +131,7 @@ export function createSongEntry(song, playlist) {
     });
     songEntry.firstChild.insertBefore(song__state, song__title);
 
-    song__options.addEventListener("click", () => songSettings.openSongSettings(song, song__title, song__artist));
-    songEntry.addEventListener("contextmenu", (e) => {
-        songSettings.openSongSettings(song, song__title, song__artist);
-        e.preventDefault();
-    });
+    
 
     let menuOn = false;
     

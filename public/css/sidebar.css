@@ -50,6 +50,7 @@
 #song-settings__metadata, #playlist-settings__metadata {
     display: flex;
     margin-bottom: 20px;
+    white-space: nowrap;
 }
 .soft-link, #playlist-settings__metadata {
     font-size: smaller;
@@ -100,6 +101,9 @@
 
 #user-settings {
     flex-direction: column;
+}
+#user-settings > h3 {
+    white-space: nowrap;
 }
 
 #sidebar__collapse {

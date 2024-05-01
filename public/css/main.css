@@ -109,11 +109,6 @@
     opacity: 0.3;
 }
 
-
-.error .tooltip, .active .tooltip {
-    visibility: visible;
-}
-
 .resolve {
     display: flex;
     flex-direction: column;

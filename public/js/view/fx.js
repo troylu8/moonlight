@@ -128,6 +128,8 @@ for (const h3 of document.getElementsByTagName("h3")) {
     h3.firstElementChild.style.height = size;
 }
 
+
+
 /**
  * adds a tooltip to the element. if one already exists, overrides it.
  * @param {HTMLElement} elem parent element
@@ -138,21 +140,37 @@ for (const h3 of document.getElementsByTagName("h3")) {
 export function setToolTip(elem, innerHTML, gap) {
     const tooltip = elem.tooltip ?? document.createElement("div");
     elem.tooltip = tooltip;
-    if (getComputedStyle(elem).position === "static") {
-        elem.style.position = "relative";
-    }
     
-
     tooltip.classList.add("tooltip");
     tooltip.innerHTML = innerHTML;
 
-    if (gap !== 0) {
-        if (gap > 0)    tooltip.style.bottom = `calc(100% + ${gap}px)`;
-        else            tooltip.style.top = `calc(100% + ${-gap}px)`;
+    /** moves tooltip to be centered on elem */
+    function reposition() {
+        const a = elem.getBoundingClientRect();
+        const b = tooltip.getBoundingClientRect();
+
+        const centerX = a.x + a.width/2;
+        const finalX = clamp(centerX - b.width/2, 0, window.innerWidth - b.width);
+        
+        tooltip.style.left = finalX + "px";
+
+        
+        const finalY = 
+            (gap === 0)?  a.y + a.height/2 - b.height/2: 
+            (gap < 0)?  a.y + a.height - gap : 
+            a.y - b.height - gap;
+
+        if (tooltip.innerHTML.includes("not synced with")) {
+            console.log(a.y, b.height, gap, tooltip.innerHTML);
+        } 
+
+        tooltip.style.top = finalY + "px";
     }
 
-    console.log("added tooltip to ", elem, tooltip);
-    elem.addEventListener("mouseover", () => {
+    new MutationObserver(() => reposition()).observe(tooltip, {childList: true, subtree: true});
+
+    elem.addEventListener("mouseenter", () => {
+        reposition();
         tooltip.style.opacity = 1;
         tooltip.style.pointerEvents = "auto";
     });
@@ -173,8 +191,8 @@ export function removeTooltip(elem) {
 
 
 [
-    ["sync", `sync&nbsp;data <p id="sync__error" class="error-msg" ></p>`],
-    ["new", "new&nbsp;song"],
+    ["sync", `sync data <p id="sync__error" class="error-msg" ></p>`],
+    ["new", "new song"],
     ["account-btn", "account"],
     ["settings-btn", "settings"]
 ].forEach(pair => {

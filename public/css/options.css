@@ -29,7 +29,9 @@
     min-width: 100%;
     min-height: 100%;
 }
-
+.options-btn > .tooltip {
+    white-space: nowrap;
+}
 
 #new__dropdown, #account__dropdown {    
     position: absolute;
