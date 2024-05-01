@@ -1,5 +1,6 @@
 import { audio } from "../play.js";
 import { data } from "../account/userdata.js";
+import { activeSidebarElem } from "./sidebar.js";
 
 const circle = document.getElementById("play__circle");
 const play = document.getElementById("play__play");
@@ -41,7 +42,7 @@ function setRPM(rpm) {
 const volumeSlider = document.getElementById("volume-slider");
 
 
-addSliderDragEvent(volumeSlider, () => {
+addDragEvent(volumeSlider, () => {
     audio.volume = volumeSlider.value / 100;
 })
 volumeSlider.addEventListener("mousedown", () => { audio.muted = false; });
@@ -92,27 +93,27 @@ export function setVolumeIcon(type) {
 
 // TEXTAREAS
 for (const tArea of document.getElementsByClassName("auto-height")) {
-    const resize = () => {
+    tArea.resize = () => {
         tArea.style.height = '1px';
         tArea.style.height = (tArea.scrollHeight) + "px";
     };
 
     // prevent newline characters and resize on input
-    tArea.addEventListener("input", resize);
+    tArea.addEventListener("input", () => tArea.resize());
     tArea.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !tArea.allowNewline) e.preventDefault();
     });
 
     tArea.setText = (text) => {
         tArea.value = text;
-        setTimeout(resize, 0);
+        setTimeout(() => tArea.resize(), 0);
     }
     
     // initial resize
     let wasEmpty = tArea.value === "";
     if (wasEmpty) tArea.value = "a"; // dummy character
     setTimeout(() => {
-        resize();
+        tArea.resize();
         if (wasEmpty) tArea.value = "";
     }, 0);
 }
@@ -137,6 +138,10 @@ for (const h3 of document.getElementsByTagName("h3")) {
 export function setToolTip(elem, innerHTML, gap) {
     const tooltip = elem.tooltip ?? document.createElement("div");
     elem.tooltip = tooltip;
+    if (getComputedStyle(elem).position === "static") {
+        elem.style.position = "relative";
+    }
+    
 
     tooltip.classList.add("tooltip");
     tooltip.innerHTML = innerHTML;
@@ -146,6 +151,7 @@ export function setToolTip(elem, innerHTML, gap) {
         else            tooltip.style.top = `calc(100% + ${-gap}px)`;
     }
 
+    console.log("added tooltip to ", elem, tooltip);
     elem.addEventListener("mouseover", () => {
         tooltip.style.opacity = 1;
         tooltip.style.pointerEvents = "auto";
@@ -216,11 +222,69 @@ function setSliderColors(slider, left, right) {
     slider.updateSliderColors();
 }
 
-export function addSliderDragEvent(slider, ondrag) {
+export function addDragEvent(slider, ondrag, onmousedown, onmouseup) {
     if (slider.dragging === undefined) {
         slider.dragging = false;
-        slider.addEventListener("mousedown", () => { slider.dragging = true; });
-        slider.addEventListener("mouseup", () => { slider.dragging = false; });
+        slider.addEventListener("mousedown", (e) => { 
+            window.getSelection().empty();
+            slider.dragging = true; 
+            document.body.style.userSelect = "none";
+            if (onmousedown) onmousedown(e);
+        });
+        window.addEventListener("mouseup", (e) => { 
+            slider.dragging = false; 
+            document.body.style.userSelect = "auto";
+            if (onmouseup) onmouseup(e);
+        });
     }
-    slider.addEventListener("mousemove", (e) => { if (slider.dragging) ondrag(e); });
+    window.addEventListener("mousemove", (e) => { if (slider.dragging) ondrag(e); });
 }
+
+function createResizeDragger(dragger, ondrag, onmousedown, onmouseup) {
+    addDragEvent(dragger, 
+        (e) => ondrag(e),
+        () => { 
+            document.body.style.setProperty("--movement-transition", "0s");
+            if (onmousedown) onmousedown();
+        },
+        () => { 
+            document.body.style.setProperty("--movement-transition", "0.2s"); 
+            if (onmouseup) onmouseup();
+        }
+    );
+}
+
+
+/** @type {NodeList} */
+let activeTextAreas;
+
+function clamp (x, min, max) { return Math.max( Math.min(x, max), min ); }
+
+/**
+ * @param {string} opposingWidthcssvar css variable with a width in `px`
+ */
+function calculateMaxWidth(opposingWidthcssvar) {
+    const str = getComputedStyle(document.body).getPropertyValue(opposingWidthcssvar);
+    return window.innerWidth - Number(str.substring(0, str.length-2)) - 50;
+}
+
+let maxSidebarWidth;
+createResizeDragger(
+    document.getElementById("sidebar__dragger"), 
+    (e) => {
+        document.body.style.setProperty("--sidebar-div-width", clamp(window.innerWidth - e.clientX, 200, maxSidebarWidth) + "px");
+        activeTextAreas.forEach(tArea => tArea.resize());
+    },
+    () => {
+        activeTextAreas = activeSidebarElem.querySelectorAll("textarea");
+        maxSidebarWidth = calculateMaxWidth("--playlists-div-width");
+    },
+    () => activeTextAreas = null
+);
+
+let maxPlaylistsWidth;
+createResizeDragger(
+    document.getElementById("playlists__dragger"), 
+    (e) => document.body.style.setProperty("--playlists-div-width", clamp(e.clientX, 100, maxPlaylistsWidth) + "px"),
+    () => maxPlaylistsWidth = calculateMaxWidth("--sidebar-div-width")
+);

@@ -1,11 +1,13 @@
 import { setSidebarContent, setSidebarOpen } from "../view/sidebar.js";
 import { Playlist, data } from "../account/userdata.js";
-import { playlistHeader, playlistDesc } from "../view/elems.js";
+import { playlistHeader, playlistDesc, setViewPlaylist } from "../view/elems.js";
 import { genID } from "../account/account.js";
 import { initDeleteBtn } from "../view/fx.js";
 
 document.getElementById("new-playlist").addEventListener("click", () => {
-    new Playlist(genID(14), { title: "new playlist" });
+    const playlist = new Playlist(genID(14), { title: "new playlist" });
+    playlist.playlistEntry.scrollIntoView();
+    setViewPlaylist(playlist);
 })
 
 const playlistSettings = document.getElementById("playlist-settings");

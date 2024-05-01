@@ -65,6 +65,8 @@ document.getElementById("account__continue").addEventListener("click", async () 
 });
 
 document.getElementById("sign-out").addEventListener("click", () => {
+    setSignInActive(true);
+
     setTitleScreen(true);
     acc.clearAccInfo();
     nullifyData();
@@ -101,16 +103,20 @@ initAccCreator({
 const title = document.getElementById("account__title");
 const toggle = document.getElementById("account__toggle");
 
-toggle.addEventListener("click", () => {
-    const signInActive = repeatPassword.style.display !== "block";
-    
-    toggle.textContent = signInActive? "already have account" : "create new account";
-    title.textContent = submit.textContent = signInActive? "create account" : "sign in" ;
-
-    repeatPassword.style.display = signInActive? "block" : "none";
-    repeatPassword.value = error.textContent = "";
+toggle.addEventListener("click", () => {    
+    setSignInActive(getComputedStyle(repeatPassword).display === "block")
 });
 
+/**
+ * @param {boolean} signin `true` for sign in, `false` for create account
+ */
+function setSignInActive(signin) {
+    toggle.textContent = signin? "already have account" : "create new account";
+    title.textContent = submit.textContent = signin? "create account" : "sign in" ;
+
+    repeatPassword.style.display = signin? "block" : "none";
+    repeatPassword.value = error.textContent = "";
+}
 
 
 const fromGuest = {

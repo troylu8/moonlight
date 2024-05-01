@@ -13,7 +13,7 @@
         <link rel="stylesheet" href="css/options.css">
         <link rel="stylesheet" href="css/main.css">
         <link rel="stylesheet" href="css/sidebar.css">
-        <link rel="stylesheet" href="css/signin.css">
+        <link rel="stylesheet" href="css/titlescreen.css">
 
         
         <script type="module" src="js/view/dropdown.js" ></script> 
@@ -53,15 +53,15 @@
                 
             </div>
             <div id="titlescreen__bottom">
-                <h2 id="account__title"> sign in </h2>
+                <h2 id="account__title"> create account </h2>
 
                 <input id="account__username" type="text" placeholder="username">
                 <input id="account__password" type="text" placeholder="password">
                 <input id="account__repeat-password" type="text" placeholder="repeat password">
                 
                 <p id="account__error" class="error-msg" ></p>
-                <button id="account__submit"> sign in </button>
-                <a id="account__toggle"> create new account </a>
+                <button id="account__submit"> create account </button>
+                <a id="account__toggle"> already have account </a>
                 <a id="account__continue"> continue without account </a>
             </div>
 
@@ -136,8 +136,10 @@
                     </div>
                 </div>
             </nav>
-    
+            
             <div id="playlists-div">
+                <div id="playlists__dragger" class="horizontal-dragger"></div>
+                
                 <div id="playlists-div__header">
                     <h2> Playlists </h2>
 
@@ -242,6 +244,8 @@
     
             
             <div id="sidebar-div" >
+                <div id="sidebar__dragger" class="horizontal-dragger"></div>
+
                 <div id="sidebar__collapse" >
                     <div class="svg-cont">
                         <svg stroke="var(--primary-color)" viewBox="0 0 24 24">
@@ -271,7 +275,7 @@
                         </div>
     
                         <h3> playlists </h3>
-                        <div id="song-settings__playlists"></div>
+                        <div id="song-settings__playlists" class="hiding-scroll"></div>
     
                         <button id="song-settings__delete" class="delete-btn"> delete </button>
                         <p id="song-settings__delete__error" class="error-msg"></p>

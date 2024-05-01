@@ -1,26 +1,41 @@
 import { updateSongEntries, songSettings, clearCurrentlyEditing } from "../settings/songSettings.js";
+import { mainDiv } from "./elems.js";
 
 export let open = false;
 
+const sidebar = document.getElementById("sidebar-div");
+const options = document.getElementById("options-div");
+
 export function setSidebarOpen(val) {
     if (open === val) return;
-    document.body.style.setProperty("--sidebar-div-width", val? "350px" : "0px");
     open = val;
+
+    if (open) {
+        sidebar.style.right = "0";
+        options.style.right = mainDiv.style.right = "var(--sidebar-div-width)";
+    }
+    else {
+        sidebar.style.right = "calc(var(--sidebar-div-width) * -1)";
+        options.style.right = mainDiv.style.right = "0";
+    }
+    
 }
 
+
+
 /** @type {HTMLElement} */
-let currentContent;
+export let activeSidebarElem;
 
 export function setSidebarContent(elem) {
     // if switching away from songsettings or to different song, update song entries of song we were just editing
-    if (currentContent === songSettings) updateSongEntries();
-    if (currentContent === elem) return setSidebarOpen(true);
+    if (activeSidebarElem === songSettings) updateSongEntries();
+    if (activeSidebarElem === elem) return setSidebarOpen(true);
 
-    if (currentContent) currentContent.classList.remove("sidebar__active");
+    if (activeSidebarElem) activeSidebarElem.classList.remove("sidebar__active");
     
-    currentContent = elem;
-    currentContent.classList.add("sidebar__active");
-    console.log(currentContent, currentContent.classList);
+    activeSidebarElem = elem;
+    activeSidebarElem.classList.add("sidebar__active");
+    console.log(activeSidebarElem, activeSidebarElem.classList);
 
     setSidebarOpen(true);
 }

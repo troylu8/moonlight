@@ -1,17 +1,19 @@
+/* right:  calc(var(--sidebar-div-width) - 350px);  */
 #sidebar-div {
 
     background-color: var(--background-color-side);
 
     position: fixed;
-    right:  calc(var(--sidebar-div-width) - 350px); 
+
+    width: var(--sidebar-div-width);
+    right:  calc(var(--sidebar-div-width) * -1); 
     top: 0;
     bottom: var(--play-div-height);
-    width: 350px;
 
     display: flex;
     flex-direction: column;
 
-    transition: 0.2s;
+    transition: var(--movement-transition);
 }
 
 #sidebar__container {
@@ -24,8 +26,8 @@
     display: flex;
     overflow-y: auto;
     padding: 20px;
-    top: 20px;
-    bottom: 20px;
+    top: 0px;
+    bottom: 0px;
     
     left: 50px;
     right: -50px;

@@ -1,4 +1,4 @@
-import { addSliderDragEvent } from "./view/fx.js";
+import { addDragEvent } from "./view/fx.js";
 import { getTimeDisplay } from "./view/elems.js";
 import { setSpin, updateVolumeIcon } from "./view/fx.js";
 import { data, Playlist, Song } from "./account/userdata.js";
@@ -163,7 +163,7 @@ audio.addEventListener("timeupdate", () => {
 });
 audio.addEventListener("ended", () => nextBtn.dispatchEvent(new Event("click")));
 
-addSliderDragEvent(seek, () => {
+addDragEvent(seek, () => {
     seekPassed.textContent = getTimeDisplay(seek.value);
 }); 
 

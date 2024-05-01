@@ -152,11 +152,10 @@ export class Playlist {
         /** @type {PlaylistCycle} */
         this.cycle = null;
 
-
         /** @type {"new" | "edited" | "synced"} */
         this._syncStatus = options._syncStatus ?? "new";
 
-        elems.createPlaylistEntries(this);
+        elems.createPlaylistEntry(this);
         elems.createPlaylistCheckboxEntry(this);
 
         /** @type {Set<Song>} */
@@ -186,15 +185,18 @@ export class Playlist {
 
         // if only playlist, nullify view and listen playlists 
         if (data.playlists.size === 1) elems.setViewPlaylist(null, true);
+        else {
+            if (this === data.curr.viewPlaylist) {
+                const adjacentPID = (this.playlistEntry.previousElementSibling ?? this.playlistEntry.nextElementSibling).id.substring(3);
+                elems.setViewPlaylist(data.playlists.get(adjacentPID));
+            }
+            if (this === data.curr.listenPlaylist) {
+                data.curr.listenPlaylist = null;
+                play.setSong(null);
+            }
+        } 
 
-        else if (this === data.curr.viewPlaylist) {
-            const prevID = this.playlistEntry.previousElementSibling.id.substring(3);
-            elems.setViewPlaylist(data.playlists.get(prevID), true);
-        }
-        else if (this === data.curr.listenPlaylist) {
-            data.curr.listenPlaylist = null;
-            play.setSong(null);
-        }
+        
 
         for (const song of this.songs) 
             song.removeFromPlaylist(this);

@@ -1,14 +1,17 @@
 :root {
     --playlists-div-width: 200px;
-    --sidebar-div-width: 0px;
+    --sidebar-div-width: 350px;
     --options-div-height: 40px;
     --play-div-height: 90px;
+
+    --movement-transition: 0.2s;
 
     --background-color: #17181a;
     --background-color-side: #232427;
     --background-color-main: #3a3c42;
     --primary-color: #DBE4F0;
     --accent-color: #9C55E8;
+    --warning-color: rgb(215, 169, 140);
     --error-color: #d13030;
 }
 
@@ -200,4 +203,20 @@ input[type="file"] {
     padding: 0;
 
     align-self: center;
+}
+
+.horizontal-dragger {
+    position: absolute;
+    width: 10px;
+    height: 100%;
+
+    cursor: ew-resize;
+
+    z-index: 10;
+}
+#sidebar__dragger {
+    left: -5px;
+}
+#playlists__dragger {
+    right: -5px;
 }

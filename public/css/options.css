@@ -4,7 +4,7 @@
     position: fixed;
     top: 0;
     left: var(--playlists-div-width);
-    right: var(--sidebar-div-width);
+    right: 0;
     height: var(--options-div-height);
 
     z-index: 2;
@@ -16,11 +16,10 @@
     padding-right: 10px;
     gap: 10px;
 
-    transition: 0.2s;
+    transition: var(--movement-transition);
 }
 
 .options-btn {
-    position: relative;
     cursor: pointer;
 
     width: 25px;

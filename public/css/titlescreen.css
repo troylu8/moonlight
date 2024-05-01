@@ -37,13 +37,9 @@
     align-items: center;
 }
 
-#sign-in {
+#create-account {
     display: flex;
 }
-#account__repeat-password {
-    display: none;
-}
-
 
 #account__title {
     margin-top: 20px;
