@@ -35,7 +35,7 @@ export function openPlaylistSettings(playlist) {
 }
 
 titleArea.addEventListener("input", () => {
-    currentlyEditing.syncStatus = "edited";
+    currentlyEditing.setSyncStatus("edited");
 
     currentlyEditing.title = titleArea.value;
 
@@ -46,7 +46,7 @@ titleArea.addEventListener("input", () => {
     currentlyEditing.checkboxDiv.lastElementChild.textContent = titleArea.value;
 });
 descArea.addEventListener("input", () => {
-    currentlyEditing.syncStatus = "edited";
+    currentlyEditing.setSyncStatus("edited");
 
     currentlyEditing.desc = descArea.value.replaceAll("\n", "<br>");
     console.log(descArea.value.replaceAll("\n", "<br>"));

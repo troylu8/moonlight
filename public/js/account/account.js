@@ -1,6 +1,6 @@
 import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
-import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles, missingFiles, reserved } from "./files.js";
+import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles, missingFiles, reserved, deviceID } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
 import { showError } from "../view/fx.js";
 
@@ -138,48 +138,55 @@ const syncBtn = document.getElementById("sync");
 syncBtn.addEventListener("click", () => syncData());
 syncBtn.addEventListener("mouseenter", () => showError(syncBtn.tooltip.lastElementChild, ""));
 
-export async function syncData() {
-    if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not signed in!")
+/** sent to server */
+class SyncChanges {
+    constructor() {
+        /** @type {Array<Song>} songs to be merged with server's data.json*/
+        this["unsynced-songs"] = [],
+
+        /** @type {Array<Playlist>} playlists to be merged with server's data.json  */
+        this["unsynced-playlists"] = [],
+
+        /** @type {Array<string>} all files that client wants from server: error state songs + songs that server has client doesnt*/
+        this.requestedFiles = Array.from(missingFiles.keys())
+                            .filter(fn => missingFiles.get(fn).state !== "new")
+                            .map(fn => "songs/" + fn),
+
+        /** @type {Array<string>} files that the client deleted, so the server should too */
+        this.trash = Array.from(data.trashqueue),
+
+        /** @type {Array<Song | Playlist>} items that will be deleted from client (not sent to server) */
+        this.doomed = [],
+
+        this.update = [],
+
+        /** if syncing is successful, these items will be created */
+        this.newItems = {
+            /** @type {Array<object>} array of song data client will receive from server */
+            songs: [],
+
+            /** @type {Array<object>} array of playlist data client will receive from server */
+            playlists: []
+        }
+    }
+}
+
+/** @type {SyncChanges} */
+let changes;
+
+export async function getSyncChanges() {
+    if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not signed in!");
 
     const serverJSON = await getData(jwt);
     
     console.log("server", Object.values(serverJSON.songs).map(s => s.filename ));
     console.log("client", Array.from(data.songs).map(s => { return {syncStatus: s[1].syncStatus, filename: s[1].filename} } ));
 
-    /** if syncing is successful, these items will be created */
-    const newItems = {
-        /** @type {Array<object>} array of song data client will receive from server */
-        songs: [],
-
-        /** @type {Array<object>} array of playlist data client will receive from server */
-        playlists: []
-    }
-        
-    /** sent to server */
-    const changes = {
-        /** @type {Array<Song>} songs to be merged with server's data.json*/
-        "unsynced-songs": [],
-
-        /** @type {Array<Playlist>} playlists to be merged with server's data.json  */
-        "unsynced-playlists": [],
-
-        /** @type {Array<string>} all files that client wants from server: error state songs + songs that server has client doesnt*/
-        "requestedFiles": Array.from(missingFiles.keys())
-                            .filter(fn => missingFiles.get(fn).state !== "new")
-                            .map(fn => "songs/" + fn),
-
-        /** @type {Array<string>} files that the client deleted, so the server should too */
-        "trash": Array.from(data.trashqueue)
-    }
-
-    console.log("unfiltered: ", Array.from(missingFiles.keys()));
-    console.log("filtered: ", Array.from(missingFiles.keys())
-                                .filter(fn => missingFiles.get(fn).state !== "new")
-                                .map(fn => "songs/" + fn));
+    changes = new SyncChanges();
     
     /** @param {"songs" | "playlists"} category */
     const addCategoryToChanges = (category) => {
-
+        
         for (const item of data[category].values()) {
             // if this song is new and missing a file, then the file will not be at the server.
             if (item.syncStatus === "new" && item.state === "error") continue;
@@ -187,20 +194,21 @@ export async function syncData() {
             if (item.syncStatus !== "synced") changes["unsynced-" + category].push(item);
 
             // syncstatus === "synced" && song/playlist isnt in server
-            else if (!serverJSON[category][item.id]) item.delete();
+            else if (!serverJSON[category][item.id]) {
+                item.setSyncStatus("doomed");
+                changes.doomed.push(item);
+            }
         }
 
         for (const id of Object.keys(serverJSON[category])) {
             const itemData = serverJSON[category][id];
             const item = data[category].get(id);
 
-            console.log("the server has ", itemData.title, ", but do we want it? ", !item);
-
             // WANTS - if client doesnt have this song/playlist && not in trash queue
             if (!item) {
                 if (!data.trashqueue.has(category + "." + id)) {
                     itemData.id = id;
-                    newItems[category].push(itemData);
+                    changes.newItems[category].push(itemData);
 
                     //TODO: push playlist filepaths here!!!!
                     if (category === "songs")
@@ -209,46 +217,50 @@ export async function syncData() {
             }
 
             // if client has song/playlist, but it hasnt been synced to latest changes 
-            else if (item.syncStatus === "synced") {
-                console.log("updating", item.title);
-                item.update(itemData);
-            }
+            else if (item.syncStatus === "synced" && itemData.lastUpdatedBy !== deviceID) {
+                changes.update.push([item, itemData]);
+            } 
                 
         }
+        
     }
 
     addCategoryToChanges("songs");
     addCategoryToChanges("playlists");
     
+    console.log(changes);
+    return changes;
+} 
+
+export async function syncData() {
+    changes = changes ?? await getSyncChanges();
     try {
-        for (const { filename } of newItems.songs)      reserved.add(filename);
-        for (const { filename } of newItems.playlists)  reserved.add(filename);
+        for (const { filename } of changes.newItems.songs)      reserved.add(filename);
+        for (const { filename } of changes.newItems.playlists)  reserved.add(filename);
         
         await syncToServer(uid, changes);
         
         console.log("changes ", changes);
-        console.log("newitems", newItems);
         
-        for (const song of changes["unsynced-songs"]) {
-            console.log("setting back to synced");
-            song.syncStatus = "synced";
-        }          
-        for (const playlists of changes["unsynced-playlists"])  playlists.syncStatus = "synced";
+        for (const song of changes["unsynced-songs"]) song.setSyncStatus("synced");
+        for (const playlists of changes["unsynced-playlists"])  playlists.setSyncStatus("synced");
 
-        for (const songData of newItems.songs) {
-            songData._syncStatus = "synced";
+        for (const songData of changes.newItems.songs) {
+            songData.syncStatus = "synced";
             new Song(songData.id, songData);
         } 
-        for (const playlistData of newItems.playlists) {
-            playlistData._syncStatus = "synced";
+        for (const playlistData of changes.newItems.playlists) {
+            playlistData.syncStatus = "synced";
             new Playlist(playlistData.id, playlistData);
         } 
         
         data.trashqueue.clear();
         
+        for (const item of changes.doomed) item.delete();
+        for (const [item, itemData] of changes.update) item.update(itemData);
+        
     } catch (err) {console.log(err)}
-
-} 
+}
 
 export async function getData(jwt) {
     const res = await fetch(`https://localhost:5001/get-data/${jwt}`); 

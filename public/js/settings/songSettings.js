@@ -67,7 +67,7 @@ export function openSongSettings(song, song__title, song__artist) {
 }
 
 titleArea.addEventListener("input", () => {
-    currentlyEditing.syncStatus = "edited";
+    currentlyEditing.setSyncStatus("edited");
 
     allEntriesUpdated = false;
 
@@ -79,7 +79,7 @@ titleArea.addEventListener("input", () => {
     song__titleLive.textContent = titleArea.value;
 });
 artistArea.addEventListener("input", () => {
-    currentlyEditing.syncStatus = "edited";
+    currentlyEditing.setSyncStatus("edited");
     
     allEntriesUpdated = false;
 

@@ -20,8 +20,8 @@
 }
 
 .options-btn {
+    position: relative;
     cursor: pointer;
-
     width: 25px;
     height: 25px;
 }
@@ -53,6 +53,10 @@
     gap: 0;
 }
 
+#new__dropdown {
+    overflow: hidden;
+}
+
 #paste-link {
     display: flex;
     gap: 5px;
@@ -62,9 +66,7 @@
     padding: 4px 5px;
     background-color: var(--accent-color);
 }
-#new__dropdown {
-    overflow: hidden;
-}
+
 #loading-bar {
     background-color: var(--accent-color);
     

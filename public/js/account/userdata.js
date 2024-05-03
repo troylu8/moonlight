@@ -18,8 +18,8 @@ export class Song {
         this.size = options.size;
         this.duration = options.duration;
 
-        /** @type {"new" | "edited" | "synced"} */
-        this._syncStatus = options._syncStatus ?? "new";
+        /** @type {"new" | "edited" | "synced" | "doomed"} */
+        this.syncStatus = options.syncStatus ?? "new";
 
         /** @type {Set<HTMLElement>} */
         this.songEntries = new Set();
@@ -31,25 +31,25 @@ export class Song {
         this.playlists = new Set();
         if (options.playlists) {
             for (const pid of options.playlists) 
-                this.addToPlaylist(pid, options._syncStatus && options._syncStatus === "synced");
+                this.addToPlaylist(pid, options.syncStatus && options.syncStatus === "synced");
         }
     }
+    
+    /** @param {"new" | "edited" | "synced" | "doomed"} syncStatus cannot set `syncStatus` to `edited` when it is `new`*/
+    setSyncStatus(syncStatus) {
+        if (syncStatus === "edited" && this.syncStatus === "new") return;
+        this.syncStatus = syncStatus;
 
-    /** @param {"new" | "edited" | "synced"} val cannot set `syncStatus` to `edited` when it is `new`*/
-    set syncStatus(val) { 
-        if (val === "edited" && this._syncStatus === "new") return;
-        this._syncStatus = val;
+        for (const songEntry of this.songEntries.values())
+            elems.setEntrySyncStatus(songEntry, syncStatus);
     }
-
-    /** @returns {"new" | "edited" | "synced"} */
-    get syncStatus() {return this._syncStatus}
 
     /** @param {"playable" | "active" | "error"} state  */
     setState(state) {
         this.state = state;
 
         if (state === "error") {
-            this.syncStatus = "edited";
+            this.setSyncStatus("edited");
             if (data.curr.song === this) play.setSong(null);
         } 
         
@@ -79,8 +79,8 @@ export class Song {
         if (!playlist || playlist.songs.has(this)) return;
         
         if ( changeSyncStatus ?? true ) {
-            this.syncStatus = "edited";
-            playlist.syncStatus = "edited";
+            this.setSyncStatus("edited");
+            playlist.setSyncStatus("edited");
         }
 
         playlist.songs.add(this);
@@ -99,8 +99,8 @@ export class Song {
     removeFromPlaylist(playlist) {
         if (!playlist.songs.has(this)) return;
 
-        this.syncStatus = "edited";
-        playlist.syncStatus = "edited";
+        this.setSyncStatus("edited");
+        playlist.setSyncStatus("edited");
 
         playlist.songs.delete(this);
         this.playlists.delete(playlist);
@@ -152,8 +152,8 @@ export class Playlist {
         /** @type {PlaylistCycle} */
         this.cycle = null;
 
-        /** @type {"new" | "edited" | "synced"} */
-        this._syncStatus = options._syncStatus ?? "new";
+        /** @type {"new" | "edited" | "synced" | "doomed"} */
+        this.syncStatus = options.syncStatus ?? "new";
 
         elems.createPlaylistEntry(this);
         elems.createPlaylistCheckboxEntry(this);
@@ -163,19 +163,16 @@ export class Playlist {
 
         if (options.songs) {
             for (const sid of options.songs) 
-                data.songs.get(sid).addToPlaylist(this,  !(options._syncStatus && options._syncStatus === "synced"));
+                data.songs.get(sid).addToPlaylist(this,  !(options.syncStatus && options.syncStatus === "synced"));
         }
         
     }
 
-    /** @param {"new" | "edited" | "synced"} val cannot set `syncStatus` to `edited` when it is `new`*/
-    set syncStatus(val) { 
-        if (val === "edited" && this._syncStatus === "new") return;
-        this._syncStatus = val;
+    /** @param {"new" | "edited" | "synced" | "doomed"} syncStatus cannot set `syncStatus` to `edited` when it is `new`*/
+    setSyncStatus(syncStatus) {
+        if (syncStatus === "edited" && this.syncStatus === "new") return;
+        this.syncStatus = syncStatus;
     }
-
-    /** @returns {"new" | "edited" | "synced"} */
-    get syncStatus() {return this._syncStatus}
 
     delete() {
         

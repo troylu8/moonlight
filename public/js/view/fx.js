@@ -132,54 +132,49 @@ for (const h3 of document.getElementsByTagName("h3")) {
 
 /**
  * adds a tooltip to the element. if one already exists, overrides it.
- * @param {HTMLElement} elem parent element
+ * @param {HTMLElement} parent parent element
  * @param {string} innerHTML 
  * @param {number} gap gap between parent and tooltip, in px
  * @returns {HTMLElement} the created tooltip
  */
-export function setToolTip(elem, innerHTML, gap) {
-    const tooltip = elem.tooltip ?? document.createElement("div");
-    elem.tooltip = tooltip;
+export function setToolTip(parent, innerHTML, gap) {
+    const tooltip = parent.tooltip ?? document.createElement("div");
+    parent.tooltip = tooltip;
     
     tooltip.classList.add("tooltip");
     tooltip.innerHTML = innerHTML;
 
     /** moves tooltip to be centered on elem */
     function reposition() {
-        const a = elem.getBoundingClientRect();
+        const a = parent.getBoundingClientRect();
         const b = tooltip.getBoundingClientRect();
 
         const centerX = a.x + a.width/2;
         const finalX = clamp(centerX - b.width/2, 0, window.innerWidth - b.width);
         
         tooltip.style.left = finalX + "px";
-
         
         const finalY = 
             (gap === 0)?  a.y + a.height/2 - b.height/2: 
             (gap < 0)?  a.y + a.height - gap : 
             a.y - b.height - gap;
 
-        if (tooltip.innerHTML.includes("not synced with")) {
-            console.log(a.y, b.height, gap, tooltip.innerHTML);
-        } 
-
         tooltip.style.top = finalY + "px";
     }
 
     new MutationObserver(() => reposition()).observe(tooltip, {childList: true, subtree: true});
 
-    elem.addEventListener("mouseenter", () => {
+    parent.addEventListener("mouseenter", () => {
         reposition();
         tooltip.style.opacity = 1;
         tooltip.style.pointerEvents = "auto";
     });
-    elem.addEventListener("mouseleave", () => {
+    parent.addEventListener("mouseleave", () => {
         tooltip.style.opacity = 0;
         tooltip.style.pointerEvents = "none";
     });
 
-    elem.appendChild(tooltip);
+    parent.appendChild(tooltip);
     return tooltip;
 }
 

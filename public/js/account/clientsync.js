@@ -1,3 +1,5 @@
+import { deviceID } from "./files.js";
+
 const Zip = require("adm-zip");
 const axios = require('axios');
 const { join } = require("path");
@@ -36,12 +38,15 @@ export async function syncToServer(uid, changes) {
         JSON.stringify(changes, 
             (key, value) => {
                 if ([
+                    "doomed",
+                    "newItems",
+                    
                     "groupElem",
                     "songEntries",
                     "playlistEntry",
                     "checkboxDiv",
                     "cycle",
-                    "_syncStatus",
+                    "syncStatus",
                     "state"
                 ].includes(key)) return undefined;
 
@@ -52,7 +57,7 @@ export async function syncToServer(uid, changes) {
     ));
 
     for (const song of changes["unsynced-songs"]) {
-        if (song._syncStatus === "new") 
+        if (song.syncStatus === "new") 
             zip.addLocalFile( join(resourcesDir, "songs", song.filename), "songs/" );
     }
     //TODO: add playlist files here!!!!!  ! 
@@ -60,7 +65,7 @@ export async function syncToServer(uid, changes) {
 
     const newItems = await axios({
         method: 'POST',
-        url: "https://localhost:5001/sync/" + uid, 
+        url: `https://localhost:5001/sync/${uid}/${deviceID}`, 
         data: zip.toBuffer(), 
         maxContentLength: Infinity,
         maxBodyLength: Infinity,

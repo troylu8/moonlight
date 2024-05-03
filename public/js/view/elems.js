@@ -43,7 +43,6 @@ const icons = {
  * @param {"playable" | "active" | "error"} state
  */
 export function setEntryState(entry, state) {
-    console.log(state);
     entry.querySelector(".song__state").innerHTML = icons[state];
 
     entry.classList.remove("playable", "active", "error");
@@ -107,7 +106,6 @@ export function createSongEntry(song, playlist) {
 
     const song__syncStatus = createElement("div", null, "song__syncStatus", songEntry.lastChild);
     setToolTip(song__syncStatus, "", 10).style.whiteSpace = "nowrap";
-    setEntrySyncStatus(songEntry, "new");
 
     const song__options = createElement("div", null, "song__options", songEntry.lastChild);
     song__options.innerHTML = icons.options;
@@ -195,6 +193,7 @@ export function createSongEntry(song, playlist) {
     });
 
     setEntryState(songEntry, song.state);
+    setEntrySyncStatus(songEntry, song.syncStatus);
 
     song.songEntries.add(songEntry);
     return [songEntry, song__title, song__artist];

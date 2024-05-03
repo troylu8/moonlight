@@ -46,19 +46,11 @@ document.body.addEventListener("keydown", async (e) => {
                 username: acc.username
             });
             break;
-        case "T":
-            setTitleScreen(true);
-            break;
-        case "Y":
-            setTitleScreen(false);
-            break;
         case "S":
             console.log(userdata.data.settings);
             break;
         case "Z":
-            for (const e of document.getElementsByClassName("tooltip")) {
-                console.log(e.getBoundingClientRect());
-            }  
+            acc.getSyncChanges();
             break;
     }
     

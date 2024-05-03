@@ -104,17 +104,17 @@ const title = document.getElementById("account__title");
 const toggle = document.getElementById("account__toggle");
 
 toggle.addEventListener("click", () => {    
-    setSignInActive(getComputedStyle(repeatPassword).display === "block")
+    setSignInActive(getComputedStyle(repeatPassword).display === "block");
 });
 
 /**
  * @param {boolean} signin `true` for sign in, `false` for create account
  */
 function setSignInActive(signin) {
-    toggle.textContent = signin? "already have account" : "create new account";
-    title.textContent = submit.textContent = signin? "create account" : "sign in" ;
+    toggle.textContent = signin?  "create new account" : "already have account";
+    title.textContent = submit.textContent = signin? "sign in" : "create account";
 
-    repeatPassword.style.display = signin? "block" : "none";
+    repeatPassword.style.display = signin? "none" : "block";
     repeatPassword.value = error.textContent = "";
 }
 
