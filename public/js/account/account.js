@@ -80,6 +80,8 @@ window.addEventListener("load", async () => {
     
     setTitleScreen(false);
     updateForUsername(username, isGuest());
+
+    getSyncChanges();
 });
 
 
@@ -188,10 +190,10 @@ export async function getSyncChanges() {
     const addCategoryToChanges = (category) => {
         
         for (const item of data[category].values()) {
-            // if this song is new and missing a file, then the file will not be at the server.
-            if (item.syncStatus === "new" && item.state === "error") continue;
-
-            if (item.syncStatus !== "synced") changes["unsynced-" + category].push(item);
+            // if this song is missing a file and new, ignore it.
+            if (item.state === "error" && item.syncStatus === "new") continue;
+            
+            else if (item.syncStatus === "new" || item.syncStatus === "edited") changes["unsynced-" + category].push(item);
 
             // syncstatus === "synced" && song/playlist isnt in server
             else if (!serverJSON[category][item.id]) {

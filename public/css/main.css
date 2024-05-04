@@ -65,9 +65,12 @@
     width: 23px;
     height: 20px;
 }
-.song__state svg, .song__syncStatus svg {
+.song__state svg, .syncStatus svg {
     width: 20px;
     height: 20px;
+    
+    display: flex;
+    align-items: center;
 }
 
 .playable .song__state svg {

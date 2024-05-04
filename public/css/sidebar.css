@@ -29,11 +29,11 @@
     top: 0px;
     bottom: 0px;
     
-    left: 50px;
-    right: -50px;
+    left: 20px;
+    right: -20px;
     opacity: 0;
     pointer-events: none;
-    transition: 0.2s;    
+    transition: 0.15s;    
 }
 .sidebar__active {
     left: 0px;

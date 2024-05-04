@@ -43,7 +43,6 @@
 
 .playlist {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 5px;
 
@@ -59,12 +58,21 @@
     /* color: var(--accent-color); */
 }
 .playlist:hover {
-    
     cursor: pointer;
-
     margin-left: 5px;
 }
 
+.playlist__title {
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+
+    padding-bottom: 7px;
+}
+
+.playlist > .syncStatus {
+    margin-left: 10px;
+}
 .playlist__options {
     visibility: hidden;
 }

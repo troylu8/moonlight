@@ -27,7 +27,7 @@ const icons = {
                     <path d="M12.884 2.532c-.346-.654-1.422-.654-1.768 0l-9 17A.999.999 0 0 0 3 21h18a.998.998 0 0 0 .883-1.467L12.884 2.532zM13 18h-2v-2h2v2zm-2-4V9h2l.001 5H11z"/>
                 </svg>`,
     
-    // icons for song__syncStatus
+    // icons for syncStatus
     unsynced:  `<svg fill="var(--warning-color)" viewBox="0 0 24 24" >
                     <path d="M16.71,16.29h0l-13-13A1,1,0,0,0,2.29,4.71L5.65,8.06a7,7,0,0,0-.59,2A4,4,0,0,0,6,18h9.59l2.7,2.71a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42ZM6,16a2,2,0,0,1,0-4,1,1,0,0,0,1-1,5,5,0,0,1,.2-1.39L13.59,16ZM18.42,8.22A7,7,0,0,0,12,4a6.74,6.74,0,0,0-2.32.4,1,1,0,0,0,.66,1.88A4.91,4.91,0,0,1,12,6a5,5,0,0,1,4.73,3.39,1,1,0,0,0,.78.67,3,3,0,0,1,1.85,4.79,1,1,0,0,0,.16,1.4,1,1,0,0,0,.62.22,1,1,0,0,0,.78-.38,5,5,0,0,0-2.5-7.87Z"/>
                 </svg>`,
@@ -57,21 +57,21 @@ export function setEntryState(entry, state) {
  * @param {"new" | "edited" | "synced" | "doomed"} state
  */
 export function setEntrySyncStatus(entry, syncStatus) {
-    const song__syncStatus = entry.querySelector(".song__syncStatus");
+    const icon = entry.querySelector(".syncStatus");
 
     let svg;
     if (syncStatus === "new" || syncStatus === "edited") svg = icons.unsynced;
     else svg = icons[syncStatus] ?? "";
 
-    const svgElem = song__syncStatus.querySelector("svg");
-    if (svgElem) song__syncStatus.removeChild(svgElem);
-    song__syncStatus.insertAdjacentHTML("afterbegin", svg);
+    const svgElem = icon.querySelector("svg");
+    if (svgElem) icon.removeChild(svgElem);
+    icon.insertAdjacentHTML("afterbegin", svg);
 
     let tooltipText = "";
     if (svg === icons.unsynced)         tooltipText = "not synced with server";
     else if (syncStatus === "doomed")   tooltipText = "will be deleted upon sync";
 
-    song__syncStatus.tooltip.innerHTML = tooltipText;
+    icon.tooltip.innerHTML = tooltipText;
 }
 
 function getSongEntry(groupElem, sid) {
@@ -104,8 +104,8 @@ export function createSongEntry(song, playlist) {
 
     const song__artist = createElement("span", null, "song__artist song__artist:" + song.id, songEntry.firstChild, song.artist);
 
-    const song__syncStatus = createElement("div", null, "song__syncStatus", songEntry.lastChild);
-    setToolTip(song__syncStatus, "", 10).style.whiteSpace = "nowrap";
+    const syncStatusIcon = createElement("div", null, "syncStatus", songEntry.lastChild);
+    setToolTip(syncStatusIcon, "", 10).style.whiteSpace = "nowrap";
 
     const song__options = createElement("div", null, "song__options", songEntry.lastChild);
     song__options.innerHTML = icons.options;
@@ -248,12 +248,19 @@ export function createPlaylistEntry(playlist) {
     });
     playlist.playlistEntry = playlistEntry;
 
+    const syncStatusIcon = createElement("div", null, "syncStatus", playlistEntry);
+    setToolTip(syncStatusIcon, "", 10).style.whiteSpace = "nowrap";
+
+    createElement("div", null, "expander", playlistEntry);
+
     const playlist__options = createElement("div", null, "playlist__options", playlistEntry);
     playlist__options.innerHTML = icons.options;
     playlist__options.addEventListener("click", (e) => {
         openPlaylistSettings(playlist);
         e.stopPropagation();
     });
+
+    setEntrySyncStatus(playlistEntry, playlist.syncStatus);
 }
 
 /** 
@@ -294,23 +301,23 @@ export function setViewPlaylist(playlist, setAsListenPlaylist) {
     if (!playlist) {
         playlistHeader.textContent = "-";
         playlistDesc.innerHTML = "-";
-        return;
-    } 
-
-    if (!playlist.groupElem) 
-        playlist.groupElem = createPlaylistGroup(playlist);
-
-    playlistHeader.textContent = playlist.title;
-    playlistDesc.innerHTML = playlist.desc;
-    songSettings.updateSongEntries();
-
-    activePlaylistGroup = playlist.groupElem;
-    activePlaylistGroup.style.display = "flex";
-
-    if (songSettings.currentlyEditing) 
-        songSettings.setLiveElements(activePlaylistGroup);
-
-    playlist.playlistEntry.classList.add("view-playlist");
+    }
+    else {
+        if (!playlist.groupElem) 
+            playlist.groupElem = createPlaylistGroup(playlist);
+    
+        playlistHeader.textContent = playlist.title;
+        playlistDesc.innerHTML = playlist.desc;
+        songSettings.updateSongEntries();
+    
+        activePlaylistGroup = playlist.groupElem;
+        activePlaylistGroup.style.display = "flex";
+    
+        if (songSettings.currentlyEditing) 
+            songSettings.setLiveElements(activePlaylistGroup);
+    
+        playlist.playlistEntry.classList.add("view-playlist");
+    }
 
     if (setAsListenPlaylist) data.updateListenPlaylist();
     

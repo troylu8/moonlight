@@ -8,7 +8,7 @@ import { initSettings } from "../settings/settings.js";
 const { ipcRenderer } = require("electron");
 
 export class Song {
-    constructor(id, options) {
+    constructor(id, options, changeSyncStatus) {
         console.log("creating new song", options.title);
         data.songs.set(id, this);
         this.id = id;
@@ -19,6 +19,7 @@ export class Song {
         this.duration = options.duration;
 
         /** @type {"new" | "edited" | "synced" | "doomed"} */
+        console.log("creating song with status", options.syncStatus);
         this.syncStatus = options.syncStatus ?? "new";
 
         /** @type {Set<HTMLElement>} */
@@ -30,8 +31,7 @@ export class Song {
         /** @type {Set<Playlist>} */
         this.playlists = new Set();
         if (options.playlists) {
-            for (const pid of options.playlists) 
-                this.addToPlaylist(pid, options.syncStatus && options.syncStatus === "synced");
+            for (const pid of options.playlists) this.addToPlaylist(pid, changeSyncStatus);
         }
     }
     
@@ -63,7 +63,7 @@ export class Song {
         this.playlists = new Set(options.playlists);
         if (options.playlists) {
             for (const playlist of options.playlists) 
-                this.addToPlaylist(playlist);
+                this.addToPlaylist(playlist, false);
         }
         updateSongEntries();
     }
@@ -79,6 +79,7 @@ export class Song {
         if (!playlist || playlist.songs.has(this)) return;
         
         if ( changeSyncStatus ?? true ) {
+            console.log("changesyncstatus is ", changeSyncStatus, "so setting edited!");
             this.setSyncStatus("edited");
             playlist.setSyncStatus("edited");
         }
@@ -135,8 +136,7 @@ export class Song {
 
 export class Playlist {
     
-    constructor(id, options) {
-        console.log("creating new song", options.title);
+    constructor(id, options, changeSyncStatus) {
         data.playlists.set(id, this);
         this.id = id;
         this.title = options.title;
@@ -160,10 +160,8 @@ export class Playlist {
 
         /** @type {Set<Song>} */
         this.songs = new Set();
-
         if (options.songs) {
-            for (const sid of options.songs) 
-                data.songs.get(sid).addToPlaylist(this,  !(options.syncStatus && options.syncStatus === "synced"));
+            for (const sid of options.songs) data.songs.get(sid).addToPlaylist(this, changeSyncStatus);
         }
         
     }
@@ -172,6 +170,8 @@ export class Playlist {
     setSyncStatus(syncStatus) {
         if (syncStatus === "edited" && this.syncStatus === "new") return;
         this.syncStatus = syncStatus;
+
+        elems.setEntrySyncStatus(this.playlistEntry, syncStatus);
     }
 
     delete() {
@@ -180,20 +180,7 @@ export class Playlist {
         if (this.syncStatus !== "new")
             data.trashqueue.set("playlists." + this.id, "playlists/ dummy value");
 
-        // if only playlist, nullify view and listen playlists 
-        if (data.playlists.size === 1) elems.setViewPlaylist(null, true);
-        else {
-            if (this === data.curr.viewPlaylist) {
-                const adjacentPID = (this.playlistEntry.previousElementSibling ?? this.playlistEntry.nextElementSibling).id.substring(3);
-                elems.setViewPlaylist(data.playlists.get(adjacentPID));
-            }
-            if (this === data.curr.listenPlaylist) {
-                data.curr.listenPlaylist = null;
-                play.setSong(null);
-            }
-        } 
-
-        
+        if (this === data.curr.viewPlaylist) elems.setViewPlaylist(null, this === data.curr.listenPlaylist);
 
         for (const song of this.songs) 
             song.removeFromPlaylist(this);
@@ -318,15 +305,16 @@ export async function loadLocaldata(uid) {
     data = new Data();
     
     const json = await readUserdata(uid);
+    console.log("json", json);
     
     data.trashqueue = new Map(json.trashqueue);
 
     for (const sid in json.songs)         
-        new Song(sid, json.songs[sid]);
+        new Song(sid, json.songs[sid], false);
 
     for (let pid in json.playlists) {
         const playlistJSON = json.playlists[pid];
-        new Playlist(pid, playlistJSON);
+        new Playlist(pid, playlistJSON, false);
     }
 
     play.setSong( data.songs.get(json.curr.song) );
