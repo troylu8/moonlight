@@ -209,6 +209,7 @@ input[type="file"] {
 }
 #sidebar__dragger {
     left: -5px;
+    display: none;
 }
 #playlists__dragger {
     right: -5px;

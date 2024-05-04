@@ -6,9 +6,12 @@ export let open = false;
 const sidebar = document.getElementById("sidebar-div");
 const options = document.getElementById("options-div");
 
+const dragger = document.getElementById("sidebar__dragger");
+
 export function setSidebarOpen(val) {
     if (open === val) return;
     open = val;
+    dragger.style.display = open? "block" : "none";
 
     if (open) {
         sidebar.style.right = "0";

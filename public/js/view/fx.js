@@ -148,9 +148,11 @@ export function setToolTip(parent, innerHTML, gap) {
     function reposition() {
         const a = parent.getBoundingClientRect();
         const b = tooltip.getBoundingClientRect();
+        const bounds = parent.parentElement.getBoundingClientRect();
+        console.log(parent.parentElement);
 
         const centerX = a.x + a.width/2;
-        const finalX = clamp(centerX - b.width/2, 0, window.innerWidth - b.width);
+        const finalX = clamp(centerX - b.width/2, bounds.x, bounds.x + bounds.width - b.width);
         
         tooltip.style.left = finalX + "px";
         
@@ -169,7 +171,7 @@ export function setToolTip(parent, innerHTML, gap) {
         tooltip.style.opacity = 1;
         tooltip.style.pointerEvents = "auto";
     });
-    parent.addEventListener("mouseleave", () => {
+    parent.addEventListener("mouseleave", (e) => {
         tooltip.style.opacity = 0;
         tooltip.style.pointerEvents = "none";
     });
@@ -271,7 +273,7 @@ function createResizeDragger(dragger, ondrag, onmousedown, onmouseup) {
 /** @type {NodeList} */
 let activeTextAreas;
 
-function clamp (x, min, max) { return Math.max( Math.min(x, max), min ); }
+function clamp(x, min, max) { return (max < min)? max : Math.max( Math.min(x, max), min ); }
 
 /**
  * @param {string} opposingWidthcssvar css variable with a width in `px`
@@ -286,7 +288,7 @@ createResizeDragger(
     document.getElementById("sidebar__dragger"), 
     (e) => {
         document.body.style.setProperty("--sidebar-div-width", clamp(window.innerWidth - e.clientX, 200, maxSidebarWidth) + "px");
-        activeTextAreas.forEach(tArea => tArea.resize());
+        if (activeTextAreas) activeTextAreas.forEach(tArea => tArea.resize());
     },
     () => {
         activeTextAreas = activeSidebarElem.querySelectorAll("textarea");

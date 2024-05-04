@@ -1,4 +1,5 @@
-import {  allFiles, makeUnique, reserved } from '../account/files.js';
+import {  makeUnique, reserved } from '../account/files.js';
+import { createTrackerEntry } from '../view/elems.js';
 
 const ytdl = require('ytdl-core');
 const fs = require("fs");
@@ -79,8 +80,45 @@ let currentDP;
  * @param {function(object)} cb 
  */
 export async function download(ytid, cb) {
-    currentDP = new DownloadProcess();
-    currentDP.download(ytid, cb);
+    // currentDP = new DownloadProcess();
+    // currentDP.download(ytid, cb);
+
+    await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
+
+    const info = await ytdl.getInfo(ytid);
+
+    if (this.destroy) return cb();  // destroy request comes in while getting info 
+    
+    const filename = await makeUnique(cleanFileName(info.videoDetails.title) + ".mp3", ytid);
+    const path = global.userDir + "/songs/" + filename;
+    reserved.add(filename);
+    
+    const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
+    const writeStream = fs.createWriteStream(path);
+    dlstream.pipe(writeStream);
+
+    dlstream.on("progress", (chunk, downloaded, total) => {
+        if (this.destroy) {
+            tracker.reset();
+            this.destroy(dlstream, path, writeStream);
+            return cb();
+        }
+
+        tracker.downloaded = downloaded;
+        tracker.total = total;
+    });
+
+    dlstream.on("end", () => {
+        cb({
+            "id": "yt#" + ytid,
+            "filename": filename,
+            "title": info.videoDetails.title,
+            "artist": info.videoDetails.author.name,
+            "size": tracker.total,
+            "duration": Number(info.videoDetails.lengthSeconds)
+        });
+        tracker.reset();
+    });
 }
 
 

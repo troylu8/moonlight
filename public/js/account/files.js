@@ -1,10 +1,12 @@
-import { createStragglerEntry, deleteStragglerEntry, getSizeDisplay } from '../view/elems.js';
+import { createStragglerEntry, createTrackerEntry, deleteStragglerEntry, getSizeDisplay } from '../view/elems.js';
 import * as acc from './account.js';
 import { data, Song } from './userdata.js';
 const { ipcRenderer } = require("electron");
 const { dirname, basename, resolve } = require("path");
 const fs = require('fs');
+const { promisify } = require('util');
 const { randomBytes, createCipheriv, createDecipheriv } = require("crypto");
+const { parseFile } = require('music-metadata');
 
 global.resources = __dirname + "/resources";
 
@@ -175,46 +177,70 @@ export async function makeUnique(path, sid) {
 }
 
 /**
- * 
- * @param {string} uid 
- * @param {string} sid 
- * @param {string} path 
- * @param {boolean} createSongData 
- * @returns {Promise<object | string | "file in use">} if `createSongData == true` returns song data object, else returns the final basename
+ * @callback uploadSongCallback
+ * @param {Error} err if file in use, `err.message === "file in use"`
+ * @param {object | string } data if  `createSongData === true` data is a songData obj. else it is final basename of uploaded file
  */
 
-export async function uploadSongFile(uid, sid, path, createSongData) {
-    await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
 
-    const originalBase = basename(path);
+export const uploadSongFile = promisify(
+    /**
+     * 
+     * @param {string} uid 
+     * @param {string} sid 
+     * @param {string} path 
+     * @param {boolean} createSongData 
+     * @param {function(Error, object | "file in use")} cb
+     */
+    async (sid, path, createSongData, cb) => {
+        await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
 
-    const dest = await makeUnique(global.userDir + "/songs/" + originalBase, sid);
-    
-    const newBase = basename(dest);
+        const originalBase = basename(path);
+        const dest = await makeUnique(global.userDir + "/songs/" + originalBase, sid);
+        const newBase = basename(dest);
 
-    const songData = createSongData ? {
-        id: acc.genID(14),
-        filename: newBase,
-        title: newBase.replace(/\.[^\/.]+$/, ""), // regex to remove extensions
-        artist: "uploaded by you",
-        size: await getFileSize(path),
-        duration: (await parseFile(req.body)).format.duration
-    } : undefined;
+        const songData = createSongData ? {
+            id: acc.genID(14),
+            filename: newBase,
+            title: newBase.replace(/\.[^\/.]+$/, ""), // regex to remove extensions
+            artist: "uploaded by you",
+            size: await getFileSize(path),
+            duration: (await parseFile(path)).format.duration
+        } : undefined;
 
-    if (inSongFolder(path)) {
-        if ( !(allFiles.get(originalBase) instanceof HTMLElement) ) return "file in use";
+        if (inSongFolder(path)) {
+            if ( !(allFiles.get(originalBase) instanceof HTMLElement) ) return cb(new Error("file in use"));
 
-        deleteStragglerEntry(originalBase);
-        return songData ?? originalBase;
+            deleteStragglerEntry(originalBase);
+            return cb(null, songData ?? originalBase);
+        }
+
+        reserved.add(newBase);
+
+        const readStream = fs.createReadStream(path);
+        const writeStream = fs.createWriteStream(dest);
+
+        const { add } = createTrackerEntry(newBase, (await fs.promises.stat(path)).size,
+            () => {
+                readStream.destroy();
+                writeStream.end(() => fs.unlink(dest, () => {}));
+            },
+            () => { 
+                console.log("done"); 
+                deleteStragglerEntry(newBase);
+                return cb(null, songData ?? newBase);
+            }
+        );
+
+        readStream.on("data", (chunk) => {
+            writeStream.write(chunk, (err) => {
+                if (err) throw err;
+                setTimeout(() => add(chunk.byteLength), 500);
+            });
+        });
+        
     }
-
-    reserved.add(newBase);
-
-    const data = await fs.promises.readFile(path);
-    await ensurePathThen(async () => await fs.promises.writeFile(dest, data));
-
-    return songData ?? newBase;
-}
+);
 
 const inSongFolder = (path) => resolve(dirname(path)) === resolve(global.userDir + "/songs");
 

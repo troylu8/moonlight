@@ -19,7 +19,6 @@ export class Song {
         this.duration = options.duration;
 
         /** @type {"new" | "edited" | "synced" | "doomed"} */
-        console.log("creating song with status", options.syncStatus);
         this.syncStatus = options.syncStatus ?? "new";
 
         /** @type {Set<HTMLElement>} */
@@ -79,7 +78,6 @@ export class Song {
         if (!playlist || playlist.songs.has(this)) return;
         
         if ( changeSyncStatus ?? true ) {
-            console.log("changesyncstatus is ", changeSyncStatus, "so setting edited!");
             this.setSyncStatus("edited");
             playlist.setSyncStatus("edited");
         }

@@ -3,7 +3,7 @@ import { togglePlay } from "../play.js";
 import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
 import { removeTooltip, setToolTip } from "./fx.js";
-import { syncData, uid } from "../account/account.js";
+import { syncData } from "../account/account.js";
 import { allFiles, deleteSongFile, getFileSize, uploadSongFile } from "../account/files.js";
 const { ipcRenderer } = require("electron");
 
@@ -161,16 +161,17 @@ export function createSongEntry(song, playlist) {
             });
             if (dialog.canceled) return;
             
-            const res = await uploadSongFile(uid, song.id, dialog.filePaths[0]);
-            if (res === "file in use") {
-                //TODO: error notification
-
-                console.log("file in use");
-            }
-            else {
-                song.filename = res;
+            try {
+                const basename = await uploadSongFile(song.id, dialog.filePaths[0], false);
+                song.filename = basename;
                 song.setState("playable");
+            } catch (err) {
+                if (err.message === "file in use") {
+                    //TODO: error notification
+                    console.log("file in use");
+                }
             }
+
         });
         
         //INFO: for NW
@@ -346,10 +347,80 @@ export async function createStragglerEntry(basename) {
         });
 }
 export async function deleteStragglerEntry(basename) {
-    allFiles.get(basename).remove();
+    const stragglerEntry = allFiles.get(basename);
+    if (!stragglerEntry) return;
+    stragglerEntry.remove();
     allFiles.delete(basename);
     if (!stragglersList.hasChildNodes()) stragglers.style.display = "none";
 }
+
+
+const trackerList = document.getElementById("new__tracker-list");
+
+/**
+ * @param {string} title 
+ * @param {number} total total size in bytes
+ * @param {function} oncancel 
+ * @param {function} oncomplete 
+ * @returns {object} 
+ * ```
+ * const obj = createTrackerEntry(...);
+ * obj.add(chunkSize); // increment tracker by some amount of bytes
+ * obj.setProgress(downloaded, total);
+ * obj.setTitle(title);
+ * ```
+ */
+export function createTrackerEntry(title, total, oncancel, oncomplete) {
+
+    const trackerElem = createElement("div", null, "tracker", trackerList);
+    trackerElem.innerHTML = `<div class="tracker__title"> ${title} </div>`;
+    
+    const cancelBtn = createElement("div", null, "tracker__cancel svg-cont", trackerElem);
+    cancelBtn.innerHTML = icons.trash;
+    cancelBtn.addEventListener("click", () => {
+        oncancel();
+        close(false);
+    });
+
+    const bar = createElement("div", null, "tracker__bar", trackerElem);
+    const close = (success) => {
+        if (success) {
+            cancelBtn.innerHTML = "done";
+        }
+        else {
+            cancelBtn.innerHTML = "canc";
+        }
+        setTimeout(() => {
+            trackerElem.style.opacity = "0";
+        }, 200);
+    } 
+    let downloaded = 0;
+
+    function updateBar() {
+        bar.style.width = downloaded / total * 100 + "%";
+        console.log(downloaded + "/" + total);
+        if (downloaded === total) {
+            oncomplete();
+            close(true);
+        } 
+    }
+    return {
+        add(chunkSize) {
+            downloaded += chunkSize;
+            updateBar();
+        },
+        setProgress(DOWNLOADED, TOTAL = total) {
+            downloaded = DOWNLOADED;
+            total = TOTAL;
+            updateBar();
+        },
+        setTitle(title) {
+            trackerElem.firstElementChild.textContent = title;
+        }
+    } 
+
+}
+
 
 /**  @returns {HTMLElement} */
 function createElement(tag, id, classes, parent, text) {
@@ -363,9 +434,19 @@ function createElement(tag, id, classes, parent, text) {
 
 
 export function getTimeDisplay(totalSeconds) {
-    const minutes = ("" + Math.floor(totalSeconds / 60));
-    const seconds = ("" + Math.floor(totalSeconds % 60)).padStart(2, "0");
-    return minutes + ":" + seconds;
+    totalSeconds = Math.floor(totalSeconds);
+
+    const res = [];
+
+    res.push(("" + totalSeconds % 60).padStart(2, "0"));
+    totalSeconds = Math.floor(totalSeconds / 60);
+
+    res.push(("" + totalSeconds % 60).padStart((totalSeconds > 60)? 2 : 1, "0"));
+    totalSeconds = Math.floor(totalSeconds / 60);
+    
+    if (totalSeconds > 0) res.push("" + totalSeconds);
+
+    return res.reverse().join(":");
 }
 
 

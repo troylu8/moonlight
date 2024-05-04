@@ -152,6 +152,7 @@ audio.addEventListener("loadedmetadata", () => {
     seek.updateSliderColors(); 
     seek.max = Math.floor(audio.duration);
     seekTotal.textContent = getTimeDisplay(audio.duration);
+    seekPassed.textContent = "0:00".padStart(seekTotal.textContent.length);
 });
 
 audio.addEventListener("timeupdate", () => {
@@ -159,12 +160,12 @@ audio.addEventListener("timeupdate", () => {
 
     seek.value = audio.currentTime;
     seek.updateSliderColors(); 
-    seekPassed.textContent = getTimeDisplay(audio.currentTime);
+    seekPassed.textContent = getTimeDisplay(audio.currentTime).padStart(seekTotal.textContent.length);
 });
 audio.addEventListener("ended", () => nextBtn.dispatchEvent(new Event("click")));
 
 addDragEvent(seek, () => {
-    seekPassed.textContent = getTimeDisplay(seek.value);
+    seekPassed.textContent = getTimeDisplay(seek.value).padStart(seekTotal.textContent.length);
 }); 
 
 seek.addEventListener("mouseup", () => { audio.currentTime = seek.value; });

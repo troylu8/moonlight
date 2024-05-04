@@ -1,10 +1,11 @@
 import Dropdown from "../view/dropdown.js"
 import * as songSettings from "../settings/songSettings.js"
 import { data, Song } from "../account/userdata.js";
-import { uid } from "../account/account.js";
+import { genID, uid } from "../account/account.js";
 import * as yt from "./getyt.js";
 import { allFiles, uploadSongFile } from "../account/files.js";
 import { showError } from "../view/fx.js";
+const { ipcRenderer } = require("electron");
 
 
 const input = document.getElementById("paste-link__input");
@@ -151,15 +152,27 @@ function isValidLink(input) {
 function getYTID(link) { return link.slice(-11); }
 
 
-const fileInput = document.getElementById("song-upload__input");
+// INFO: for NW    
+// const fileInput = document.getElementById("song-upload__input");
+// fileInput.addEventListener("change", async () => {
+//     const songData = await uploadSongFile(uid, fileInput.value, true);
+//     if (songData instanceof Object) initNewSong(songData);
+// });
 
-
-document.getElementById("song-upload").addEventListener("click", () => {
+document.getElementById("song-upload").addEventListener("click", async () => {
     if (!data.curr.viewPlaylist) return showError(error, "select a playlist to add song");
-    fileInput.click()
-} );
+    // fileInput.click();
 
-fileInput.addEventListener("change", async () => {
-    const songData = await uploadSongFile(uid, fileInput.value, true);
-    if (songData instanceof Object) initNewSong(songData);
+    const dialog = await ipcRenderer.invoke("show-dialog", {
+        title: "upload song ",
+        properties: ['openFile'],
+        filters: [
+            { name: 'music', extensions: ["mp3", "wav", "m4a", "avi"] },
+        ],
+    });
+    if (dialog.canceled) return;
+
+    const songData = await uploadSongFile(genID(14), dialog.filePaths[0], true);
+    initNewSong(songData);
 });
+

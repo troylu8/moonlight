@@ -13,8 +13,6 @@
 
     display: flex;
     flex-direction: column;
-
-    z-index: 1;
 }
 
 #playlists-div__header {
