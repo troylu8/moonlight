@@ -129,6 +129,8 @@ for (const h3 of document.getElementsByTagName("h3")) {
 }
 
 
+const primary = document.getElementById("primary");
+
 
 /**
  * adds a tooltip to the element. if one already exists, overrides it.
@@ -144,12 +146,14 @@ export function setToolTip(parent, innerHTML, gap) {
     tooltip.classList.add("tooltip");
     tooltip.innerHTML = innerHTML;
 
+    let baseAncestor = parent;
+    while (baseAncestor.parentElement != primary) baseAncestor = baseAncestor.parentElement;
+
     /** moves tooltip to be centered on elem */
     function reposition() {
         const a = parent.getBoundingClientRect();
         const b = tooltip.getBoundingClientRect();
-        const bounds = parent.parentElement.getBoundingClientRect();
-        console.log(parent.parentElement);
+        const bounds = baseAncestor.getBoundingClientRect();
 
         const centerX = a.x + a.width/2;
         const finalX = clamp(centerX - b.width/2, bounds.x, bounds.x + bounds.width - b.width);

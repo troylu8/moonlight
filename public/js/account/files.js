@@ -1,4 +1,5 @@
-import { createStragglerEntry, createTrackerEntry, deleteStragglerEntry, getSizeDisplay } from '../view/elems.js';
+import { Tracker } from '../new-song/tracker.js';
+import { createStragglerEntry, deleteStragglerEntry, getSizeDisplay } from '../view/elems.js';
 import * as acc from './account.js';
 import { data, Song } from './userdata.js';
 const { ipcRenderer } = require("electron");
@@ -193,18 +194,26 @@ export const uploadSongFile = promisify(
      * @param {function(Error, object | "file in use")} cb
      */
     async (sid, path, createSongData, cb) => {
+        console.log("start");
+
+        const tracker = new Tracker();
+
         await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
 
-        const originalBase = basename(path);
+        const size = await getFileSize(path);
+        tracker.setProgress(0, size);
+
+        const originalBase = tracker.titleElem.textContent = basename(path);
+
         const dest = await makeUnique(global.userDir + "/songs/" + originalBase, sid);
         const newBase = basename(dest);
 
         const songData = createSongData ? {
             id: acc.genID(14),
             filename: newBase,
-            title: newBase.replace(/\.[^\/.]+$/, ""), // regex to remove extensions
+            title: originalBase.replace(/\.[^\/.]+$/, ""), // regex to remove extensions
             artist: "uploaded by you",
-            size: await getFileSize(path),
+            size: size,
             duration: (await parseFile(path)).format.duration
         } : undefined;
 
@@ -220,22 +229,20 @@ export const uploadSongFile = promisify(
         const readStream = fs.createReadStream(path);
         const writeStream = fs.createWriteStream(dest);
 
-        const { add } = createTrackerEntry(newBase, (await fs.promises.stat(path)).size,
-            () => {
-                readStream.destroy();
-                writeStream.end(() => fs.unlink(dest, () => {}));
-            },
-            () => { 
-                console.log("done"); 
-                deleteStragglerEntry(newBase);
-                return cb(null, songData ?? newBase);
-            }
-        );
+        tracker.oncancel = () => {
+            readStream.destroy();
+            writeStream.end(() => fs.unlink(dest, () => {}));
+        };
+        tracker.oncomplete = () => { 
+            console.log("done"); 
+            deleteStragglerEntry(newBase);
+            return cb(null, songData ?? newBase);
+        };
 
         readStream.on("data", (chunk) => {
             writeStream.write(chunk, (err) => {
                 if (err) throw err;
-                setTimeout(() => add(chunk.byteLength), 500);
+                tracker.add(chunk.byteLength);
             });
         });
         

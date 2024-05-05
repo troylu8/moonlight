@@ -38,7 +38,6 @@ export function setSidebarContent(elem) {
     
     activeSidebarElem = elem;
     activeSidebarElem.classList.add("sidebar__active");
-    console.log(activeSidebarElem, activeSidebarElem.classList);
 
     setSidebarOpen(true);
 }

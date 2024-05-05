@@ -138,10 +138,9 @@ fromGuestBtn.addEventListener("click", () => {
 const accountBtn = document.getElementById("account-btn");
 const accountDropdown = document.getElementById("account__dropdown");
 
-export const accDropdown = new Dropdown(accountBtn, accountDropdown, {
-    onclose: () => {
+export const accDropdown = new Dropdown(accountBtn, accountDropdown, () => {
         fromGuestInputs.style.display = "none";
         fromGuestBtn.style.display = "block";
         fromGuest.error.textContent = "";
     }
-}); 
+); 

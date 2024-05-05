@@ -19,7 +19,7 @@
     transition: var(--movement-transition);
 }
 
-.options-btn, .tracker__cancel {
+.options-btn {
     position: relative;
     cursor: pointer;
     width: 25px;
@@ -54,6 +54,7 @@
 }
 
 #new__dropdown {
+    width: 200px;
     overflow: hidden;
 }
 
@@ -70,21 +71,34 @@
 #new__tracker-list {
     display: flex;
     flex-direction: column;
+    max-width: 100%;
 }
 
 .tracker {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: 0.2s;
+}
+
+.tracker__top {
     display: flex;
     justify-content: space-between;
-    width: 100%;
 }
 
 .tracker__title {
     font-size: smaller;
+    
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
 }
 
 .tracker__cancel {
-    width: 25px;
-    width: 25px;
+    position: relative;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
 }
 
 #loading-bar, .tracker__bar {
@@ -92,8 +106,6 @@
     
     width: 0%;
     height: 6px;
-
-    transition: 0.2s;
 
     position: absolute;
     margin: 0;

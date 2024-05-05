@@ -1,5 +1,5 @@
 import {  makeUnique, reserved } from '../account/files.js';
-import { createTrackerEntry } from '../view/elems.js';
+import { Tracker } from './tracker.js';
 
 const ytdl = require('ytdl-core');
 const fs = require("fs");
@@ -83,11 +83,16 @@ export async function download(ytid, cb) {
     // currentDP = new DownloadProcess();
     // currentDP.download(ytid, cb);
 
+    let stop = false;
+
+    const tracker = new Tracker("fetching info", Infinity, () => stop = true);
+
     await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
 
     const info = await ytdl.getInfo(ytid);
+    if (stop) return cb();  // destroy request comes in while getting info 
 
-    if (this.destroy) return cb();  // destroy request comes in while getting info 
+    tracker.titleElem.textContent = info.videoDetails.title;
     
     const filename = await makeUnique(cleanFileName(info.videoDetails.title) + ".mp3", ytid);
     const path = global.userDir + "/songs/" + filename;
@@ -95,18 +100,15 @@ export async function download(ytid, cb) {
     
     const dlstream = ytdl.downloadFromInfo(info, {quality: "highestaudio", filter: "audioonly"});
     const writeStream = fs.createWriteStream(path);
+
+    tracker.oncancel = () => {
+        dlstream.destroy();
+        writeStream.end(() => fs.unlink(path, () => {}));
+        cb();
+    };
+
     dlstream.pipe(writeStream);
-
-    dlstream.on("progress", (chunk, downloaded, total) => {
-        if (this.destroy) {
-            tracker.reset();
-            this.destroy(dlstream, path, writeStream);
-            return cb();
-        }
-
-        tracker.downloaded = downloaded;
-        tracker.total = total;
-    });
+    dlstream.on("progress", (chunk, downloaded, total) => tracker.setProgress(downloaded, total));
 
     dlstream.on("end", () => {
         cb({
@@ -114,10 +116,9 @@ export async function download(ytid, cb) {
             "filename": filename,
             "title": info.videoDetails.title,
             "artist": info.videoDetails.author.name,
-            "size": tracker.total,
+            "size": tracker.getTotal(),
             "duration": Number(info.videoDetails.lengthSeconds)
         });
-        tracker.reset();
     });
 }
 

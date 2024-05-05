@@ -1,7 +1,7 @@
 import Dropdown from "../view/dropdown.js"
 import * as songSettings from "../settings/songSettings.js"
 import { data, Song } from "../account/userdata.js";
-import { genID, uid } from "../account/account.js";
+import { genID } from "../account/account.js";
 import * as yt from "./getyt.js";
 import { allFiles, uploadSongFile } from "../account/files.js";
 import { showError } from "../view/fx.js";
@@ -26,42 +26,14 @@ async function getyt(link) {
     if (!isValidLink(link)) return showError(error, "invalid link");
 
     const ytid = getYTID(link);
-
     
     //TODO: enable this
     // if ( data.songs["yt" + id] !== undefined ) return showError(error, "yt video already downloaded");
-
-    setButtonEnabled(false, "...");
     
-    if ( !(await videoExists(ytid)) ) {
-        showError(error, "video doesn't exist");
-        return setButtonEnabled(true, "get");
-    }
-    
- 
-    tracking = true;
-    loadingBar.style.opacity = "1";
-    setLoadingBar(0.05);
+    if ( !(await videoExists(ytid)) ) return showError(error, "video doesn't exist");
 
-    updateLoadingBarID = setInterval( async () => {
-
-        const percent = yt.tracker.downloaded / yt.tracker.total;
-
-        console.log("received " + percent);
-        setLoadingBar(Math.max(percent, 0.05));
-    }, 50);
-
-    
-    setButtonEnabled(true, "x");
-    
     yt.download(ytid, (songData) => {
-        if (songData) { // video downloaded fully
-            setLoadingBar(1);
-            stopLoading(true);
-            button.textContent = "get";
-
-            initNewSong(songData);
-        }
+        if (songData) initNewSong(songData);  // video downloaded successfully
     });
 }
 
@@ -74,61 +46,18 @@ async function initNewSong(songData) {
     allFiles.set(song.filename, song);
 }
 
-const dropdown = new Dropdown(
+new Dropdown(
     document.getElementById("new"), 
     document.getElementById("new__dropdown"),
-    {
-        allowClose: () => !tracking,
-        onclose: () => error.textContent = ""
-    }
+    () => error.textContent = ""
 );
 
-function stopLoading(closeDropdown) {
-    tracking = false;
-    setTimeout(() => {
-        loadingBar.style.opacity = "0";
-        setTimeout(() => {  // wait for transition time before resetting loading bar
-            setLoadingBar(0);
-            if (closeDropdown) dropdown.close();
-
-            console.log("stopped loading");
-        }, 300);
-    }, 200);
-    
-    return clearInterval(updateLoadingBarID);
-}
-
-function setButtonEnabled(val, text) {
-    enabled = val;
-    button.textContent = text;
-}
-
-async function destroy() {
-    stopLoading(false);
-
-    setButtonEnabled(false, "...");
-    await yt.destroy();
-    setButtonEnabled(true, "get");
-}
-
 button.onclick = () => {
-    if (!enabled) return console.log("can't click now!");
-
-    if (tracking) destroy();
-    else {
-        if (!data.curr.viewPlaylist) return showError(error, "select a playlist to add song");
-        getyt(input.value);
-    } 
+    if (!data.curr.viewPlaylist) return showError(error, "select a playlist to add song");
+    getyt(input.value);
 }
 
-input.onkeydown = (e) => {
-    if (e.key === "Enter") button.onclick()
-}
-
-const loadingBar = document.getElementById("loading-bar");
-function setLoadingBar(percent) {
-    loadingBar.style.width = percent * 100 + "%";
-}
+input.onkeydown = (e) => { if (e.key === "Enter") button.onclick(); }
 
 async function videoExists(id) {
     const res = await fetch("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + id);

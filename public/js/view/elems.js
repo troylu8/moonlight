@@ -74,8 +74,17 @@ export function setEntrySyncStatus(entry, syncStatus) {
     icon.tooltip.innerHTML = tooltipText;
 }
 
-function getSongEntry(groupElem, sid) {
-    return groupElem.querySelector("." + (sid.startsWith("yt#") ? sid.substring(3) : sid));
+/**
+ * @param {HTMLElement} groupElem 
+ * @param {Song} song 
+ * @returns {HTMLElement}
+ */
+function getSongEntry(groupElem, song) {
+    if (!song.songEntries) return null;
+    for (const entry of song.songEntries.values()) {
+        if (entry.parentElement === groupElem) return entry;
+    }
+    return null;
 }
 
 /** 
@@ -370,57 +379,20 @@ const trackerList = document.getElementById("new__tracker-list");
  * obj.setTitle(title);
  * ```
  */
-export function createTrackerEntry(title, total, oncancel, oncomplete) {
+export function createTrackerEntry(title) {
 
     const trackerElem = createElement("div", null, "tracker", trackerList);
-    trackerElem.innerHTML = `<div class="tracker__title"> ${title} </div>`;
-    
-    const cancelBtn = createElement("div", null, "tracker__cancel svg-cont", trackerElem);
-    cancelBtn.innerHTML = icons.trash;
-    cancelBtn.addEventListener("click", () => {
-        oncancel();
-        close(false);
-    });
-
-    const bar = createElement("div", null, "tracker__bar", trackerElem);
-    const close = (success) => {
-        if (success) {
-            cancelBtn.innerHTML = "done";
-        }
-        else {
-            cancelBtn.innerHTML = "canc";
-        }
-        setTimeout(() => {
-            trackerElem.style.opacity = "0";
-        }, 200);
-    } 
-    let downloaded = 0;
-
-    function updateBar() {
-        bar.style.width = downloaded / total * 100 + "%";
-        console.log(downloaded + "/" + total);
-        if (downloaded === total) {
-            oncomplete();
-            close(true);
-        } 
-    }
-    return {
-        add(chunkSize) {
-            downloaded += chunkSize;
-            updateBar();
-        },
-        setProgress(DOWNLOADED, TOTAL = total) {
-            downloaded = DOWNLOADED;
-            total = TOTAL;
-            updateBar();
-        },
-        setTitle(title) {
-            trackerElem.firstElementChild.textContent = title;
-        }
-    } 
-
+    trackerElem.innerHTML = 
+        `<div class="tracker__top">
+            <div class="tracker__title"> ${title} </div>
+            <div class="tracker__cancel">
+                <div class="svg-cont"> ${icons.trash} </div>
+            </div>
+            <div class="tracker__bar"></div>
+        </div>`
+        
+    return trackerElem;
 }
-
 
 /**  @returns {HTMLElement} */
 function createElement(tag, id, classes, parent, text) {
