@@ -1,5 +1,11 @@
 import { createTrackerEntry } from "../view/elems.js";
 
+let closedTrackers = [];
+export function removeClosedTrackerElems() {
+    closedTrackers.forEach(t => t.trackerElem.remove());
+    closedTrackers = [];
+}
+
 export class Tracker {
 
     downloaded = 0;
@@ -12,8 +18,8 @@ export class Tracker {
         this.trackerElem = createTrackerEntry(title);
         
         this.titleElem = this.trackerElem.querySelector(".tracker__title");
-        this.cancelBtn = this.trackerElem.querySelector(".tracker__cancel");
-        this.cancelBtn.addEventListener("click", () => {
+        this.iconElem = this.trackerElem.querySelector(".tracker__icon");
+        this.iconElem.addEventListener("click", () => {
             if (this.oncancel) this.oncancel();
             this.close(false);
         });
@@ -32,15 +38,17 @@ export class Tracker {
     }
 
     close(success) {
+
         if (success) {
-            this.cancelBtn.innerHTML = "done";
+            this.iconElem.querySelector(".tracker__trash").style.display = "none";
+            this.iconElem.querySelector(".tracker__check").style.display = "block";
         }
         else {
-            this.cancelBtn.innerHTML = "canc";
+            this.trackerElem.classList.add("tracker__canceled");
         }
-        setTimeout(() => {
-            fadeOut(this.trackerElem);
-        }, 1000);
+
+        setTimeout(() => this.bar.style.opacity = "0", 300);
+        closedTrackers.push(this);
     } 
 
     updateBar() {
@@ -48,21 +56,7 @@ export class Tracker {
         console.log(this.downloaded + "/" + this.total, this.bar.style.width);
         if (this.downloaded === this.total) {
             if (this.oncomplete) this.oncomplete();
-            // this.close(true);
+            this.close(true);
         } 
     }
-}
-
-function fadeOut(elem) {
-    let op = 1;
-    const timer = setInterval(() => {
-        op /= 1.2;
-        console.log(op);
-        if (op <= 0.05) {
-            elem.remove();
-            console.log("remove elem!!!");
-            return clearInterval(timer);
-        }
-        elem.style.opacity = op;
-    }, 20);
 }

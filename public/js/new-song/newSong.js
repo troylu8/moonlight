@@ -5,6 +5,7 @@ import { genID } from "../account/account.js";
 import * as yt from "./getyt.js";
 import { allFiles, uploadSongFile } from "../account/files.js";
 import { showError } from "../view/fx.js";
+import { removeClosedTrackerElems } from "./tracker.js";
 const { ipcRenderer } = require("electron");
 
 
@@ -46,10 +47,14 @@ async function initNewSong(songData) {
     allFiles.set(song.filename, song);
 }
 
+
 new Dropdown(
     document.getElementById("new"), 
     document.getElementById("new__dropdown"),
-    () => error.textContent = ""
+    () => {
+        error.textContent = "";
+        removeClosedTrackerElems();
+    } 
 );
 
 button.onclick = () => {

@@ -146,6 +146,7 @@ input[type="file"] {
 .hiding-scroll {
     transition: --scrollbar-color 0.2s;
     overflow-y: auto;
+    padding-right: 5px;
 }
 .hiding-scroll:hover {
     --scrollbar-color: var(--accent-color);

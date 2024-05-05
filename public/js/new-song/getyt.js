@@ -116,7 +116,7 @@ export async function download(ytid, cb) {
             "filename": filename,
             "title": info.videoDetails.title,
             "artist": info.videoDetails.author.name,
-            "size": tracker.getTotal(),
+            "size": tracker.total,
             "duration": Number(info.videoDetails.lengthSeconds)
         });
     });
