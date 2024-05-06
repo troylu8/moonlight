@@ -5,8 +5,8 @@ import { openPlaylistSettings } from "../settings/playlistSettings.js";
 import { removeTooltip, setToolTip } from "./fx.js";
 import { syncData } from "../account/account.js";
 import { allFiles, deleteSongFile, getFileSize, uploadSongFile } from "../account/files.js";
+import { getyt } from "../new-song/newSong.js";
 const { ipcRenderer } = require("electron");
-
 
 const icons = {
     options:   `<svg fill="var(--primary-color)" width="20px" height="20px" viewBox="0 0 32 32" >
@@ -15,9 +15,7 @@ const icons = {
     trash:     `<svg viewBox="0 0 24 24" >
                     <path  stroke="var(--error-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4,6h16M16,6l-.2706-.81193c-.2623-.78682-.3935-1.18023-.6367-1.47109-.2148-.25685-.4906-.45566-.8022-.5782C13.9376,3,13.523,3,12.6936,3h-1.3872c-.8294,0-1.244,0-1.59689.13878-.31159.12254-.58743.32135-.80222.5782-.24324.29086-.37437.68427-.63665,1.47109L8,6M18,6v10.2c0,1.6802,0,2.5202-.327,3.162-.2876.5645-.7465,1.0234-1.311,1.311C15.7202,21,14.8802,21,13.2,21h-2.4c-1.68016,0-2.52024,0-3.16197-.327-.56449-.2876-1.02343-.7465-1.31105-1.311C6,18.7202,6,17.8802,6,16.2L6,6m4,4.593941L14,16.2m0-5.606059L10,16.2"/>
                 </svg>`,
-    check:     `<svg fill="none" viewBox="0 0 24 24">
-                    <path stroke="green" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M6 12L10.2426 16.2426L18.727 7.75732"/>
-                </svg>`,
+    
 
     // icons matching song.state
     playable:  `<svg stroke="var(--primary-color)" viewBox="0 0 24 24">
@@ -37,8 +35,27 @@ const icons = {
     doomed:    `<svg viewBox="0 -0.5 20 20">
                     <path stroke="var(--error-color)" clip-rule="evenodd" fill="none" fill-rule="evenodd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M5.5,12.0002c.00024-3.33952,2.35944-6.21381,5.6348-6.8651s6.5547,1.10183,7.8325,4.18721.1982,6.64369-2.5786,8.49889-6.47743,1.4905-8.8387-.871c-1.31272-1.3129-2.05013-3.0934-2.05-4.95Z" transform="translate(-2.500311-2.500443)" />
                     <path fill="var(--error-color)" d="M9.34477,14.0937c-.29295.2929-.29304.7677-.0002,1.0607.29284.2929.76773.293,1.06063.0002L9.34477,14.0937Zm3.68543-1.5631c.293-.2929.2931-.7677.0002-1.0607s-.7677-.293-1.0606-.0002l1.0604,1.0609ZM11.9695,11.47c-.2928.293-.2926.7679.0004,1.0607s.7679.2926,1.0606-.0004L11.9695,11.47Zm3.685-1.56573c.2928-.293.2926-.76787-.0004-1.06066s-.7679-.2926-1.0606.00041l1.061,1.06025ZM13.0302,11.4697c-.2929-.2928-.7678-.2927-1.0606.0002s-.2928.7678.0002,1.0607l1.0604-1.0609Zm1.5646,3.6849c.2929.2928.7678.2927,1.0606-.0002.2929-.293.2928-.7678-.0002-1.0607l-1.0604,1.0609Zm-2.6252-2.6242c.2928.2929.7677.293,1.0606.0002s.2931-.7677.0002-1.0607l-1.0608,1.0605ZM10.4054,8.84392c-.2928-.29295-.76768-.29304-1.06063-.00021s-.29304.76772-.0002,1.06066L10.4054,8.84392Zm-.0002,6.31068l2.625-2.624-1.0604-1.0609-2.62503,2.624l1.06043,1.0609Zm2.6253-2.6243l2.624-2.62603-1.061-1.06025L11.9695,11.47l1.061,1.0603Zm-1.0607.0003l2.625,2.624l1.0604-1.0609-2.625-2.624-1.0604,1.0609Zm1.0606-1.0607l-2.625-2.62598L9.34457,9.90437L11.9696,12.5304l1.0608-1.0605Z" transform="translate(-2.500318-2.499142)"/>
-                </svg>`
+                </svg>`,
 
+    check:     `<svg fill="none" viewBox="0 0 24 24">
+                    <path stroke="green" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M6 12L10.2426 16.2426L18.727 7.75732"/>
+                </svg>`,
+    musicnote: `<svg viewBox="0 0 24 24" fill="none" >
+                    <path stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12.5 8.89001V18.5M12.5 8.89001V5.57656C12.5 5.36922 12.5 5.26554 12.5347 5.17733C12.5653 5.09943 12.615 5.03047 12.6792 4.97678C12.752 4.91597 12.8503 4.88318 13.047 4.81761L17.447 3.35095C17.8025 3.23245 17.9803 3.17319 18.1218 3.20872C18.2456 3.23982 18.3529 3.31713 18.4216 3.42479C18.5 3.54779 18.5 3.73516 18.5 4.10989V7.42335C18.5 7.63069 18.5 7.73436 18.4653 7.82258C18.4347 7.90048 18.385 7.96943 18.3208 8.02313C18.248 8.08394 18.1497 8.11672 17.953 8.18229L13.553 9.64896C13.1975 9.76746 13.0197 9.82671 12.8782 9.79119C12.7544 9.76009 12.6471 9.68278 12.5784 9.57512C12.5 9.45212 12.5 9.26475 12.5 8.89001ZM12.5 18.5C12.5 19.8807 10.933 21 9 21C7.067 21 5.5 19.8807 5.5 18.5C5.5 17.1192 7.067 16 9 16C10.933 16 12.5 17.1192 12.5 18.5Z" />
+                </svg>`,
+    playlist:  `<svg stroke="var(--primary-color)" stroke-width="1.5" stroke-linecap="round" viewBox="0 0 24 24" fill="none">
+                    <path d="M8 14H3"/>
+                    <path d="M12 9L3 9"/>
+                    <path d="M16 17.4286C16 18.8487 14.8807 20 13.5 20C12.1193 20 11 18.8487 11 17.4286C11 16.0084 12.1193 14.8571 13.5 14.8571C14.8807 14.8571 16 16.0084 16 17.4286ZM16 17.4286V11"/>
+                    <path d="M18.675 8.11607L16.9205 8.95824C16.5788 9.12225 16.408 9.20426 16.2845 9.33067C16.1855 9.43211 16.1091 9.55346 16.0605 9.68666C16 9.85265 16 10.0422 16 10.4212C16 11.2976 16 11.7358 16.1911 11.9987C16.3421 12.2066 16.5673 12.3483 16.8201 12.3945C17.1397 12.453 17.5348 12.2634 18.325 11.8841L20.0795 11.0419C20.4212 10.8779 20.592 10.7959 20.7155 10.6695C20.8145 10.5681 20.8909 10.4467 20.9395 10.3135C21 10.1475 21 9.95803 21 9.57901C21 8.70256 21 8.26434 20.8089 8.00144C20.6579 7.79361 20.4327 7.65188 20.1799 7.60565C19.8603 7.54717 19.4652 7.7368 18.675 8.11607Z"/>
+                    <path d="M20 4L9.5 4M3 4L5.25 4"/>
+                </svg>`,
+
+    download:  `<svg stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" fill="none" fill-rule="evenodd" viewBox="0 0 24 24" >
+                    <line x1="12" y1="5" x2="12" y2="15" ></line>
+                    <path d="M17,11 L12.7071,15.2929 C12.3166,15.6834 11.6834,15.6834 11.2929,15.2929 L7,11"></path>
+                    <line x1="19" y1="20" x2="5" y2="20" ></line>
+                </svg>`
 } 
 
 /** 
@@ -397,6 +414,29 @@ export function createTrackerEntry(title) {
         
     return trackerElem;
 }
+
+const searchResults = document.getElementById("search-results");
+
+export function createSearchResultEntry(searchResult) {
+    const resultElem = createElement("div", null, "search-result", searchResults);
+    resultElem.innerHTML = 
+       `<div class="search-result__icon">${searchResult.type === "video"? icons.musicnote : icons.playlist}</div>
+        <p class="search-result__title">${searchResult.title}</p>
+        <p class="search-result__artist">${searchResult.author.name}</p>
+        <div class="expander"></div>`;
+    
+    const downloadBtn = createElement("div", null, "search-result__download", resultElem);
+    downloadBtn.innerHTML = `<div class="svg-cont">${icons.download}</div>`;
+    downloadBtn.addEventListener("click", () => {
+        
+        if (searchResult.type === "playlist") {
+            console.log(searchResult);
+        }
+        else getyt(searchResult.url, searchResult.title);
+
+    });
+}
+
 
 /**  @returns {HTMLElement} */
 function createElement(tag, id, classes, parent, text) {

@@ -8,47 +8,10 @@ import { showError } from "../view/fx.js";
 import { removeClosedTrackerElems } from "./tracker.js";
 const { ipcRenderer } = require("electron");
 
-
 const input = document.getElementById("paste-link__input");
 const button = document.getElementById("paste-link__btn");
 const error = document.getElementById("new__error");
-
-
-/** between dings from getyt and destroy, button is disabled */
-let enabled = true;
-/** if true, loading bar active. determines whether button sends getyt or destroy, and stops loading bar  */
-export let tracking = false;
-
-let updateLoadingBarID;
-
-async function getyt(link) {
-    link = link.trim();
-    
-    if (!isValidLink(link)) return showError(error, "invalid link");
-
-    const ytid = getYTID(link);
-    
-    //TODO: enable this
-    // if ( data.songs["yt" + id] !== undefined ) return showError(error, "yt video already downloaded");
-    
-    if ( !(await videoExists(ytid)) ) return showError(error, "video doesn't exist");
-
-    yt.download(ytid, (songData) => {
-        if (songData) initNewSong(songData);  // video downloaded successfully
-    });
-}
-
-/** add to data.songs, add to current playlist, open settings */
-async function initNewSong(songData) {    
-    const song = new Song(songData.id, songData);
-    const songElems = song.addToPlaylist(data.curr.viewPlaylist); 
-    songSettings.openSongSettings(song, songElems[1], songElems[2]);
-
-    allFiles.set(song.filename, song);
-}
-
-
-new Dropdown(
+const new__dropdown = new Dropdown(
     document.getElementById("new"), 
     document.getElementById("new__dropdown"),
     () => {
@@ -57,8 +20,47 @@ new Dropdown(
     } 
 );
 
-button.onclick = () => {
+async function validateLink(link) {
+    
+    link = link.trim();
+    
+    if (!isValidLink(link)) return "invalid link";
+
+    const ytid = getYTID(link);
+    
+    //TODO: enable this
+    // if ( data.songs["yt" + id] !== undefined ) return "yt video already downloaded";
+    
+    if ( !(await videoExists(ytid)) ) return new Error("video doesn't exist");
+    
+    error.textContent = "";
+    return ytid;
+}
+
+//TODO: only ytid inputted
+export async function getyt(ytid, title) {
+    new__dropdown.open();
+    yt.download(ytid, (songData) => {
+        if (songData) initNewSong(songData);  // video downloaded successfully
+    }, title);
+}
+
+/** add to data.songs, add to current playlist, open settings */
+export async function initNewSong(songData) {    
+    const song = new Song(songData.id, songData);
+    const songElems = song.addToPlaylist(data.curr.viewPlaylist); 
+    songSettings.openSongSettings(song, songElems[1], songElems[2]);
+
+    allFiles.set(song.filename, song);
+}
+
+
+
+
+button.onclick = async () => {
     if (!data.curr.viewPlaylist) return showError(error, "select a playlist to add song");
+    const errmsg = await validateLink(input.value);
+    if (errmsg) return showError(error, errmsg);
     getyt(input.value);
 }
 

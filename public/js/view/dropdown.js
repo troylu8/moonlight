@@ -21,10 +21,8 @@ export default class Dropdown {
         
 
         document.body.addEventListener("mousedown", (e) => {
-            
             if (this.visible && !parent.contains(e.target)) {
                 this.close();
-                
             }
         });
 

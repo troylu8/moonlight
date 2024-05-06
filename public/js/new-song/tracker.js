@@ -38,6 +38,7 @@ export class Tracker {
     }
 
     close(success) {
+        if (this.closed) return;
 
         if (success) {
             this.iconElem.querySelector(".tracker__trash").style.display = "none";
@@ -49,14 +50,15 @@ export class Tracker {
 
         setTimeout(() => this.bar.style.opacity = "0", 300);
         closedTrackers.push(this);
+
+        this.closed = true;
     } 
 
     updateBar() {
         this.bar.style.width = this.downloaded / this.total * 100 + "%";
-        console.log(this.downloaded + "/" + this.total, this.bar.style.width);
         if (this.downloaded === this.total) {
             if (this.oncomplete) this.oncomplete();
             this.close(true);
-        } 
+        }
     }
 }

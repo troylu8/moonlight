@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="css/sidebar.css">
         <link rel="stylesheet" href="css/titlescreen.css">
 
-        
+
         <script type="module" src="js/view/dropdown.js" ></script> 
         <script type="module" src="js/view/sidebar.js" ></script> 
         <script type="module" src="js/view/signinElems.js"></script>
@@ -27,6 +27,7 @@
         <script type="module" src="js/settings/playlistSettings.js"></script>
 
         <script type="module" src="js/new-song/newSong.js" ></script>
+        <script type="module" src="js/new-song/searchyt.js" ></script>
 
         <script type="module" src="js/account/userdata.js" ></script>
         <script type="module" src="js/account/account.js" ></script>
@@ -70,6 +71,15 @@
         <div id="primary">
 
             <nav id="options-div">
+
+                <div id="search-yt">
+                    <input id="search-yt__input" type="text" placeholder="search" value="Saiki Kusuo no Psi Nan Original Soundtrack">
+
+                    <div id="search-results"></div>
+                </div>
+
+                <div class="expander"></div>
+
                 <div id="sync" class="options-btn"> 
                     <div class="svg-cont">
                         <svg class="svg-child" stroke="var(--primary-color)" fill="var(--primary-color)" viewBox="0 0 24 24" >

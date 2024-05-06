@@ -211,8 +211,8 @@ export function showError(errorElem, text) {
 }
 
 export let shiftDown = false;
-window.addEventListener("keydown", (e) => shiftDown = e.shiftKey);
-window.addEventListener("keyup", (e) => shiftDown = e.shiftKey);
+document.body.addEventListener("keydown", (e) => shiftDown = e.shiftKey);
+document.body.addEventListener("keyup", (e) => shiftDown = e.shiftKey);
 
 export function initDeleteBtn(btn, errElem, onShiftClick) {
     btn.reset = (text) => {
@@ -250,13 +250,13 @@ export function addDragEvent(slider, ondrag, onmousedown, onmouseup) {
             document.body.style.userSelect = "none";
             if (onmousedown) onmousedown(e);
         });
-        window.addEventListener("mouseup", (e) => { 
+        document.body.addEventListener("mouseup", (e) => { 
             slider.dragging = false; 
             document.body.style.userSelect = "auto";
             if (onmouseup) onmouseup(e);
         });
     }
-    window.addEventListener("mousemove", (e) => { if (slider.dragging) ondrag(e); });
+    document.body.addEventListener("mousemove", (e) => { if (slider.dragging) ondrag(e); });
 }
 
 function createResizeDragger(dragger, ondrag, onmousedown, onmouseup) {

@@ -13,7 +13,7 @@
     justify-content: end;
     align-items: center;
 
-    padding-right: 10px;
+    padding: 0 10px;
     gap: 10px;
 
     transition: var(--movement-transition);
@@ -42,15 +42,11 @@
     flex-direction: column;
     align-items: center;
     padding: 10px;
-    gap: 10px;
 
     background-color: var(--background-color);
     border-radius: 10px;
 
     cursor: default;
-}
-#account__dropdown {
-    gap: 0;
 }
 
 #new__dropdown {
@@ -61,6 +57,7 @@
 #paste-link {
     display: flex;
     gap: 5px;
+    margin-top: 10px;
 }
 
 #song-upload, #paste-link__btn {
@@ -71,7 +68,6 @@
 #new__tracker-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
     width: 100%;
     max-width: 100%;
     max-height: 250px;
@@ -84,6 +80,7 @@
     flex-direction: column;
     gap: 2px;
     transition: 0.2s;
+    margin-top: 10px;
 }
 
 .tracker__top {
@@ -143,4 +140,53 @@
 
 #song-settings__delete__error, #playlist-settings__delete__error {
     align-self: center;
+}
+
+#search-yt {
+    position: relative;
+    width: calc(100% - 80px);
+
+    max-width: 450px;
+}
+
+#search-yt__input {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+#search-results {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    box-sizing: border-box;
+    width: 100%;
+
+    display: none;
+    flex-direction: column;
+
+    background-color: var(--background-color);
+    padding: 5px;
+
+    border-radius: 0 0 5px 5px;
+}
+
+.search-result {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-result__title, .search-result__artist {
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+}
+
+.search-result__artist {
+    font-weight: 400;
+}
+
+.search-result__icon, .search-result__download {
+    min-width: 25px;
+    min-height: 25px;
 }
