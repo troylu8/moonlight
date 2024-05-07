@@ -1,5 +1,4 @@
 import { createSearchResultEntry } from '../view/elems.js';
-
 const yts = require('yt-search');
 
 
@@ -31,3 +30,4 @@ document.body.addEventListener("mousedown", (e) => {
         searchResults.innerHTML = "";
     }
 });
+

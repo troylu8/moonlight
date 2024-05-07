@@ -5,7 +5,8 @@ import { openPlaylistSettings } from "../settings/playlistSettings.js";
 import { removeTooltip, setToolTip } from "./fx.js";
 import { syncData } from "../account/account.js";
 import { allFiles, deleteSongFile, getFileSize, uploadSongFile } from "../account/files.js";
-import { getyt } from "../new-song/newSong.js";
+import * as yt from "../new-song/getyt.js";
+import { initNewSong } from "../new-song/newSong.js";
 const { ipcRenderer } = require("electron");
 
 const icons = {
@@ -427,13 +428,20 @@ export function createSearchResultEntry(searchResult) {
     
     const downloadBtn = createElement("div", null, "search-result__download", resultElem);
     downloadBtn.innerHTML = `<div class="svg-cont">${icons.download}</div>`;
-    downloadBtn.addEventListener("click", () => {
-        
-        if (searchResult.type === "playlist") {
-            console.log(searchResult);
-        }
-        else getyt(searchResult.url, searchResult.title);
+    downloadBtn.addEventListener("click", async () => {
+        if (searchResult.type === "list") {
 
+            const infoReq = await fetch(`https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/playlist?list=${searchResult.listId}`);
+
+            yt.downloadPlaylist(searchResult.listId, () => {}, (await infoReq.json()).title);
+        }
+        else {
+            if (!data.curr.viewPlaylist) return console.log("select a playlist to add song");
+            
+            yt.downloadSong(searchResult.videoId, (songData) => {
+                if (songData) initNewSong(songData);  // video downloaded successfully
+            }, searchResult.title);
+        }
     });
 }
 

@@ -1,17 +1,18 @@
-import Dropdown from "../view/dropdown.js"
-import * as songSettings from "../settings/songSettings.js"
+import { openSongSettings } from "../settings/songSettings.js"
 import { data, Song } from "../account/userdata.js";
 import { genID } from "../account/account.js";
 import * as yt from "./getyt.js";
 import { allFiles, uploadSongFile } from "../account/files.js";
 import { showError } from "../view/fx.js";
 import { removeClosedTrackerElems } from "./tracker.js";
+import Dropdown from "../view/dropdown.js";
 const { ipcRenderer } = require("electron");
 
 const input = document.getElementById("paste-link__input");
 const button = document.getElementById("paste-link__btn");
 const error = document.getElementById("new__error");
-const new__dropdown = new Dropdown(
+
+export const new__dropdown = new Dropdown(
     document.getElementById("new"), 
     document.getElementById("new__dropdown"),
     () => {
@@ -20,56 +21,34 @@ const new__dropdown = new Dropdown(
     } 
 );
 
-async function validateLink(link) {
-    
+async function getYTID(link) {
     link = link.trim();
-    
-    if (!isValidLink(link)) return "invalid link";
 
-    const ytid = getYTID(link);
-    
-    //TODO: enable this
-    // if ( data.songs["yt" + id] !== undefined ) return "yt video already downloaded";
-    
-    if ( !(await videoExists(ytid)) ) return new Error("video doesn't exist");
-    
+    if (!isValidLink(link)) throw new Error("invalid link");
+
+    const ytid = link.slice(-11);
+        
     error.textContent = "";
     return ytid;
 }
 
-//TODO: only ytid inputted
-export async function getyt(ytid, title) {
-    new__dropdown.open();
-    yt.download(ytid, (songData) => {
-        if (songData) initNewSong(songData);  // video downloaded successfully
-    }, title);
-}
-
-/** add to data.songs, add to current playlist, open settings */
-export async function initNewSong(songData) {    
-    const song = new Song(songData.id, songData);
-    const songElems = song.addToPlaylist(data.curr.viewPlaylist); 
-    songSettings.openSongSettings(song, songElems[1], songElems[2]);
-
-    allFiles.set(song.filename, song);
-}
-
-
-
-
 button.onclick = async () => {
     if (!data.curr.viewPlaylist) return showError(error, "select a playlist to add song");
-    const errmsg = await validateLink(input.value);
-    if (errmsg) return showError(error, errmsg);
-    getyt(input.value);
+
+    try { 
+        yt.downloadSong(
+            await getYTID(input.value), 
+            (songData) => {
+                if (songData) initNewSong(songData);  // video downloaded successfully
+            }
+        ); 
+    } 
+    catch (err) { showError(error, err.message); }
 }
 
 input.onkeydown = (e) => { if (e.key === "Enter") button.onclick(); }
 
-async function videoExists(id) {
-    const res = await fetch("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + id);
-    return res.status === 200; 
-}
+
 
 /** 
  * @param {string} input yt link 
@@ -82,11 +61,13 @@ function isValidLink(input) {
             input.startsWith("youtu.be/watch?v=")
 }
 
-/** 
- * @param {string} link yt link 
- */
-function getYTID(link) { return link.slice(-11); }
-
+export async function initNewSong(songData, playlist, openSettings) {    
+    const song = new Song(songData.id, songData);
+    const songElems = song.addToPlaylist(playlist ?? data.curr.viewPlaylist); 
+    if (openSettings ?? true) openSongSettings(song, songElems[1], songElems[2]);
+    
+    allFiles.set(song.filename, song);
+}
 
 // INFO: for NW    
 // const fileInput = document.getElementById("song-upload__input");
