@@ -15,13 +15,11 @@ const error = document.getElementById("new__error");
 export const new__dropdown = new Dropdown(
     document.getElementById("new"), 
     document.getElementById("new__dropdown"),
-    () => {
-        error.textContent = "";
-        removeClosedTrackerElems();
-    } 
+    removeClosedTrackerElems,
+    () => error.textContent = ""
 );
 
-async function getYTID(link) {
+async function getYTSID(link) {
     link = link.trim();
 
     if (!isValidLink(link)) throw new Error("invalid link");
@@ -35,15 +33,18 @@ async function getYTID(link) {
 button.onclick = async () => {
     if (!data.curr.viewPlaylist) return showError(error, "select a playlist to add song");
 
-    try { 
-        yt.downloadSong(
-            await getYTID(input.value), 
-            (songData) => {
-                if (songData) initNewSong(songData);  // video downloaded successfully
-            }
-        ); 
-    } 
-    catch (err) { showError(error, err.message); }
+    let ytsid;
+    try {ytsid = await getYTSID(input.value); }
+    catch (err) { return showError(error, err.message); }
+    
+    yt.downloadSong(
+        ytsid, 
+        (err, songData) => {
+            if (err) return showError(error, err.message);
+            if (songData) initNewSong(songData);  // video downloaded successfully
+        }
+    ); 
+    
 }
 
 input.onkeydown = (e) => { if (e.key === "Enter") button.onclick(); }

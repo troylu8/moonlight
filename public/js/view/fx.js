@@ -172,12 +172,19 @@ export function setToolTip(parent, innerHTML, gap) {
 
     parent.addEventListener("mouseenter", () => {
         reposition();
+        tooltip.style.visibility = "visible";
         tooltip.style.opacity = 1;
         tooltip.style.pointerEvents = "auto";
     });
-    parent.addEventListener("mouseleave", (e) => {
+
+    const hide = () => {
         tooltip.style.opacity = 0;
         tooltip.style.pointerEvents = "none";
+    }
+    parent.addEventListener("mouseleave", hide);
+    parent.addEventListener("wheel", () => {
+        tooltip.style.visibility = "hidden";
+        hide();
     });
 
     parent.appendChild(tooltip);

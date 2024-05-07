@@ -59,14 +59,15 @@ export async function downloadPlaylist(ytpid, cb, title) {
     let complete = 0;
 
     for (const s of songs) { 
-        try {
-            downloadSong(s[0], (songData) => {
-                initNewSong(songData, playlist, false);
-                if (++complete === songs.length) cb();
-            }, s[1]);
-        } catch (err) {
-            console.log("caught", err.message);
-        }
+        
+        downloadSong(s[0], (err, songData) => {
+            //TODO: notification "1 unavailable song"
+            if (err) return console.log(err.message);
+
+            initNewSong(songData, playlist, false);
+            if (++complete === songs.length) cb();
+        }, s[1]);
+        
     }
 }
 
@@ -78,21 +79,21 @@ async function videoExists(id) {
 
 /**  download mp3, then create song object with song data
  * @param {string} ytsid youtube song id
- * @param {function(object | null)} cb called with songdata download was successful
+ * @param {function(Error | undefined, object | undefined)} cb called with songdata download was successful
  * @param {string} title temporarily used as the tracker title until the song info is fetched
  */
 export async function downloadSong(ytsid, cb, title) {
     new__dropdown.open();
     let stop = false;
     
-    if ( !(await videoExists(ytsid)) ) throw new Error("video doesnt exist");
+    if ( !(await videoExists(ytsid)) ) return cb(new Error("video doesnt exist"));
 
     const tracker = new Tracker(title ?? "fetching info", Infinity, () => stop = true);
 
     await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
 
     const info = await ytdl.getInfo(ytsid);
-    if (stop) return cb(null);  // destroy request comes in while getting info 
+    if (stop) return cb();  // destroy request comes in while getting info 
 
     tracker.titleElem.textContent = info.videoDetails.title;
 
@@ -106,15 +107,15 @@ export async function downloadSong(ytsid, cb, title) {
     tracker.oncancel = () => {
         dlstream.destroy();
         writeStream.end(() => fs.unlink(path, () => {}));
-        cb(null);
+        cb();
     };
 
     dlstream.pipe(writeStream);
     dlstream.on("progress", (chunk, downloaded, total) => tracker.setProgress(downloaded, total));
 
     dlstream.on("end", () => 
-        cb({
-            "id": "yt#" + ytsid,
+        cb(null, {
+            "id": genID(14),
             "filename": filename,
             "title": info.videoDetails.title,
             "artist": info.videoDetails.author.name,

@@ -138,7 +138,7 @@ fromGuestBtn.addEventListener("click", () => {
 const accountBtn = document.getElementById("account-btn");
 const accountDropdown = document.getElementById("account__dropdown");
 
-export const accDropdown = new Dropdown(accountBtn, accountDropdown, () => {
+export const accDropdown = new Dropdown(accountBtn, accountDropdown, null, () => {
         fromGuestInputs.style.display = "none";
         fromGuestBtn.style.display = "block";
         fromGuest.error.textContent = "";

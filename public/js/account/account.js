@@ -9,11 +9,11 @@ import { showError } from "../view/fx.js";
  * @returns {string} may contain `0-9` `a-z` `A-Z` `_` `-`
  */
 export function genID(len) {
-    const map = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-";
+    const map = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-";
     
-    let res = "";
+    let res = map[Math.floor(Math.random() * 52)]; // first character of css classes cannot be a number
     
-    for (let i = 0; i < len; i++) 
+    for (let i = 0; i < len-1; i++) 
         res += map[ crypto.getRandomValues(new Uint8Array(1))[0] >> 2 ]
     
     return res;
@@ -151,8 +151,10 @@ class SyncChanges {
 
         /** @type {Array<string>} all files that client wants from server: error state songs + songs that server has client doesnt*/
         this.requestedFiles = Array.from(missingFiles.keys())
-                            .filter(fn => missingFiles.get(fn).state !== "new")
+                            .filter(fn => missingFiles.get(fn).syncStatus !== "new")
                             .map(fn => "songs/" + fn),
+        console.log("missing files", Array.from(missingFiles.keys()));
+        console.log("requested files", this.requestedFiles);
 
         /** @type {Array<string>} files that the client deleted, so the server should too */
         this.trash = Array.from(data.trashqueue),

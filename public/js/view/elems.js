@@ -108,6 +108,8 @@ function getSongEntry(groupElem, song) {
     return null;
 }
 
+
+
 /** 
  * @param {Song} song
  * @param {Playlist} playlist 
@@ -119,9 +121,7 @@ export function createSongEntry(song, playlist) {
     const e = getSongEntry(playlist.groupElem, song.id);
     if (e) return e;
 
-    const className = song.id.startsWith("yt#") ? song.id.substring(3) : song.id;
-
-    const songEntry = createElement("div", null, "song " + className, playlist.groupElem);
+    const songEntry = createElement("div", null, "song " + song.id, playlist.groupElem);
     songEntry.song = song;
     songEntry.innerHTML = 
        `<div class="song__left"></div>
@@ -230,13 +230,13 @@ export function createSongEntry(song, playlist) {
     return [songEntry, song__title, song__artist];
 }
 
+
 /** @param {Playlist} playlist  */
 export function deleteSongEntry(song, playlist) {
     if (!playlist.groupElem) return;
     
-    const className = song.id.startsWith("yt#") ? song.id.substring(3) : song.id;
-
-    const entry = playlist.groupElem.querySelector("." + className);
+    const entry = playlist.groupElem.querySelector("." + song.id);
+    
     entry.remove();
     song.songEntries.delete(entry);
 }
@@ -438,7 +438,7 @@ export function createSearchResultEntry(searchResult) {
         else {
             if (!data.curr.viewPlaylist) return console.log("select a playlist to add song");
             
-            yt.downloadSong(searchResult.videoId, (songData) => {
+            yt.downloadSong(searchResult.videoId, (err, songData) => {
                 if (songData) initNewSong(songData);  // video downloaded successfully
             }, searchResult.title);
         }
