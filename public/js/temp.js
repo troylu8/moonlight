@@ -2,7 +2,7 @@ import * as userdata from "./account/userdata.js";
 import * as play from "./play.js";
 import * as acc from "./account/account.js";
 import { setTitleScreen } from "./view/signinElems.js";
-import { writeSavedJWT } from "./account/files.js";
+import { missingFiles, writeSavedJWT } from "./account/files.js";
 
 
 const songs = ["LaEgpNBt-bQ","shyRW65dvn0","eSW2LVbPThw","rB7XFQgJHBI","p0s0_4KO9t4","lzHtVBFE9jU"]
@@ -25,12 +25,6 @@ document.body.addEventListener("keydown", async (e) => {
         case "A":
             userdata.data.curr.listenPlaylist.cycle.print();
             break;
-        case "C":
-            console.log(userdata.data.curr.song);
-            break;
-        case "L":
-            console.log(userdata.data.curr.listenPlaylist.cycle.last);
-            break;
         case "Q":
             console.log(userdata.data);
             break;
@@ -50,8 +44,15 @@ document.body.addEventListener("keydown", async (e) => {
             console.log(userdata.data.settings);
             break;
         case "Z":
-            acc.getSyncChanges();
+            const serverJSON = await getData(jwt);
+            getDoomed(serverJSON, "songs");
+            getDoomed(serverJSON, "playlists");
             break;
+
+        case "M":
+            console.log(missingFiles);
+            break;
+        
     }
     
 })

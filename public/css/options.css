@@ -60,9 +60,16 @@
     margin-top: 10px;
 }
 
-#song-upload, #paste-link__btn {
-    padding: 4px 5px;
+#song-upload {
     background-color: var(--accent-color);
+    padding: 4px 5px;
+}
+
+#paste-link__btn {
+    background-color: var(--accent-color);
+    width: 25px;
+    height: 25px;
+    border-radius: 5px;
 }
 
 #new__tracker-list {
@@ -152,6 +159,7 @@
 #search-yt__input {
     box-sizing: border-box;
     width: 100%;
+    z-index: 1;
 }
 
 #search-results {
@@ -166,8 +174,9 @@
 
     background-color: var(--background-color);
     padding: 5px;
-
     border-radius: 0 0 5px 5px;
+
+    outline: solid 3px var(--accent-color);
 }
 
 .search-result {

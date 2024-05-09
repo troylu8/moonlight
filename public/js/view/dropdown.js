@@ -19,16 +19,15 @@ export default class Dropdown {
             if (this.visible)   this.close();
             else                this.open();
         });
-        dropdown.addEventListener("click", (e) => e.stopPropagation());
         
-
         document.body.addEventListener("mousedown", (e) => {
             if (this.visible && !parent.contains(e.target)) {
                 this.close();
             }
         });
-
+        
         dropdown.addEventListener("mouseover", (e) => e.stopPropagation());
+        dropdown.addEventListener("click", (e) => e.stopPropagation());
     }
 
     open() {

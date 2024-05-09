@@ -8,6 +8,7 @@ const fs = require('fs');
 const { promisify } = require('util');
 const { randomBytes, createCipheriv, createDecipheriv } = require("crypto");
 const { parseFile } = require('music-metadata');
+const chokidar = require('chokidar');
 
 global.resources = __dirname + "/resources";
 
@@ -266,8 +267,8 @@ export const missingFiles = new Map();
 export const reserved = new Set();
 
 
-/** @type {fs.FSWatcher} */
 let watcher;
+
 
 export async function watchFiles(dir) {
     if (watcher) watcher.close();
@@ -291,51 +292,50 @@ export async function watchFiles(dir) {
         if (!allFiles.has(filename)) createStragglerEntry(filename);
     });
 
-    watcher = fs.watch(dir, async (eventType, filename) => {
+    const songsDir = global.userDir + "/songs";
+    watcher = chokidar.watch(songsDir, {cwd: songsDir});
     
-        if (eventType === "rename") {
-
-            // FILE REMOVED
-            if (allFiles.has(filename)) {
-                console.log(filename, " REMOVED!");
-
-                const obj = allFiles.get(filename);
-
-                // if removed file was a straggler
-                if (obj instanceof HTMLElement) deleteStragglerEntry(filename);
-                
-                // otherwise set song to error state
-                else {
-                    missingFiles.set(filename, obj);
-                    obj.setState("error");
-                } 
-
-                allFiles.delete(filename);
-            }
-
-            // FILE ADDED
+    watcher.on("ready", () => {
+        watcher.on("add", (filename) => {
+            console.log(filename, " ADDED!");
+    
+            console.log("reserved", reserved);
+        
+            if (missingFiles.has(filename)) {
+                missingFiles.get(filename).setState("playable");
+                missingFiles.delete(filename);
+            } 
             else {
-                console.log(filename, " ADDED!");
-
-                console.log("reserved", reserved);
+                if (reserved.has(filename)) reserved.delete(filename);
+                else createStragglerEntry(filename);
+            } 
+        });
+    
+        watcher.on("unlink", (filename) => {
+            console.log(filename, " REMOVED!");
+    
+            const obj = allFiles.get(filename);
+    
+            // if removed file was a straggler
+            if (obj instanceof HTMLElement) deleteStragglerEntry(filename);
             
-                if (missingFiles.has(filename)) {
-                    missingFiles.get(filename).setState("playable");
-                    missingFiles.delete(filename);
-                } 
-                else if (!reserved.has(filename)) createStragglerEntry(filename);
-            }
-        }
-
-        else /* if (eventType === "change") */ {
+            // otherwise set song to error state
+            else {
+                missingFiles.set(filename, obj);
+                obj.setState("error");
+            } 
+    
+            allFiles.delete(filename);
+        });
+    
+        watcher.on("change", (filename, stats) => {
             console.log(filename, "CHANGED!");
-            
+                
             // update size display
             const obj = allFiles.get(filename);
             if (obj instanceof HTMLElement) {
-                obj.querySelector(".straggler__size").textContent = 
-                    getSizeDisplay(await getFileSize(global.userDir + "/songs/" + filename));
+                obj.querySelector(".straggler__size").textContent = getSizeDisplay(stats.size);
             }
-        }
+        })
     });
 }

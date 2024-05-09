@@ -170,7 +170,7 @@ export function setToolTip(parent, innerHTML, gap) {
 
     new MutationObserver(() => reposition()).observe(tooltip, {childList: true, subtree: true});
 
-    parent.addEventListener("mouseenter", () => {
+    parent.addEventListener("mouseover", () => {
         reposition();
         tooltip.style.visibility = "visible";
         tooltip.style.opacity = 1;

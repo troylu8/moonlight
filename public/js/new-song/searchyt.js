@@ -8,26 +8,40 @@ export async function searchYT(query) {
 
     const all = res.all.filter(sr => sr.type === "video" || sr.type === "list");
     
-    for (let i = 0; i < 5; i++) {
-        createSearchResultEntry(all[i]);
-    }
+    searchResults.innerHTML = "";
+    for (let i = 0; i < Math.min(5, all.length); i++) createSearchResultEntry(all[i]);
 }
 
 const search = document.getElementById("search-yt__input");
 const searchResults = document.getElementById("search-results");
 
-search.addEventListener("keydown", (e) => {
+searchResults.close = () => {
+    searchResults.style.display = "none";
+    searchResults.innerHTML = "";
+
+    search.style.borderRadius = "5px";
+    search.style.outline = "";
+}
+
+search.addEventListener("keydown", async (e) => {
     if (e.key !== "Enter") return;
 
     searchResults.style.display = "block";
-    searchResults.innerHTML = "";
-    searchYT(search.value);
+    search.style.borderRadius = "5px 5px 0 0";
+    search.style.outline = "solid 3px var(--accent-color)";
+    
+    let c = 0;
+    const loadingAnimation = setInterval(() => {
+        searchResults.innerHTML = "searching" + "...".substring(0, c++ % 4);
+    }, 100);
+
+    await searchYT(search.value);
+    
+    clearInterval(loadingAnimation);
 });
 
 document.body.addEventListener("mousedown", (e) => {
-    if (searchResults.style.display === "block" && !searchResults.contains(e.target)) {
-        searchResults.style.display = "none";
-        searchResults.innerHTML = "";
-    }
+    if (searchResults.style.display === "block" && !searchResults.parentElement.contains(e.target)) 
+        searchResults.close();
 });
 

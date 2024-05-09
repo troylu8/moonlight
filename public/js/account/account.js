@@ -81,7 +81,9 @@ window.addEventListener("load", async () => {
     setTitleScreen(false);
     updateForUsername(username, isGuest());
 
-    getSyncChanges();
+    const serverJSON = await getData(jwt);
+    getDoomed(serverJSON, "songs");
+    getDoomed(serverJSON, "playlists");
 });
 
 
@@ -136,9 +138,9 @@ function parseJWT(jwt) {
 }
 
 const syncBtn = document.getElementById("sync");
-
 syncBtn.addEventListener("click", () => syncData());
 syncBtn.addEventListener("mouseenter", () => showError(syncBtn.tooltip.lastElementChild, ""));
+
 
 /** sent to server */
 class SyncChanges {
@@ -175,10 +177,21 @@ class SyncChanges {
     }
 }
 
-/** @type {SyncChanges} */
-let changes;
+function getDoomed(serverJSON, category) {
+    const res = [];
+    for (const item of data[category].values()) {
 
-export async function getSyncChanges() {
+        // song/playlist isnt in server && syncstatus === "synced" 
+        if (!serverJSON[category][item.id] && item.syncstatus === "synced") {
+            item.setSyncStatus("doomed");
+            res.push(item);
+        }
+    }
+    return res;
+}
+
+export async function syncData() {
+    
     if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not signed in!");
 
     const serverJSON = await getData(jwt);
@@ -186,10 +199,12 @@ export async function getSyncChanges() {
     console.log("server", Object.values(serverJSON.songs).map(s => s.filename ));
     console.log("client", Array.from(data.songs).map(s => { return {syncStatus: s[1].syncStatus, filename: s[1].filename} } ));
 
-    changes = new SyncChanges();
+    const changes = new SyncChanges();
     
     /** @param {"songs" | "playlists"} category */
     const addCategoryToChanges = (category) => {
+
+        changes.doomed = getDoomed(serverJSON, category);
         
         for (const item of data[category].values()) {
             // if this song is missing a file and new, ignore it.
@@ -197,7 +212,6 @@ export async function getSyncChanges() {
             
             else if (item.syncStatus === "new" || item.syncStatus === "edited") changes["unsynced-" + category].push(item);
 
-            // syncstatus === "synced" && song/playlist isnt in server
             else if (!serverJSON[category][item.id]) {
                 item.setSyncStatus("doomed");
                 changes.doomed.push(item);
@@ -232,15 +246,10 @@ export async function getSyncChanges() {
     addCategoryToChanges("songs");
     addCategoryToChanges("playlists");
     
-    console.log(changes);
-    return changes;
-} 
+    for (const { filename } of changes.newItems.songs)      reserved.add(filename);
+    for (const { filename } of changes.newItems.playlists)  reserved.add(filename);
 
-export async function syncData() {
-    changes = changes ?? await getSyncChanges();
     try {
-        for (const { filename } of changes.newItems.songs)      reserved.add(filename);
-        for (const { filename } of changes.newItems.playlists)  reserved.add(filename);
         
         await syncToServer(uid, changes);
         

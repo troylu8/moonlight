@@ -429,10 +429,12 @@ export function createSearchResultEntry(searchResult) {
     const downloadBtn = createElement("div", null, "search-result__download", resultElem);
     downloadBtn.innerHTML = `<div class="svg-cont">${icons.download}</div>`;
     downloadBtn.addEventListener("click", async () => {
+        searchResults.close();
+
         if (searchResult.type === "list") {
 
             const infoReq = await fetch(`https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/playlist?list=${searchResult.listId}`);
-
+            
             yt.downloadPlaylist(searchResult.listId, () => {}, (await infoReq.json()).title);
         }
         else {

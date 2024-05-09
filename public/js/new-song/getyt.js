@@ -54,7 +54,7 @@ async function getPlaylistSongs(ytpid) {
 
 export async function downloadPlaylist(ytpid, cb, title) {
     const songs = await getPlaylistSongs(ytpid);
-    const playlist = new Playlist(genID(14), {title: title});
+    const playlist = new Playlist(genID(14), {title: title, desc: "downloaded from https://www.youtube.com/playlist?list=" + ytpid});
 
     let complete = 0;
 
@@ -65,7 +65,7 @@ export async function downloadPlaylist(ytpid, cb, title) {
             if (err) return console.log(err.message);
 
             initNewSong(songData, playlist, false);
-            if (++complete === songs.length) cb();
+            if (++complete === songs.length) cb(playlist);
         }, s[1]);
         
     }
