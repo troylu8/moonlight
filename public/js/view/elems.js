@@ -7,6 +7,7 @@ import { syncData } from "../account/account.js";
 import { allFiles, deleteSongFile, getFileSize, uploadSongFile } from "../account/files.js";
 import * as yt from "../new-song/getyt.js";
 import { initNewSong } from "../new-song/newSong.js";
+import { drag } from "./drag.js";
 const { ipcRenderer } = require("electron");
 
 const icons = {
@@ -129,6 +130,7 @@ export function createSongEntry(song, playlist) {
         <div class="song__right">
             <span class="song__duration"> ${getTimeDisplay(song.duration)} </span>
         </div>`
+    drag(songEntry, song, playlist);
 
     const song__title = createElement("span", null, "song__title song__title:" + song.id, songEntry.firstChild, song.title);
 

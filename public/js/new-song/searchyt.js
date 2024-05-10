@@ -9,7 +9,8 @@ export async function searchYT(query) {
     const all = res.all.filter(sr => sr.type === "video" || sr.type === "list");
     
     searchResults.innerHTML = "";
-    for (let i = 0; i < Math.min(5, all.length); i++) createSearchResultEntry(all[i]);
+    if (all.length === 0) searchResults.innerHTML = "no results found."
+    else for (const result of all) createSearchResultEntry(result);
 }
 
 const search = document.getElementById("search-yt__input");

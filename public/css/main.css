@@ -30,6 +30,8 @@
     align-items: center;
     margin-right: 15px;
 
+    cursor: grab;
+    user-select: none;
     /* position: relative; */
 }
 
@@ -51,6 +53,7 @@
 
 .playable .song__state, .song__options {
     visibility: hidden;
+    cursor: pointer;
 }
 .playable:hover .song__state, .song:hover .song__options {
     visibility: visible;
@@ -115,4 +118,8 @@
 .resolve {
     display: flex;
     flex-direction: column;
+}
+
+.drag-buffer {
+    background-color: var(--accent-color);
 }

@@ -248,22 +248,22 @@ function setSliderColors(slider, left, right) {
     slider.updateSliderColors();
 }
 
-export function addDragEvent(slider, ondrag, onmousedown, onmouseup) {
-    if (slider.dragging === undefined) {
-        slider.dragging = false;
-        slider.addEventListener("mousedown", (e) => { 
+export function addDragEvent(elem, ondrag, onmousedown, onmouseup) {
+    if (elem.dragging === undefined) {
+        elem.dragging = false;
+        elem.addEventListener("mousedown", (e) => { 
             window.getSelection().empty();
-            slider.dragging = true; 
+            elem.dragging = true; 
             document.body.style.userSelect = "none";
             if (onmousedown) onmousedown(e);
         });
         document.body.addEventListener("mouseup", (e) => { 
-            slider.dragging = false; 
+            elem.dragging = false; 
             document.body.style.userSelect = "auto";
             if (onmouseup) onmouseup(e);
         });
     }
-    document.body.addEventListener("mousemove", (e) => { if (slider.dragging) ondrag(e); });
+    document.body.addEventListener("mousemove", (e) => { if (elem.dragging) ondrag(e); });
 }
 
 function createResizeDragger(dragger, ondrag, onmousedown, onmouseup) {
