@@ -59,7 +59,6 @@ function inThePresent() {
  * @returns {boolean} `true` if successful, `false` if `song.state === "error"`
 */
 export function setSong(song) {
-    
     // set previous song to "playable" state
     if (data.curr.song && data.curr.song.state !== "error") data.curr.song.setState("playable");
 
@@ -171,48 +170,7 @@ addDragEvent(seek, () => {
 seek.addEventListener("mouseup", () => { audio.currentTime = seek.value; });
 
 
-export class SongNode {
-    
-    constructor(cycle, song, prev, next) {
-        /** @type {SongNode} */
-        this.next = next;
-        if (next) next.prev = this;
-
-        /** @type {SongNode} */
-        this.prev = prev;
-        if (prev) prev.next = this;
-
-        /** @type {Song} */
-        this.song = song;
-
-        /** @type {PlaylistCycle} */
-        this.cycle = cycle;
-        cycle.nodes.set(song, this);
-
-        this.index = (prev)? prev.index + 1 : 0;
-    }
-
-    delete() {
-        // if this node is alone
-        if (this.next === this) {
-            this.cycle.last = null;
-            return console.log("deleted sole node");
-        };
-
-        if (this === this.cycle.last) {
-            this.cycle.last = this.prev;
-        }
-
-        this.prev.next = this.next;
-        this.next.prev = this.prev;
-    }
-}
-
 export class PlaylistCycle {
-
-    /** `SongNode` of last song in playlist (unshuffled)
-     * @type {SongNode} `null` when shuffle is ON */
-    last;
 
     /** @type {Array<Song>} */
     shuffleArr = [];
@@ -222,24 +180,17 @@ export class PlaylistCycle {
         /** @type {Playlist} */
         this.playlist = playlist;
 
-        /** @type {Map<Song, SongNode>}*/
-        this.nodes = new Map();
-
         /** @type {Map<Song, number>} song -> index in `shuffleArr`*/
         this.songIndexes = new Map();
 
-        for (const song of playlist.songs) 
-            this.addSong(song)
+        for (const song of playlist.songs) this.addSong(song)
     }
 
     addSong(song, afterCurrent) {
-        this._appendNode(song);
         this._insertSongRandom(song, afterCurrent);
     }
 
     deleteSong(song) {
-        this.nodes.get(song).delete();
-
         const i = this.songIndexes.get(song);
         this.shuffleArr[i] = this.shuffleArr[this.shuffleArr.length-1];
         this.songIndexes.set(this.shuffleArr[i], i);
@@ -247,28 +198,11 @@ export class PlaylistCycle {
         this.shuffleArr.pop();
         this.songIndexes.delete(song);
     }
-
-    /** adds node to end */
-    _appendNode(song) {
-        let newNode;
-
-        // if no nodes, create sole node (points to itself)
-        if (!this.last) {
-            newNode = new SongNode(this, song);
-            newNode.next = newNode;
-            newNode.prev = newNode;
-        }
-        else newNode = new SongNode(this, song, this.last, this.last.next);
-
-        this.last = newNode;
-    }
     
     /** inserts a node randomly into `shuffleOrder`
      * @returns {number} the index which it was inserted
      */
     _insertSongRandom(song, afterCurrent) {
-
-        // console.log("adding ", song.title, "to", this.playlist.title, " after? ", afterCurrent);        
 
         // push new song to end of arr
         this.shuffleArr.push(song);
@@ -304,8 +238,36 @@ export class PlaylistCycle {
     }
 
     updateCurrIndex() {
-        // console.log("updated curr index");
         this.currIndex = this.songIndexes.get(data.curr.song);
+    }
+
+    async setSongPrev(playSong) {
+        if (!data.curr.song) return;
+        if (data.curr.listenPlaylist.songs.size <= 1 && !toBeDeleted.playlist) return;
+        
+        // SHUFFLE OFF: prev in cycle
+        if (!data.settings.shuffle) {
+            let entry = data.curr.song.songEntries.get(this.playlist);
+            
+            do {
+                entry = prevSongEntry(entry);
+            }
+            while ( !setSong(entry.song) );
+        }
+        
+        // SHUFFLE ON: history
+        else {
+            let song;
+            do {
+                if (historyIndex-- === 0) {
+                    setSong(data.curr.song); // if no more history, replay curr song from beginning
+                    return audio.play();
+                } 
+                song = data.songs.get(history[--historyIndex]);
+            } while ( !song || !setSong(song) ); // if song was deleted || song.state === "error"
+        }
+
+        if (playSong) audio.play();
     }
 
     async setSongNext(playSong) {
@@ -321,16 +283,18 @@ export class PlaylistCycle {
                 song = data.songs.get(history[++historyIndex]);
             } while ( !song || !setSong(song) ); // if song was deleted || song.state === "error"
     
-
             if (playSong) audio.play();
             return;
         }
         
         // SHUFFLE OFF
         if (!data.settings.shuffle) {
-            let node = this.nodes.get(data.curr.song).next;
+            let entry = data.curr.song.songEntries.get(this.playlist);
             
-            while ( !setSong(node.song) ) node = node.next;
+            do {
+                entry = nextSongEntry(entry);
+            }
+            while ( !setSong(entry.song) );
         }
         // SHUFFLE ON
         else {
@@ -355,19 +319,28 @@ export class PlaylistCycle {
     }
 
     print() {
-
-        if (this.last == null) return console.log("no song nodes");
-
-        const arr = [];
-        for (let p = this.last.next; p !== this.last; p = p.next) {
-            arr.push(p.song.title);
-        }
-        arr.push(this.last.song.title);
-
-        // console.log("songnodes: ", arr);
         console.log("shuffleArr: ", this.shuffleArr.map(s => (s == null)? "null" : s.title));
         console.log("currIndex: ", this.currIndex);
     }
+
+    asOrderedArray() {
+        const res = [];
+        for (let songEntry = this.playlist.groupElem.firstElementChild; songEntry != null ; songEntry = songEntry.nextElementSibling) {
+            if (songEntry.song) res.push(songEntry.song.id);
+        }
+        return res;
+    }
+}
+
+export function nextSongEntry(entry) {
+    entry = entry.nextElementSibling ?? entry.parentElement.firstElementChild;
+    while (!entry.song) entry = entry.nextElementSibling ?? entry.parentElement.firstElementChild;
+    return entry;
+}
+function prevSongEntry(entry) {
+    entry = entry.previousElementSibling ?? entry.parentElement.lastElementChild;
+    while (!entry.song) entry = entry.previousElementSibling ?? entry.parentElement.lastElementChild;
+    return entry;
 }
 
 
@@ -406,32 +379,12 @@ function kickAway(arr, start, banned) {
     return arr;
 }
 const nextBtn = document.getElementById("next");
-nextBtn.addEventListener("click", async () => 
+nextBtn.addEventListener("click", () => 
     data.curr.listenPlaylist.cycle.setSongNext(true)
 );
-
-document.getElementById("prev").addEventListener("click", async () => {
-    if (!data.curr.song) return;
-    if (data.curr.listenPlaylist.songs.size <= 1 && !toBeDeleted.playlist) return;
-    
-    // SHUFFLE OFF: next in cycle
-    if (!data.settings.shuffle) {
-        let node = data.curr.listenPlaylist.cycle.nodes.get(data.curr.song).prev;
-        while ( !togglePlay(node.song) ) node = node.prev;
-    }
-    
-    // SHUFFLE ON: history
-    else {
-        let song;
-        do {
-            if (historyIndex-- === 0) {
-                setSong(data.curr.song); // if no more history, replay curr song from beginning
-                return audio.play();
-            } 
-            song = data.songs.get(history[--historyIndex]);
-        } while ( !song || !setSong(song) ); // if song was deleted || song.state === "error"
-    }
-})
+document.getElementById("prev").addEventListener("click", async () => 
+    data.curr.listenPlaylist.cycle.setSongPrev(true)
+);
 
 const shuffleSvg = document.getElementById("shuffle-svg");
 

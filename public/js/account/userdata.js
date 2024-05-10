@@ -21,8 +21,8 @@ export class Song {
         /** @type {"new" | "edited" | "synced" | "doomed"} */
         this.syncStatus = options.syncStatus ?? "new";
 
-        /** @type {Set<HTMLElement>} */
-        this.songEntries = new Set();
+        /** @type {Map<Playlist, HTMLElement>} */
+        this.songEntries = new Map();
 
         /** @type {"playable" | "active" | "error"} */
         this.state = "playable";
@@ -266,12 +266,20 @@ class Data {
             "cycle"        
         );
 
+
         return JSON.stringify(obj, 
-            (key, value) => {
+            function(key, value) {
                 if (value instanceof Function) return undefined;
 
                 if (ignore.includes(key)) return undefined;
                 
+                if (key === "playlists") {
+                    const res = {};
+                    for (const playlist of this.playlists.values()) {
+                        res[playlist.id] = playlist.cycle.asOrderedArray();
+                    }
+                    return res;
+                }
                 if (value instanceof Set) {
                     if (key === "songs") return Array.from(value).map(v => v.id);
                     else return undefined;

@@ -1,23 +1,10 @@
-import { Playlist, Song } from "../account/userdata.js";
+import { nextSongEntry } from "../play.js";
 import { addDragEvent } from "./fx.js";
-
-
-/** the dragging entry will be dropped before this entry */
-let destination;
-
-const a = document.createElement("div");
-a.style.position = "fixed";
-a.style.width = a.style.height = "5px";
-a.style.left = "500px";
-a.style.backgroundColor = "red";
-a.style.zIndex = "100";
 
 /**
  * @param {HTMLElement} entry 
- * @param {Song} song 
- * @param {Playlist} playlist 
  */
-export function drag(entry, song, playlist) {
+export function drag(entry) {
 
     function mouseInTopHalf(entry, y) {
         const rect = entry.getBoundingClientRect();
@@ -26,7 +13,9 @@ export function drag(entry, song, playlist) {
 
     let pos;
 
-    
+    /** the dragging entry will be dropped before this entry */
+    let destination;
+    let dragBuffer;
 
     addDragEvent(entry, 
         (e) => {
@@ -34,11 +23,9 @@ export function drag(entry, song, playlist) {
 
             const hoveringEntry = document.elementFromPoint(pos[0], e.clientY).closest(".song");
             if (hoveringEntry) {
-                console.log(mouseInTopHalf(hoveringEntry, e.clientY), hoveringEntry.song.title);
+                destination = mouseInTopHalf(hoveringEntry, e.clientY)? hoveringEntry : nextSongEntry(hoveringEntry);
+                entry.parentElement.insertBefore(dragBuffer, destination);
             }
-
-            // document.body.appendChild(a);
-            // a.style.top = e.clientY+ "px";
         },
 
         (e) => {
@@ -48,25 +35,24 @@ export function drag(entry, song, playlist) {
             entry.style.top = rect.y + "px";
             entry.style.left = rect.x + "px";
             entry.style.position = "fixed";
+            entry.style.pointerEvents = "none";
             pos = [rect.x, rect.y];
 
-            const buffer = document.createElement("div");
-            buffer.className = "drag-buffer";
-            buffer.style.minHeight = rect.height + "px";
+            dragBuffer = document.createElement("div");
+            dragBuffer.className = "drag__buffer";
+            dragBuffer.style.minHeight = rect.height + "px";
+            entry.parentElement.insertBefore(dragBuffer, entry);
 
-            entry.parentElement.insertBefore(buffer, entry);
-
-            entry.parentElement.addEventListener("wheel", () => {
-                console.log("wheel event");
-            });
-            entry.style.pointerEvents = "none";
-
-            destination = buffer;
+            destination = entry;
         },
 
         (e) => {
-            entry.style.pointerEvents = "auto";
-            destination = null;
+            console.log("mouseup called on ", entry.song.title);
+            ["width", "height", "top", "left", "position", "pointer-events"]
+                .forEach(p => entry.style.removeProperty(p));
+            
+            dragBuffer.replaceWith(entry);
+            dragBuffer = destination = null;
         }
     )
 }

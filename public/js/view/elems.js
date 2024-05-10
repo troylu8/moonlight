@@ -228,7 +228,7 @@ export function createSongEntry(song, playlist) {
     setEntryState(songEntry, song.state);
     setEntrySyncStatus(songEntry, song.syncStatus);
 
-    song.songEntries.add(songEntry);
+    song.songEntries.set(playlist, songEntry);
     return [songEntry, song__title, song__artist];
 }
 

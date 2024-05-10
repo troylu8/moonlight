@@ -104,7 +104,7 @@ initDeleteBtn(deleteBtn, deleteErr, () => {
 export function updateSongEntries() {
     if (allEntriesUpdated || !currentlyEditing) return;
 
-    for (const songElem of currentlyEditing.songEntries) {
+    for (const songElem of currentlyEditing.songEntries.values()) {
         setTitleArtistText(songElem, currentlyEditing.title, currentlyEditing.artist);
     }
 

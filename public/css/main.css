@@ -120,6 +120,7 @@
     flex-direction: column;
 }
 
-.drag-buffer {
+.drag__buffer {
     background-color: var(--accent-color);
+    /* height is programmatically set to equal songEntry height */
 }

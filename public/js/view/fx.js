@@ -258,6 +258,8 @@ export function addDragEvent(elem, ondrag, onmousedown, onmouseup) {
             if (onmousedown) onmousedown(e);
         });
         document.body.addEventListener("mouseup", (e) => { 
+            if (!elem.dragging) return;
+
             elem.dragging = false; 
             document.body.style.userSelect = "auto";
             if (onmouseup) onmouseup(e);
