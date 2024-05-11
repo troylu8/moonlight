@@ -1,5 +1,5 @@
+import { jwt, uid } from "./account.js";
 import { deviceID } from "./files.js";
-import { data } from "./userdata.js";
 
 const Zip = require("adm-zip");
 const axios = require('axios');
@@ -32,11 +32,7 @@ function extractAllToAsync(zip, targetPath, cb) {
 const extractAllToPromise = promisify(extractAllToAsync);
 
 
-
-
-
-
-export async function syncToServer(uid, changes) {
+export async function syncToServer(changes) {
     const resourcesDir = join(global.resources, "users", uid);
 
     console.log("client", changes);
@@ -69,12 +65,11 @@ export async function syncToServer(uid, changes) {
         if (song.syncStatus === "new") 
             zip.addLocalFile( join(resourcesDir, "songs", song.filename), "songs/" );
     }
-    //TODO: add playlist files here!!!!!  ! 
 
-
+    //TODO: remove this dependency
     const newItems = await axios({
         method: 'POST',
-        url: `https://localhost:5001/sync/${uid}/${deviceID}`, 
+        url: `https://localhost:5001/sync/${jwt}/${deviceID}`, 
         data: zip.toBuffer(), 
         maxContentLength: Infinity,
         maxBodyLength: Infinity,

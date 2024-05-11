@@ -2,7 +2,7 @@ import * as songSettings from "../settings/songSettings.js";
 import { togglePlay } from "../play.js";
 import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
-import { removeTooltip, setToolTip } from "./fx.js";
+import { removeTooltip, sendNotification, setToolTip, showError } from "./fx.js";
 import { syncData } from "../account/account.js";
 import { allFiles, deleteSongFile, getFileSize, uploadSongFile } from "../account/files.js";
 import * as yt from "../new-song/getyt.js";
@@ -199,10 +199,8 @@ export function createSongEntry(song, playlist, before) {
                 song.filename = basename;
                 song.setState("playable");
             } catch (err) {
-                if (err.message === "file in use") {
-                    //TODO: error notification
-                    console.log("file in use");
-                }
+                if (err.message === "file in use") 
+                    sendNotification("file used by another song!", "var(--error-color)");
             }
 
         });

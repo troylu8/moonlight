@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
 const db = require('better-sqlite3')(__dirname + "/../users.db");
 
-const createJWT = promisify(jwt.sign);
 
 const router = express.Router();
 
@@ -14,6 +13,11 @@ db.prepare("CREATE TABLE IF NOT EXISTS users (uid TEXT, username TEXT, hash TEXT
 
 const secretKey = fs.readFileSync(__dirname + "/../auth/secret.key", "utf8");
 console.log("secretkey:", secretKey);
+
+const createJWT = promisify(jwt.sign);
+const verifyJWT = promisify(
+    (someJWT, cb) => jwt.verify(someJWT, secretKey, cb)
+);
 
 
 function exists(searchColumn, value) {
@@ -74,45 +78,45 @@ router.put("/change-password/:uid", express.json(), async (req, res) => {
     else res.status(401).end();
 });
 
-router.post("/set-hash/:jwt", express.text(), (req, res) => {
+router.post("/set-hash/:jwt", express.text(), async (req, res) => {
 
-    jwt.verify(req.params["jwt"], secretKey, async (err, decoded) => {
-        if (err) return res.status(401).end();
+    let decoded;
+    try { decoded = await verifyJWT(req.params["jwt"]); }
+    catch (err) { return res.status(401).end(); }
 
-        db.prepare("UPDATE users SET hash=? WHERE uid=?").run(
-            await bcrypt.hash(req.body, 11), 
-            decoded.uid
-        );
-        
-        res.status(200).end("edited hash");
-    });    
+    db.prepare("UPDATE users SET hash=? WHERE uid=?").run(
+        await bcrypt.hash(req.body, 11), 
+        decoded.uid
+    );
+    
+    res.status(200).end("edited hash");
     
 });
 
-router.get("/get-data/:jwt", express.text(), (req, res) => {
+router.get("/get-data/:jwt", express.text(), async (req, res) => {
 
-    jwt.verify(req.params["jwt"], secretKey, (err, decoded) => {
-        if (err) return res.status(401).end();
+    let decoded;
+    try { decoded = await verifyJWT(req.params["jwt"]); }
+    catch (err) { return res.status(401).end(); }
 
-        const row = db.prepare("SELECT userdata FROM users WHERE uid=?").get(decoded.uid);
-        if (!row) return res.status(404).end();
+    const row = db.prepare("SELECT userdata FROM users WHERE uid=?").get(decoded.uid);
+    if (!row) return res.status(404).end();
 
-        res.status(200).json(JSON.parse(row.userdata));
-    })
-
+    res.status(200).json(JSON.parse(row.userdata));
+    
 });
 
-router.put("/upload-data/:jwt", express.json(), (req, res) => {
+router.put("/upload-data/:jwt", express.json(), async (req, res) => {
 
-    jwt.verify(req.params["jwt"], secretKey, (err, decoded) => {
-        if (err) return res.status(401).end();
+    let decoded;
+    try { decoded = await verifyJWT(req.params["jwt"]); }
+    catch (err) { return res.status(401).end(); }
 
-        db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(req.body.userdata, decoded.uid);
-        res.status(200).end();
-    })
+    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(req.body.userdata, decoded.uid);
+    res.status(200).end();
     
 });
 
 
 
-module.exports = { router, db };
+module.exports = { router, db, verifyJWT };

@@ -1,7 +1,7 @@
 import { setSidebarContent } from "../view/sidebar.js";
 import { accDropdown } from "../view/signinElems.js";
 import {data} from "../account/userdata.js";
-import { initDeleteBtn, showError } from "../view/fx.js";
+import { initDeleteBtn, sendNotification, showError } from "../view/fx.js";
 import { stragglersList } from "../view/elems.js";
 import * as acc from "../account/account.js";
 const fs = require("fs");
@@ -94,13 +94,15 @@ initAccEditor(
             headers: {
                 "Content-Type": "application/json"
             },
-        });
+        }).catch(acc.fetchErrHandler);
+        if (!res) return;
+
         if (res.status === 409) return showError(changeU__error, "username taken");
         if (res.status === 401) return showError(changeU__error, "wrong password");
 
         acc.setAccInfo(null, null, username);
 
-        //TODO: notif
+        sendNotification("set username as " + username)
         return true;
     }
 );
@@ -131,10 +133,12 @@ initAccEditor(
             headers: {
                 "Content-Type": "application/json"
             },
-        });
+        }).catch(acc.fetchErrHandler);
+        if (!res) return;
+        
         if (res.status === 401) return showError(changeP__error, "wrong password");
 
-        //TODO: notif
+        sendNotification("password change success");
         return true;
     }
 );

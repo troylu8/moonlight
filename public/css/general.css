@@ -231,6 +231,8 @@ input[type="file"] {
     display: flex;
     flex-direction: column-reverse;
     gap: 10px;
+
+    pointer-events: none;
 }
 
 .notification {
@@ -245,4 +247,6 @@ input[type="file"] {
     padding: 4px 5px;
     font-size: smaller;
 
+    pointer-events: all;
+    cursor: pointer;
 }

@@ -117,7 +117,6 @@ export class Song {
     }
 
     delete() {
-        //TODO: test this
         
         if (this === data.curr.song) {
             if (data.curr.listenPlaylist.songs.size === 1) play.setSong(null);
@@ -181,7 +180,6 @@ export class Playlist {
 
     delete() {
         
-        //TODO: add playlist files!
         if (this.syncStatus !== "new")
             data.trashqueue.set("playlists." + this.id, "playlists/ dummy value");
 

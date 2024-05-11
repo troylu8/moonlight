@@ -117,25 +117,33 @@ export async function downloadPlaylist(ytpid, cb, title) {
 
     let complete = 0;
 
+    let unavailable = 0;
+
     for (const s of songs.entries()) {
-        
         downloadSong(s[1].ytsid, (err, songData) => {
-            //TODO: notification "1 unavailable song"
-            if (err) return console.log(err.message);
+            if (err) {
+                unavailable++;
+                return complete++;
+            } 
 
             const song = new Song(songData.id, songData);
             const entry = song.addToPlaylist(playlist, true, indexToEntry.getAfter(s[1].index))[0];
             indexToEntry.add(s[1].index, entry);
             allFiles.set(song.filename, song);
 
-            sendNotification("downloaded " + song.title);
-
-            if (++complete === songs.length) {
-                sendNotification("finished downloading playlist: " + playlist.title);
+            if (++complete === songs.size) {
+                sendNotification("finished downloading " + playlist.title);
+                if (unavailable !== 0) {
+                    sendNotification(
+                        unavailable + 
+                        ((unavailable === 1)? " song was " : " songs were") +
+                        "unable to be downloaded",
+                        "var(--error-color)"
+                    );
+                }
                 cb(playlist);
             } 
-        }, s[0]);
-        
+        }, s[0]);   
     }
 }
 

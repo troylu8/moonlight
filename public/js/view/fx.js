@@ -234,7 +234,7 @@ export function showError(errorElem, text) {
         errorElem.style.opacity = "0";
         setTimeout(() => errorElem.style.opacity = "1", 50);        
     }
-    errorElem.innerHTML = text;
+    errorElem.innerHTML = text ?? "";
 }
 
 export let shiftDown = false;
@@ -340,10 +340,11 @@ createResizeDragger(
 
 const notifications = document.getElementById("notifications");
 
-export function sendNotification(msg) {
+export function sendNotification(msg, color) {
 
     const notif = document.createElement("div");
     notif.className = "notification";
+    if (color) notif.style.borderLeftColor = color;
     notif.textContent = msg;
     
     notifications.insertBefore(notif, notifications.firstChild);

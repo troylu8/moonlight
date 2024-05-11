@@ -3,7 +3,9 @@ const fs = require('fs');
 const Zip = require("adm-zip");
 const { join } = require("path");
 const { promisify } = require('util');
-const { db } = require("./reception.js");
+const jwt = require('jsonwebtoken');
+const { db, verifyJWT } = require("./reception.js");
+
 
 fs.mkdir(__dirname + "/../userfiles", {recursive: true}, () => {});
 
@@ -40,11 +42,14 @@ function writeZip(zip, targetfilename, cb) {
 }
 const writeZipPromise = promisify(writeZip);
 
+router.post('/:jwt/:deviceID', express.raw( {type: "*/*", limit: Infinity} ), async (req, res) => {
 
-//TODO: use jwt
-router.post('/:uid/:deviceID', express.raw( {type: "*/*", limit: Infinity} ), async (req, res) => {
+    let decoded;
+    try { decoded = await verifyJWT(req.params["jwt"]); }
+    catch (err) { return res.status(401).end(); }
 
-    const zipPath = join(__dirname, "../userfiles", req.params["uid"] + ".zip");
+    
+    const zipPath = join(__dirname, "../userfiles", decoded.uid + ".zip");
 
     const createdNewFile = await createFile(zipPath);
     console.log(zipPath, createdNewFile);
@@ -65,7 +70,7 @@ router.post('/:uid/:deviceID', express.raw( {type: "*/*", limit: Infinity} ), as
         }
     }
 
-    const row = db.prepare("SELECT userdata FROM users WHERE uid=? ").get(req.params["uid"]);
+    const row = db.prepare("SELECT userdata FROM users WHERE uid=? ").get(decoded.uid);
     if (!row) return res.status(404).end("userdata missing")
     const data = JSON.parse(row.userdata);
     
@@ -93,7 +98,7 @@ router.post('/:uid/:deviceID', express.raw( {type: "*/*", limit: Infinity} ), as
         console.log("deleted", info[0], info[1]);
     }
 
-    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(JSON.stringify(data), req.params["uid"]);
+    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(JSON.stringify(data), decoded.uid);
     console.log("finished editing data");
     
     await writeZipPromise(userfiles, zipPath);
@@ -110,6 +115,7 @@ router.post('/:uid/:deviceID', express.raw( {type: "*/*", limit: Infinity} ), as
     }
     
     res.send(toClient.toBuffer());
+    
 });
 
 module.exports = router;

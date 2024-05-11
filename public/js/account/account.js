@@ -107,7 +107,9 @@ export async function createAccData(USERNAME, PASSWORD) {
         headers: {
             "Content-Type": "application/json"
         },
-    });
+    }).catch(fetchErrHandler);
+    if (!jwtReq) return;
+
     if (jwtReq.status === 409) return "username taken";
 
     // i was going to clear guest id here, but might as well save a new one
@@ -132,7 +134,8 @@ export async function fetchAccData(USERNAME, PASSWORD) {
         headers: {
             "Content-Type": "application/json"
         }
-    })
+    }).catch(fetchErrHandler);
+    if (!res) return;
 
     if (res.status === 404) return "username not found";
     if (res.status === 401) return "wrong password"
@@ -242,7 +245,6 @@ export async function syncData() {
                     itemData.id = id;
                     changes.newItems[category].push(itemData);
 
-                    //TODO: push playlist filepaths here!!!!
                     if (category === "songs")
                         changes.requestedFiles.push("songs/" + itemData.filename);
                 }
@@ -265,7 +267,7 @@ export async function syncData() {
 
     try {
         
-        await syncToServer(uid, changes);
+        await syncToServer(changes);
         
         for (const song of changes["unsynced-songs"]) song.setSyncStatus("synced");
         for (const playlists of changes["unsynced-playlists"])  playlists.setSyncStatus("synced");
@@ -292,8 +294,8 @@ export async function syncData() {
 }
 
 export async function getData(jwt) {
-    const res = await fetch(`https://localhost:5001/get-data/${jwt}`); 
-    if (res.ok) return await res.json();
+    const res = await fetch(`https://localhost:5001/get-data/${jwt}`).catch(fetchErrHandler); 
+    if (res && res.ok) return await res.json();
 }
 
 export async function uploadData() {
@@ -306,5 +308,11 @@ export async function uploadData() {
             "pass": password,
             "userdata": data
         }, ["curr", "settings", "trashqueue", "edited"])
-    });
+    })
+    .catch(fetchErrHandler);
+}
+
+
+export function fetchErrHandler(err) {
+    sendNotification(err.message, "var(--error-color)");
 }
