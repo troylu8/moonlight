@@ -20,37 +20,40 @@ function exists(searchColumn, value) {
     return db.prepare("SELECT uid FROM users WHERE ?=?").get(searchColumn, value) != undefined;
 }
 
-router.post("/create-account-dir/:uid/:username", express.text(), async (req, res) => {
-    if (exists("username", req.params["username"])) return res.status(409).end("username taken");
+router.post("/create-account-dir/:uid", express.json(), async (req, res) => {
+    if (exists("username", req.body.username)) return res.status(409).end("username taken");
 
     db.prepare("INSERT INTO users VALUES ( ?,?,?,? )").run(
         req.params["uid"],
-        req.params["username"],
-        await bcrypt.hash(req.body, 11),
+        req.body.username,
+        await bcrypt.hash(req.body.password, 11),
         JSON.stringify({
             "playlists": {},
             "songs": {}
         }),
     );
-    res.status(200).end(await createJWT({uid: req.params["uid"], username: req.params["username"]}, secretKey));
+    res.status(200).end(await createJWT({uid: req.params["uid"], username: req.body.username}, secretKey));
 });
 
-router.post("/sign-in/:username", express.text(), async (req, res) => {
-    const row = db.prepare("SELECT uid, hash FROM users WHERE username=?").get(req.params["username"]);
+router.post("/sign-in", express.json(), async (req, res) => {
+    const row = db.prepare("SELECT uid, hash FROM users WHERE username=?").get(req.body.username);
     if (!row) return res.status(404).end();
 
-    if (await bcrypt.compare(req.body, row.hash))   
-        res.status(200).end(await createJWT({uid: row.uid, username: req.params["username"]}, secretKey));
+    if (await bcrypt.compare(req.body.password, row.hash))   
+        res.status(200).end(await createJWT({uid: row.uid, username: req.body.username}, secretKey));
     else 
         res.status(401).end();
 });
 
-router.put("/change-username/:uid/:newusername", express.text(), async (req, res) => {
+router.put("/change-username/:uid", express.text(), async (req, res) => {
     const row = db.prepare("SELECT hash FROM users WHERE uid=?").get(req.params["uid"]);
     if (!row) return res.status(404).end();
 
     if (await bcrypt.compare(req.body, row.hash)) {
-        db.prepare("UPDATE users SET username=? WHERE uid=?").run(req.params["newusername"], req.params["uid"]);
+        if ( db.prepare("SELECT * FROM users WHERE username=?").get(req.body) )
+            return res.status(409).end();
+
+        db.prepare("UPDATE users SET username=? WHERE uid=?").run(req.body, req.params["uid"]);
         res.status(200).end();
     }
     else res.status(401).end();

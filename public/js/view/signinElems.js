@@ -18,9 +18,7 @@ export function setTitleScreen(active) {
 const signedInAs = document.getElementById("signed-in-as");
 
 
-const isSafeFilename = (str) => ! (/[/\\?%*:|"<>]/g.test(str));
 function inputErrors(username, password, repeatPassword, signingIn) {
-    if (!isSafeFilename(username)) return "username has forbidden characters";
     if (username === "") return "username cannot be empty";
     if (password === "") return "password cannot be empty";
     if (!signingIn && password !== repeatPassword) return "passwords don't match"

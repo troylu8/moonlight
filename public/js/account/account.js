@@ -96,9 +96,15 @@ export async function createAccData(USERNAME, PASSWORD) {
     const uid = fromGuest? guestID : genID(14);
     
     // create account at server
-    const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${uid}/${USERNAME}`, {
+    const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${uid}`, {
         method: "POST",
-        body: PASSWORD
+        body: JSON.stringify({
+            username: USERNAME,
+            password: PASSWORD
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        },
     });
     if (jwtReq.status === 409) return "username taken";
 
@@ -115,9 +121,15 @@ export async function createAccData(USERNAME, PASSWORD) {
 /** @returns {Promise<"username not found" | "unauthorized" | "success">} */
 export async function fetchAccData(USERNAME, PASSWORD) {
 
-    const res = await fetch("https://localhost:5001/sign-in/" + USERNAME, {
+    const res = await fetch("https://localhost:5001/sign-in", {
         method: "POST",
-        body: PASSWORD
+        body: JSON.stringify({
+            username: USERNAME,
+            password: PASSWORD
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        }
     })
 
     if (res.status === 404) return "username not found";
