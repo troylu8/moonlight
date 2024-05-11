@@ -5,6 +5,7 @@ import { updateSongEntries } from "../settings/songSettings.js";
 import * as acc from "./account.js";
 import { deleteSongFile, missingFiles, readUserdata, writeUserdata } from "./files.js";
 import { initSettings } from "../settings/settings.js";
+import * as fx from "../view/fx.js";
 const { ipcRenderer } = require("electron");
 
 export class Song {
@@ -13,7 +14,10 @@ export class Song {
         this.id = id;
         this.title = options.title;
         this.artist = options.artist;
+        
         this.filename = options.filename;
+        elems.deleteStragglerEntry(this.filename);
+
         this.size = options.size;
         this.duration = options.duration;
 
@@ -37,6 +41,8 @@ export class Song {
     setSyncStatus(syncStatus) {
         if (syncStatus === "edited" && this.syncStatus === "new") return;
         this.syncStatus = syncStatus;
+
+        if (syncStatus === "edited" || syncStatus === "new") fx.setSynced(false);
 
         for (const songEntry of this.songEntries.values())
             elems.setEntrySyncStatus(songEntry, syncStatus);
@@ -169,6 +175,8 @@ export class Playlist {
         if (syncStatus === "edited" && this.syncStatus === "new") return;
         this.syncStatus = syncStatus;
 
+        if (syncStatus === "edited" || syncStatus === "new") fx.setSynced(false);
+
         elems.setEntrySyncStatus(this.playlistEntry, syncStatus);
     }
 
@@ -253,10 +261,7 @@ class UserData {
 
         data.curr.listenPlaylist = data.curr.viewPlaylist;
         
-        if (!data.curr.listenPlaylist) {
-            console.log("listenplaylist set to none");
-            return play.setSong(null);
-        } 
+        if (!data.curr.listenPlaylist) return play.setSong(null);
         
         if (!data.curr.listenPlaylist.cycle)
             data.curr.listenPlaylist.cycle = new PlaylistCycle(data.curr.listenPlaylist);
@@ -314,7 +319,6 @@ export async function loadLocaldata(uid) {
     data = new UserData();
     
     const json = await readUserdata(uid);
-    console.log("json", json);
     
     data.trashqueue = new Map(json.trashqueue);
 

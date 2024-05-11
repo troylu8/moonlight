@@ -117,7 +117,7 @@ function getSongEntry(groupElem, song) {
  * @param {HTMLElement} before add songEntry before this element
  */
 export function createSongEntry(song, playlist, before) {
-    if (!playlist.groupElem) return console.log("no group element!!");
+    if (!playlist.groupElem) return;
 
     // if songEntry already exists
     const e = getSongEntry(playlist.groupElem, song.id);

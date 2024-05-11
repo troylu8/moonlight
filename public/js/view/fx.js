@@ -15,7 +15,7 @@ export function toggleSpin() {
 export function setSpin(spin) {
     if (spin === spinning) return;
 
-    setRPM(spin? rpm : 0);
+    setRPM(circle, spin? rpm : 0);
     
     if (spin) {
         pause.style.display = "block";
@@ -28,16 +28,36 @@ export function setSpin(spin) {
     spinning = spin;
 }
 
-function setRPM(rpm) {
+export function setRPM(elem, rpm) {
     if (rpm === 0) {
-        circle.style.animationPlayState = "paused";
+        elem.style.animationPlayState = "paused";
     }
     else {
-        circle.style.animationPlayState = "running";
-        circle.style.animationDuration = (60 / rpm) + 's';
+        elem.style.animationPlayState = "running";
+        elem.style.animationDuration = (60 / rpm) + 's';
     }
 }
 
+const sync__circle = document.getElementById("sync__circle");
+const sync__done = document.getElementById("sync__done");
+export function startSyncSpin() {
+    setSynced(false);
+    setRPM(sync__circle, 40);
+}
+export function stopSyncSpin() {
+    setSynced(true);
+    setRPM(sync__circle, 0);
+}
+
+let synced = false;
+
+export function setSynced(val) {
+    if (synced === val) return;
+    synced = val;
+
+    sync__circle.style.display = synced? "none" : "block";
+    sync__done.style.display = synced? "block" : "none";
+}
 
 const volumeSlider = document.getElementById("volume-slider");
 
@@ -315,4 +335,22 @@ createResizeDragger(
     document.getElementById("playlists__dragger"), 
     (e) => document.body.style.setProperty("--playlists-div-width", clamp(e.clientX, 100, maxPlaylistsWidth) + "px"),
     () => maxPlaylistsWidth = calculateMaxWidth("--sidebar-div-width")
+);
+
+
+function clickToExpand(button, content) {
+    button.addEventListener("click", () => {
+        if (content.style.display === "flex") 
+            content.style.display = "none";
+        else 
+            content.style.display = "flex";
+    });
+}
+clickToExpand(
+    document.getElementById("change-username__btn"),
+    document.getElementById("change-username__inputs")
+);
+clickToExpand(
+    document.getElementById("change-password__btn"),
+    document.getElementById("change-password__inputs")
 );

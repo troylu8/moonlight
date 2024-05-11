@@ -31,6 +31,11 @@ function extractAllToAsync(zip, targetPath, cb) {
 }
 const extractAllToPromise = promisify(extractAllToAsync);
 
+
+
+
+
+
 export async function syncToServer(uid, changes) {
     const resourcesDir = join(global.resources, "users", uid);
 

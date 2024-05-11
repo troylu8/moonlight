@@ -64,7 +64,6 @@ export function setSong(song) {
 
     // if setting song to none
     if (!song) {
-        console.log("set song to none");
         audio.src = "";
         data.curr.song = null;
 

@@ -33,7 +33,7 @@ router.post("/create-account-dir/:uid/:username", express.text(), async (req, re
         }),
     );
     res.status(200).end(await createJWT({uid: req.params["uid"], username: req.params["username"]}, secretKey));
-})
+});
 
 router.post("/sign-in/:username", express.text(), async (req, res) => {
     const row = db.prepare("SELECT uid, hash FROM users WHERE username=?").get(req.params["username"]);
@@ -43,9 +43,18 @@ router.post("/sign-in/:username", express.text(), async (req, res) => {
         res.status(200).end(await createJWT({uid: row.uid, username: req.params["username"]}, secretKey));
     else 
         res.status(401).end();
-})
+});
 
+router.put("/change-username/:uid/:newusername", express.text(), async (req, res) => {
+    const row = db.prepare("SELECT hash FROM users WHERE uid=?").get(req.params["uid"]);
+    if (!row) return res.status(404).end();
 
+    if (await bcrypt.compare(req.body, row.hash)) {
+        db.prepare("UPDATE users SET username=? WHERE uid=?").run(req.params["newusername"], req.params["uid"]);
+        res.status(200).end();
+    }
+    else res.status(401).end();
+});
 
 router.post("/set-hash/:jwt", express.text(), (req, res) => {
 
@@ -60,7 +69,7 @@ router.post("/set-hash/:jwt", express.text(), (req, res) => {
         res.status(200).end("edited hash");
     });    
     
-})
+});
 
 router.get("/get-data/:jwt", express.text(), (req, res) => {
 
@@ -84,7 +93,8 @@ router.put("/upload-data/:jwt", express.json(), (req, res) => {
         res.status(200).end();
     })
     
-})
+});
+
 
 
 module.exports = { router, db };

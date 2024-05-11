@@ -201,3 +201,23 @@
     min-width: 25px;
     min-height: 25px;
 }
+
+@keyframes spinning {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#sync__circle {
+    animation-iteration-count: infinite;
+    animation-name: spinning;
+    animation-timing-function: linear;
+    animation-play-state: paused;
+}
+
+#sync__done {
+    display: none;
+}

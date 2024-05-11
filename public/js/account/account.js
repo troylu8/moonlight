@@ -2,7 +2,7 @@ import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
 import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles, missingFiles, reserved, deviceID } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
-import { showError } from "../view/fx.js";
+import { setRPM, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
 
 /**
  * @param {number} len 
@@ -140,6 +140,7 @@ function parseJWT(jwt) {
 }
 
 const syncBtn = document.getElementById("sync");
+
 syncBtn.addEventListener("click", () => syncData());
 syncBtn.addEventListener("mouseenter", () => showError(syncBtn.tooltip.lastElementChild, ""));
 
@@ -193,6 +194,8 @@ function getDoomed(serverJSON, category) {
 export async function syncData() {
     
     if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not signed in!");
+
+    startSyncSpin();
 
     const serverJSON = await getData(jwt);
 
@@ -255,11 +258,11 @@ export async function syncData() {
 
         for (const songData of changes.newItems.songs) {
             songData.syncStatus = "synced";
-            new Song(songData.id, songData);
+            new Song(songData.id, songData, false);
         } 
         for (const playlistData of changes.newItems.playlists) {
             playlistData.syncStatus = "synced";
-            new Playlist(playlistData.id, playlistData);
+            new Playlist(playlistData.id, playlistData, false);
         } 
         
         data.trashqueue.clear();
@@ -268,6 +271,8 @@ export async function syncData() {
         for (const [item, itemData] of changes.update) item.update(itemData);
         
     } catch (err) {console.log(err)}
+
+    stopSyncSpin();
 }
 
 export async function getData(jwt) {

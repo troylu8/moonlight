@@ -101,9 +101,24 @@
 
 #user-settings {
     flex-direction: column;
+    gap: 10px;
 }
 #user-settings > h3 {
     white-space: nowrap;
+}
+
+#change-username__btn, #change-password__btn {
+    padding: 4px 5px;
+    align-self: first baseline;
+}
+#change-username__inputs, #change-password__inputs {
+    display: none;
+    flex-direction: column;
+    gap: 10px
+}
+#change-username__submit, #change-password__submit {
+    padding: 4px 5px;
+    align-self: center;
 }
 
 #sidebar__collapse {

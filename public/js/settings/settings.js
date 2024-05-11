@@ -39,3 +39,12 @@ initDeleteBtn(deleteAllBtn, deleteAllErr, () => {
 document.getElementById("open-song-folder").addEventListener("click", () => {
     ipcRenderer.invoke("show-folder", global.userDir + "/songs");
 });
+
+
+
+const changeU__username = document.getElementById("change-username__username");
+const changeU__password = document.getElementById("change-username__password");
+
+document.getElementById("change-username__submit").addEventListener("click", () => {
+    
+})
