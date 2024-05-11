@@ -1,0 +1,94 @@
+{
+    "playlists": {
+        "zKGCediYSUpR0s": {
+            "id": "zKGCediYSUpR0s",
+            "title": "my playlist",
+            "desc": "downloaded from https://www.youtube.com/playlist?list=PLSPVXMrD_iNGtdYWjCqrvXnsF08jity9h",
+            "songs": [
+                "N5mpU0ixIVCl2w",
+                "fiiPkjP4YC6XIM",
+                "dxEcp7macHAHtA",
+                "GY0ji9JjZYccYX",
+                "hRuNGWKEh033lM",
+                "nWx-DdNrCBK5S9",
+                "GfGo4CDTf1ixnq",
+                "b03tk-cXUkyRXJ"
+            ],
+            "lastUpdatedBy": "dTJzPG6z3tLdTP"
+        }
+    },
+    "songs": {
+        "b03tk-cXUkyRXJ": {
+            "id": "b03tk-cXUkyRXJ",
+            "title": "Rhythm Doctor OST - wish i could care less (ft. Yeo)",
+            "artist": "7th Beat Games",
+            "filename": "Rhythm Doctor OST - wish i could care less (ft. Yeo).mp3",
+            "size": 2088748,
+            "duration": 116,
+            "lastUpdatedBy": "dTJzPG6z3tLdTP"
+        },
+        "nWx-DdNrCBK5S9": {
+            "id": "nWx-DdNrCBK5S9",
+            "title": "ポストシェルター",
+            "artist": "Inabakumori - Topic",
+            "filename": "ポストシェルター.mp3",
+            "size": 3342158,
+            "duration": 203,
+            "lastUpdatedBy": "dTJzPG6z3tLdTP"
+        },
+        "fiiPkjP4YC6XIM": {
+            "id": "fiiPkjP4YC6XIM",
+            "title": "Fizzy",
+            "artist": "Tanger",
+            "filename": "Fizzy.mp3",
+            "size": 3753547,
+            "duration": 191,
+            "lastUpdatedBy": "dTJzPG6z3tLdTP"
+        },
+        "GY0ji9JjZYccYX": {
+            "id": "GY0ji9JjZYccYX",
+            "title": "ラグトレイン",
+            "artist": "Inabakumori - Topic",
+            "filename": "ラグトレイン.mp3",
+            "size": 3953350,
+            "duration": 252,
+            "lastUpdatedBy": "dTJzPG6z3tLdTP"
+        },
+        "hRuNGWKEh033lM": {
+            "id": "hRuNGWKEh033lM",
+            "title": "Alan Walker - Fade [COPYRIGHTED NCS Release]",
+            "artist": "Deleted NCS - Circle Spectrum",
+            "filename": "Alan Walker - Fade [COPYRIGHTED NCS Release].mp3",
+            "size": 4522404,
+            "duration": 261,
+            "lastUpdatedBy": "dTJzPG6z3tLdTP"
+        },
+        "GfGo4CDTf1ixnq": {
+            "id": "GfGo4CDTf1ixnq",
+            "title": "きゅうくらりん",
+            "artist": "Iyowa - Topic",
+            "filename": "きゅうくらりん.mp3",
+            "size": 3763853,
+            "duration": 218,
+            "lastUpdatedBy": "dTJzPG6z3tLdTP"
+        },
+        "N5mpU0ixIVCl2w": {
+            "id": "N5mpU0ixIVCl2w",
+            "title": "Rhythm Doctor OST - All The Times (Full Version)",
+            "artist": "7th Beat Games",
+            "filename": "Rhythm Doctor OST - All The Times (Full Version).mp3",
+            "size": 3575440,
+            "duration": 215,
+            "lastUpdatedBy": "dTJzPG6z3tLdTP"
+        },
+        "dxEcp7macHAHtA": {
+            "id": "dxEcp7macHAHtA",
+            "title": "AJR - 3 O'Clock Things (Official Video)",
+            "artist": "AJR",
+            "filename": "AJR - 3 O'Clock Things (Official Video).mp3",
+            "size": 4689938,
+            "duration": 278,
+            "lastUpdatedBy": "dTJzPG6z3tLdTP"
+        }
+    }
+}

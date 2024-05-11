@@ -42,7 +42,7 @@ const writeZipPromise = promisify(writeZip);
 
 
 //TODO: use jwt
-router.post('/:uid/:did', express.raw( {type: "*/*", limit: Infinity} ), async (req, res) => {
+router.post('/:uid/:deviceID', express.raw( {type: "*/*", limit: Infinity} ), async (req, res) => {
 
     const zipPath = join(__dirname, "../userfiles", req.params["uid"] + ".zip");
 
@@ -75,12 +75,12 @@ router.post('/:uid/:did', express.raw( {type: "*/*", limit: Infinity} ), async (
 
     // merge json data
     for (const song of changes["unsynced-songs"]) {
-        song.lastUpdatedBy = req.params["did"];
+        song.lastUpdatedBy = req.params["deviceID"];
         data.songs[song.id] = song;
         console.log("added", song.title, " to data");
     }
     for (const playlist of changes["unsynced-playlists"]) {
-        playlist.lastUpdatedBy = req.params["did"];
+        playlist.lastUpdatedBy = req.params["deviceID"];
         data.playlists[playlist.id] = playlist;
         console.log("added", playlist.title, " to data");
     }

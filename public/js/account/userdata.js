@@ -252,7 +252,7 @@ class UserData {
     updateListenPlaylist() {
 
         data.curr.listenPlaylist = data.curr.viewPlaylist;
-
+        
         if (!data.curr.listenPlaylist) {
             console.log("listenplaylist set to none");
             return play.setSong(null);

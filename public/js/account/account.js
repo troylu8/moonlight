@@ -157,8 +157,6 @@ class SyncChanges {
         this.requestedFiles = Array.from(missingFiles.keys())
                             .filter(fn => missingFiles.get(fn).syncStatus !== "new")
                             .map(fn => "songs/" + fn),
-        console.log("missing files", Array.from(missingFiles.keys()));
-        console.log("requested files", this.requestedFiles);
 
         /** @type {Array<string>} files that the client deleted, so the server should too */
         this.trash = Array.from(data.trashqueue),
@@ -197,9 +195,6 @@ export async function syncData() {
     if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not signed in!");
 
     const serverJSON = await getData(jwt);
-    
-    console.log("server", Object.values(serverJSON.songs).map(s => s.filename ));
-    console.log("client", Array.from(data.songs).map(s => { return {syncStatus: s[1].syncStatus, filename: s[1].filename} } ));
 
     const changes = new SyncChanges();
     
@@ -254,8 +249,6 @@ export async function syncData() {
     try {
         
         await syncToServer(uid, changes);
-        
-        console.log("changes ", changes);
         
         for (const song of changes["unsynced-songs"]) song.setSyncStatus("synced");
         for (const playlists of changes["unsynced-playlists"])  playlists.setSyncStatus("synced");

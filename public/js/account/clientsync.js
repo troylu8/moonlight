@@ -34,39 +34,30 @@ const extractAllToPromise = promisify(extractAllToAsync);
 export async function syncToServer(uid, changes) {
     const resourcesDir = join(global.resources, "users", uid);
 
+    console.log("client", changes);
+
     const zip = new Zip();
     zip.addFile("changes.json", Buffer.from(
-        data.stringify(changes, [
-            "doomed",
-            "newItems",
-            
-            "groupElem",
-            "songEntries",
-            "playlistEntry",
-            "checkboxDiv",
-            "cycle",
-            "syncStatus",
-            "state"
-        ])
-        // JSON.stringify(changes, 
-        //     (key, value) => {
-        //         if ([
-        //             "doomed",
-        //             "newItems",
+        JSON.stringify(changes, 
+            function(key, value) {
+                if ([
+                    "doomed",
+                    "newItems",
                     
-        //             "groupElem",
-        //             "songEntries",
-        //             "playlistEntry",
-        //             "checkboxDiv",
-        //             "cycle",
-        //             "syncStatus",
-        //             "state"
-        //         ].includes(key)) return undefined;
+                    "playlists",
+                    "groupElem",
+                    "songEntries",
+                    "playlistEntry",
+                    "checkboxDiv",
+                    "cycle",
+                    "syncStatus",
+                    "state"
+                ].includes(key)) return undefined;
 
-        //         if (key === "songs" || key === "playlists") return Array.from(value).map(i => i.id);
+                if (key === "songs") return this.getOrderedSIDs();
 
-        //         return value;
-        //     })
+                return value;
+            })
     ));
 
     for (const song of changes["unsynced-songs"]) {
