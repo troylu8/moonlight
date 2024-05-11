@@ -1,14 +1,22 @@
-import { nextSongEntry } from "../play.js";
+import { Playlist } from "../account/userdata.js";
 import { addDragEvent } from "./fx.js";
 
 /**
  * @param {HTMLElement} entry 
+ * @param {Playlist} playlist 
  */
-export function drag(entry) {
+export function dragabbleEntry(entry, playlist) {
+    entry.querySelector(".song__options").addEventListener("mousedown", e => e.stopPropagation());
+    entry.querySelector(".song__state").addEventListener("mousedown", e => e.stopPropagation());
 
     function mouseInTopHalf(entry, y) {
         const rect = entry.getBoundingClientRect();
         return y < ( rect.y + rect.height/2 );
+    }
+    function nextSongEntry(entry) {
+        do entry = entry.nextElementSibling;
+        while (entry && !entry.song);
+        return entry;
     }
 
     let pos;
@@ -16,6 +24,7 @@ export function drag(entry) {
     /** the dragging entry will be dropped before this entry */
     let destination;
     let dragBuffer;
+
 
     addDragEvent(entry, 
         (e) => {
@@ -47,12 +56,13 @@ export function drag(entry) {
         },
 
         (e) => {
-            console.log("mouseup called on ", entry.song.title);
             ["width", "height", "top", "left", "position", "pointer-events"]
                 .forEach(p => entry.style.removeProperty(p));
             
             dragBuffer.replaceWith(entry);
             dragBuffer = destination = null;
+
+            playlist.setSyncStatus("edited");
         }
     )
 }

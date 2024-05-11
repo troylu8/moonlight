@@ -1,8 +1,9 @@
-import {  makeUnique, reserved } from '../account/files.js';
-import { Playlist } from '../account/userdata.js';
+import {  allFiles, makeUnique, reserved } from '../account/files.js';
+import { Playlist, Song } from '../account/userdata.js';
 import { Tracker } from './tracker.js';
 import { genID } from '../account/account.js';
-import { initNewSong, new__dropdown } from './newSong.js';
+import { new__dropdown } from './newSong.js';
+import { setViewPlaylist } from '../view/elems.js';
 const ytdl = require('ytdl-core');
 const fs = require("fs");
 
@@ -18,7 +19,7 @@ function cleanFileName(str) {
 
 /**
  * @param {string} ytpid youtube playlist id
- * @returns {Promise<Array<Array<string>>>} `[ [youtube songID, song title], ... ]`
+ * @returns {Promise< Map<string, {ytsid: string, index: number}> >} `song title` ->  `{ytsid: (youtube songID), index: (song index) }`
  */
 async function getPlaylistSongs(ytpid) {
     const YT_API_KEY = "AIzaSyBKrluI981e6nye-M8qHs_N3kDx3m7N8wg";
@@ -29,11 +30,14 @@ async function getPlaylistSongs(ytpid) {
         return await res.json();
     }
 
-    const songs = [];
+    const songs = new Map();
     
     const pushToSongs = (items) => {
         for (const video of items) {
-            songs.push([video.snippet.resourceId.videoId, video.snippet.title])
+            songs.set(video.snippet.title, {
+                ytsid: video.snippet.resourceId.videoId,
+                index: songs.size
+            });
         }
         return items.length;
     }
@@ -51,22 +55,81 @@ async function getPlaylistSongs(ytpid) {
     return songs;
 }
 
+class BSTNode {
+
+    constructor(key, value, left, right) {
+        this.key = key;
+        this.value = value;
+        
+        /** @type {BSTNode} */
+        this.left = left;
+        /** @type {BSTNode} */
+        this.right = right;
+    }    
+}
+
+class BST {
+    
+    add(key, value) {
+        /** @type {BSTNode} */
+        this.root = this._addUnder(this.root, key, value);
+    }
+
+    /**
+     *  @param {BSTNode} root
+     */
+    _addUnder(root, key, value) {
+        if (!root) return new BSTNode(key, value);
+
+        if (root.key < key) root.right = this._addUnder(root.right, key, value);
+        else if (root.key > key) root.left = this._addUnder(root.left, key, value);
+
+        return root;
+    }
+    
+    /** get the value after this key */
+    getAfter(key) {
+        let p = this.root;
+        let res = null;
+
+        while (p) {
+            if (p.key > key) {
+                res = p.value;
+                p = p.left;
+            }
+            else {
+                p = p.right;
+            }
+        }
+
+        return res;
+    }
+}
+
 
 export async function downloadPlaylist(ytpid, cb, title) {
     const songs = await getPlaylistSongs(ytpid);
     const playlist = new Playlist(genID(14), {title: title, desc: "downloaded from https://www.youtube.com/playlist?list=" + ytpid});
+    setViewPlaylist(playlist);
+
+    const indexToEntry = new BST();
 
     let complete = 0;
 
-    for (const s of songs) { 
+    for (const s of songs.entries()) {
         
-        downloadSong(s[0], (err, songData) => {
+        downloadSong(s[1].ytsid, (err, songData) => {
             //TODO: notification "1 unavailable song"
             if (err) return console.log(err.message);
 
-            initNewSong(songData, playlist, false);
+            const song = new Song(songData.id, songData);
+            const entry = song.addToPlaylist(playlist, true, indexToEntry.getAfter(s[1].index))[0];
+            indexToEntry.add(s[1].index, entry);
+
+            allFiles.set(song.filename, song);
+
             if (++complete === songs.length) cb(playlist);
-        }, s[1]);
+        }, s[0]);
         
     }
 }

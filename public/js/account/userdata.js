@@ -9,7 +9,6 @@ const { ipcRenderer } = require("electron");
 
 export class Song {
     constructor(id, options, changeSyncStatus) {
-        console.log("creating new song", options.title);
         data.songs.set(id, this);
         this.id = id;
         this.title = options.title;
@@ -71,8 +70,9 @@ export class Song {
     /** 
      * @param {Playlist} playlist
      * @param {boolean} changeSyncStatus `true` if adding to playlist should set `.syncStatus` of song and playlist to `"edited"`
+     * @param {HTMLElement} before 
      */
-    addToPlaylist(playlist, changeSyncStatus) {
+    addToPlaylist(playlist, changeSyncStatus, before) {
         if ( !(playlist instanceof Playlist) ) playlist = data.playlists.get(playlist);
         
         if (!playlist || playlist.songs.has(this)) return;
@@ -85,7 +85,7 @@ export class Song {
         playlist.songs.add(this);
         this.playlists.add(playlist);
 
-        const songElems = elems.createSongEntry(this, playlist);
+        const songElems = elems.createSongEntry(this, playlist, before);
 
         if (this === data.curr.song && playlist === data.curr.listenPlaylist && playlist.songs.size !== 0) 
             play.toBeDeleted.set(null, null);
@@ -209,11 +209,22 @@ export class Playlist {
             this.playlistEntry.firstElementChild.textContent = this.title;
         }
     }
+
+    getOrderedSIDs() {
+        // if this playlist was viewed, then construct arr with songEntries in case they were moved around
+        if (this.groupElem) {
+            const res = [];
+            for (let songEntry = this.groupElem.firstElementChild; songEntry != null ; songEntry = songEntry.nextElementSibling)
+                if (songEntry.song) res.push(songEntry.song.id);
+            return res;
+        }
+        return Array.from(this.songs).map(s => s.id);
+    }
     
 }
 
 
-class Data {
+class UserData {
 
     settings = {
         shuffle: false,
@@ -270,20 +281,13 @@ class Data {
         return JSON.stringify(obj, 
             function(key, value) {
                 if (value instanceof Function) return undefined;
-
                 if (ignore.includes(key)) return undefined;
                 
-                if (key === "playlists") {
-                    const res = {};
-                    for (const playlist of this.playlists.values()) {
-                        res[playlist.id] = playlist.cycle.asOrderedArray();
-                    }
-                    return res;
-                }
                 if (value instanceof Set) {
-                    if (key === "songs") return Array.from(value).map(v => v.id);
-                    else return undefined;
+                    // a Set of songs only appears under data.playlists
+                    return (key === "songs")? this.getOrderedSIDs() : undefined;
                 } 
+                
                 if (key === "song" || key === "listenPlaylist") return value? value.id : undefined;
                 if (key === "trashqueue") return Array.from(value);
                 if (value instanceof Map) return Object.fromEntries(value);
@@ -298,7 +302,7 @@ class Data {
     }
 };
 
-/** @type {Data}  */
+/** @type {UserData}  */
 export let data;
 
 ipcRenderer.on("cleanup", () => {if (data) data.saveDataLocal()} );
@@ -307,7 +311,7 @@ export async function loadLocaldata(uid) {
     if (data) {
         for (const playlist of data.playlists.values()) playlist.removeElements();
     }
-    data = new Data();
+    data = new UserData();
     
     const json = await readUserdata(uid);
     console.log("json", json);

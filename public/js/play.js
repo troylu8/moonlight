@@ -249,10 +249,8 @@ export class PlaylistCycle {
         if (!data.settings.shuffle) {
             let entry = data.curr.song.songEntries.get(this.playlist);
             
-            do {
-                entry = prevSongEntry(entry);
-            }
-            while ( !setSong(entry.song) );
+            do entry = entry.previousElementSibling ?? entry.parentElement.lastElementChild;
+            while ( !entry.song || !setSong(entry.song) );
         }
         
         // SHUFFLE ON: history
@@ -291,10 +289,8 @@ export class PlaylistCycle {
         if (!data.settings.shuffle) {
             let entry = data.curr.song.songEntries.get(this.playlist);
             
-            do {
-                entry = nextSongEntry(entry);
-            }
-            while ( !setSong(entry.song) );
+            do entry = entry.nextElementSibling ?? entry.parentElement.firstElementChild;
+            while ( !entry.song || !setSong(entry.song) );
         }
         // SHUFFLE ON
         else {
@@ -322,27 +318,7 @@ export class PlaylistCycle {
         console.log("shuffleArr: ", this.shuffleArr.map(s => (s == null)? "null" : s.title));
         console.log("currIndex: ", this.currIndex);
     }
-
-    asOrderedArray() {
-        const res = [];
-        for (let songEntry = this.playlist.groupElem.firstElementChild; songEntry != null ; songEntry = songEntry.nextElementSibling) {
-            if (songEntry.song) res.push(songEntry.song.id);
-        }
-        return res;
-    }
 }
-
-export function nextSongEntry(entry) {
-    entry = entry.nextElementSibling ?? entry.parentElement.firstElementChild;
-    while (!entry.song) entry = entry.nextElementSibling ?? entry.parentElement.firstElementChild;
-    return entry;
-}
-function prevSongEntry(entry) {
-    entry = entry.previousElementSibling ?? entry.parentElement.lastElementChild;
-    while (!entry.song) entry = entry.previousElementSibling ?? entry.parentElement.lastElementChild;
-    return entry;
-}
-
 
 function rand(min, max) {
     return min + Math.floor(Math.random() * ((max - min) + 1));

@@ -297,10 +297,7 @@ export async function watchFiles(dir) {
     
     watcher.on("ready", () => {
         watcher.on("add", (filename) => {
-            console.log(filename, " ADDED!");
-    
-            console.log("reserved", reserved);
-        
+            
             if (missingFiles.has(filename)) {
                 missingFiles.get(filename).setState("playable");
                 missingFiles.delete(filename);
@@ -312,7 +309,6 @@ export async function watchFiles(dir) {
         });
     
         watcher.on("unlink", (filename) => {
-            console.log(filename, " REMOVED!");
     
             const obj = allFiles.get(filename);
     
@@ -329,7 +325,6 @@ export async function watchFiles(dir) {
         });
     
         watcher.on("change", (filename, stats) => {
-            console.log(filename, "CHANGED!");
                 
             // update size display
             const obj = allFiles.get(filename);

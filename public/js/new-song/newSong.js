@@ -62,9 +62,9 @@ function isValidLink(input) {
             input.startsWith("youtu.be/watch?v=")
 }
 
-export async function initNewSong(songData, playlist, openSettings) {    
+export async function initNewSong(songData, playlist, openSettings, before) {    
     const song = new Song(songData.id, songData);
-    const songElems = song.addToPlaylist(playlist ?? data.curr.viewPlaylist); 
+    const songElems = song.addToPlaylist(playlist ?? data.curr.viewPlaylist, true, before); 
     if (openSettings ?? true) openSongSettings(song, songElems[1], songElems[2]);
     
     allFiles.set(song.filename, song);

@@ -15,7 +15,8 @@
     "license": "ISC",
     "scripts": {
         "start": "electron .",
-        "rebuild": "electron-rebuild -f -w better-sqlite3"
+        "rebuild": "electron-rebuild -f -w better-sqlite3",
+        "//note": "dont forget that `npm rebuild` is NOT the same as `npm run rebuild` !!! "
     },
     "electronmon": {
         "patterns": [

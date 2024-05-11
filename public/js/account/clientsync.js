@@ -1,4 +1,5 @@
 import { deviceID } from "./files.js";
+import { data } from "./userdata.js";
 
 const Zip = require("adm-zip");
 const axios = require('axios');
@@ -35,25 +36,37 @@ export async function syncToServer(uid, changes) {
 
     const zip = new Zip();
     zip.addFile("changes.json", Buffer.from(
-        JSON.stringify(changes, 
-            (key, value) => {
-                if ([
-                    "doomed",
-                    "newItems",
+        data.stringify(changes, [
+            "doomed",
+            "newItems",
+            
+            "groupElem",
+            "songEntries",
+            "playlistEntry",
+            "checkboxDiv",
+            "cycle",
+            "syncStatus",
+            "state"
+        ])
+        // JSON.stringify(changes, 
+        //     (key, value) => {
+        //         if ([
+        //             "doomed",
+        //             "newItems",
                     
-                    "groupElem",
-                    "songEntries",
-                    "playlistEntry",
-                    "checkboxDiv",
-                    "cycle",
-                    "syncStatus",
-                    "state"
-                ].includes(key)) return undefined;
+        //             "groupElem",
+        //             "songEntries",
+        //             "playlistEntry",
+        //             "checkboxDiv",
+        //             "cycle",
+        //             "syncStatus",
+        //             "state"
+        //         ].includes(key)) return undefined;
 
-                if (key === "songs" || key === "playlists") return Array.from(value).map(i => i.id);
+        //         if (key === "songs" || key === "playlists") return Array.from(value).map(i => i.id);
 
-                return value;
-            })
+        //         return value;
+        //     })
     ));
 
     for (const song of changes["unsynced-songs"]) {

@@ -7,7 +7,7 @@ import { syncData } from "../account/account.js";
 import { allFiles, deleteSongFile, getFileSize, uploadSongFile } from "../account/files.js";
 import * as yt from "../new-song/getyt.js";
 import { initNewSong } from "../new-song/newSong.js";
-import { drag } from "./drag.js";
+import { dragabbleEntry } from "./entryDrag.js";
 const { ipcRenderer } = require("electron");
 
 const icons = {
@@ -114,15 +114,17 @@ function getSongEntry(groupElem, song) {
 /** 
  * @param {Song} song
  * @param {Playlist} playlist 
+ * @param {HTMLElement} before add songEntry before this element
  */
-export function createSongEntry(song, playlist) {
-    if (!playlist.groupElem) return;
+export function createSongEntry(song, playlist, before) {
+    if (!playlist.groupElem) return console.log("no group element!!");
 
     // if songEntry already exists
     const e = getSongEntry(playlist.groupElem, song.id);
     if (e) return e;
 
-    const songEntry = createElement("div", null, "song " + song.id, playlist.groupElem);
+    const songEntry = createElement("div", null, "song " + song.id);
+    playlist.groupElem.insertBefore(songEntry, before);
     songEntry.song = song;
     songEntry.innerHTML = 
        `<div class="song__left"></div>
@@ -130,7 +132,6 @@ export function createSongEntry(song, playlist) {
         <div class="song__right">
             <span class="song__duration"> ${getTimeDisplay(song.duration)} </span>
         </div>`
-    drag(songEntry, song, playlist);
 
     const song__title = createElement("span", null, "song__title song__title:" + song.id, songEntry.firstChild, song.title);
 
@@ -227,6 +228,7 @@ export function createSongEntry(song, playlist) {
 
     setEntryState(songEntry, song.state);
     setEntrySyncStatus(songEntry, song.syncStatus);
+    dragabbleEntry(songEntry, playlist);
 
     song.songEntries.set(playlist, songEntry);
     return [songEntry, song__title, song__artist];
@@ -303,7 +305,6 @@ export function createPlaylistEntry(playlist) {
 function createPlaylistGroup(playlist) {
     const playlist__group = createElement("nav", "group:" + playlist.id, "playlist__group hiding-scroll", mainDiv);
     playlist.groupElem = playlist__group;
-    playlist__group.playlist = playlist;
 
     for (const song of playlist.songs) {
         createSongEntry(song, playlist);

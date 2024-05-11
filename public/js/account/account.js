@@ -81,9 +81,11 @@ window.addEventListener("load", async () => {
     setTitleScreen(false);
     updateForUsername(username, isGuest());
 
-    const serverJSON = await getData(jwt);
-    getDoomed(serverJSON, "songs");
-    getDoomed(serverJSON, "playlists");
+    if (!isGuest()) {
+        const serverJSON = await getData(jwt);
+        getDoomed(serverJSON, "songs");
+        getDoomed(serverJSON, "playlists");
+    }
 });
 
 
