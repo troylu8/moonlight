@@ -25,10 +25,10 @@ function inputErrors(username, password, repeatPassword, signingIn) {
 }
 
 /**
- * @param {object} options contains `username`, `password`, `repeatPassword`, `error`, `submit` fields
+ * @param {{username, password,repeatPassword, error, submit}} elems
  */
-function initAccCreator(options) {
-    const {username, password, repeatPassword, error, submit} = options;
+function initAccCreator(elems) {
+    const {username, password, repeatPassword, error, submit} = elems;
 
     // typing clears error text, pressing enter clicks submit
     [username, password, repeatPassword].forEach((node) => {

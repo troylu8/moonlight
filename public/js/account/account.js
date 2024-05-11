@@ -2,7 +2,7 @@ import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
 import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles, missingFiles, reserved, deviceID } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
-import { setRPM, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
+import { sendNotification, setRPM, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
 
 /**
  * @param {number} len 
@@ -35,7 +35,7 @@ export let username;
 /** @type {string} */
 export let jwt;
 
-function setAccInfo(JWT, UID, USERNAME) {
+export function setAccInfo(JWT, UID, USERNAME) {
     if (JWT === "guest") {
         if (!guestID && !fetchGuestID() ) {
             console.log("no guest id, making one");
@@ -51,6 +51,8 @@ function setAccInfo(JWT, UID, USERNAME) {
         uid = UID ?? uid;
         username = USERNAME ?? username;
     }
+
+    updateForUsername(username, isGuest());
     
     global.userDir = global.resources + "/users/" + uid;
 }
@@ -79,7 +81,7 @@ window.addEventListener("load", async () => {
     await loadAcc(jwt, info.uid, info.username);
     
     setTitleScreen(false);
-    updateForUsername(username, isGuest());
+    
 
     if (!isGuest()) {
         const serverJSON = await getData(jwt);
@@ -285,6 +287,8 @@ export async function syncData() {
     } catch (err) {console.log(err)}
 
     stopSyncSpin();
+
+    sendNotification("sync complete!");
 }
 
 export async function getData(jwt) {

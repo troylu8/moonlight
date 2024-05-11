@@ -338,19 +338,23 @@ createResizeDragger(
 );
 
 
-function clickToExpand(button, content) {
-    button.addEventListener("click", () => {
-        if (content.style.display === "flex") 
-            content.style.display = "none";
-        else 
-            content.style.display = "flex";
-    });
+const notifications = document.getElementById("notifications");
+
+export function sendNotification(msg) {
+
+    const notif = document.createElement("div");
+    notif.className = "notification";
+    notif.textContent = msg;
+    
+    notifications.insertBefore(notif, notifications.firstChild);
+    getComputedStyle(notif).transition;
+    notif.style.left = "0";
+
+    function closeNotification() {
+        notif.style.left = "100%";
+        notif.addEventListener("transitionend", notif.remove);
+    }
+
+    notif.addEventListener("click", closeNotification);
+    setTimeout(closeNotification, 5000);
 }
-clickToExpand(
-    document.getElementById("change-username__btn"),
-    document.getElementById("change-username__inputs")
-);
-clickToExpand(
-    document.getElementById("change-password__btn"),
-    document.getElementById("change-password__inputs")
-);

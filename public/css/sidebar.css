@@ -111,7 +111,7 @@
     padding: 4px 5px;
     align-self: first baseline;
 }
-#change-username__inputs, #change-password__inputs {
+#change-username__content, #change-password__content {
     display: none;
     flex-direction: column;
     gap: 10px

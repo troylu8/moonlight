@@ -4,6 +4,7 @@ import { Tracker } from './tracker.js';
 import { genID } from '../account/account.js';
 import { new__dropdown } from './newSong.js';
 import { setViewPlaylist } from '../view/elems.js';
+import { sendNotification } from '../view/fx.js';
 const ytdl = require('ytdl-core');
 const fs = require("fs");
 
@@ -125,10 +126,14 @@ export async function downloadPlaylist(ytpid, cb, title) {
             const song = new Song(songData.id, songData);
             const entry = song.addToPlaylist(playlist, true, indexToEntry.getAfter(s[1].index))[0];
             indexToEntry.add(s[1].index, entry);
-
             allFiles.set(song.filename, song);
 
-            if (++complete === songs.length) cb(playlist);
+            sendNotification("downloaded " + song.title);
+
+            if (++complete === songs.length) {
+                sendNotification("finished downloading playlist: " + playlist.title);
+                cb(playlist);
+            } 
         }, s[0]);
         
     }

@@ -167,7 +167,6 @@ export class Playlist {
         if (options.songs) {
             for (const sid of options.songs) data.songs.get(sid).addToPlaylist(this, changeSyncStatus);
         }
-        
     }
 
     /** @param {"new" | "edited" | "synced" | "doomed"} syncStatus cannot set `syncStatus` to `edited` when it is `new`*/

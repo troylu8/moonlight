@@ -220,3 +220,29 @@ input[type="file"] {
     flex-grow:1;
     background-color: lightcoral;
 }
+
+#notifications {
+    position: fixed;
+    top: 0;
+    bottom: calc(var(--play-div-height) + 10px);
+    right: 0;
+    width: 150px;
+
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+}
+
+.notification {
+    border-left: solid 5px var(--accent-color);
+    background-color: var(--background-color);
+    
+    position: relative;
+    left: 100%;
+    transition: 0.2s;
+
+    border-radius: 5px;
+    padding: 4px 5px;
+    font-size: smaller;
+
+}

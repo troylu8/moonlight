@@ -42,30 +42,99 @@ document.getElementById("open-song-folder").addEventListener("click", () => {
 });
 
 
+/**
+ * @param {{button, content, inputs, error, submit}} elems
+ */
+function initAccEditor(elems, onsubmit) {
+    const {button, content, inputs, error, submit} = elems;
+
+    button.addEventListener("click", () => {
+        if (content.style.display !== "flex") {
+            inputs.forEach(input => input.value = "");
+            error.textContent = "";
+            content.style.display = "flex";
+        }
+        else content.style.display = "none";
+    });
+
+    inputs.forEach(elem => elem.addEventListener("keypress", (e) => {
+        if (e.key === "Enter")  submit.click();
+        else                    error.textContent = "";
+    }));
+
+    submit.addEventListener("click", async () => {
+        if (await onsubmit()) content.style.display = "none";
+    });
+}
 
 const changeU__username = document.getElementById("change-username__username");
 const changeU__password = document.getElementById("change-username__password");
-const changeU__submit = document.getElementById("change-username__submit");
 const changeU__error = document.getElementById("change-username__error");
 
-[changeU__username, changeU__password]
-.forEach(elem => elem.addEventListener("keypress", (e) => {
-    if (e.key === "Enter")  changeU__submit.click();
-    else                    changeU__error.textContent = "";
-}));
+initAccEditor(
+    {
+        button: document.getElementById("change-username__btn"),
+        content: document.getElementById("change-username__content"),
+        inputs: [changeU__username, changeU__password],
+        error: changeU__error,
+        submit: document.getElementById("change-username__submit")
+    }, 
+    async () => {
+        const username = changeU__username.value.trim();
 
-changeU__submit.addEventListener("click", async () => {
-    const username = changeU__username.value.trim();
+        if (username === "") return showError(changeU__error, "username cannot be empty");
+        if (username === acc.username) return showError(changeU__error, "this is your current username");
 
-    if (username === "") return showError(changeU__error, "username cannot be empty");
-    if (username === acc.username) return showError(changeU__error, "this is your current username");
+        const res = await fetch(`https://localhost:5001/change-username/${acc.uid}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                username: username,
+                password: changeU__password.value.trim()
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+        if (res.status === 409) return showError(changeU__error, "username taken");
+        if (res.status === 401) return showError(changeU__error, "wrong password");
 
-    const req = await fetch(`https://localhost:5001/change-username/${acc.uid}`, {
-        method: "PUT",
-        body: username
-    });
-    if (req.status === 409) return showError(changeU__error, "username taken");
-    if (req.status === 401) return showError(changeU__error, "wrong password");
+        acc.setAccInfo(null, null, username);
 
-    console.log("success");
-})
+        //TODO: notif
+        return true;
+    }
+);
+
+const changeP__old = document.getElementById("change-password__old-password");
+const changeP__new = document.getElementById("change-password__new-password");
+const changeP__repeat = document.getElementById("change-password__repeat-password");
+const changeP__error = document.getElementById("change-password__error");
+
+initAccEditor(
+    {
+        button: document.getElementById("change-password__btn"),
+        content: document.getElementById("change-password__content"),
+        inputs: [changeP__old, changeP__new, changeP__repeat],
+        error: changeP__error,
+        submit: document.getElementById("change-password__submit")
+    },
+    async () => {
+        const newPassword = changeP__new.value.trim();
+        if (newPassword !== changeP__repeat.value.trim()) return showError(changeP__error, "passwords don't match");
+        
+        const res = await fetch(`https://localhost:5001/change-password/${acc.uid}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                oldPassword: changeP__old.value.trim(),
+                newPassword: newPassword
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+        if (res.status === 401) return showError(changeP__error, "wrong password");
+
+        //TODO: notif
+        return true;
+    }
+);

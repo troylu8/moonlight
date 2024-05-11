@@ -45,15 +45,30 @@ router.post("/sign-in", express.json(), async (req, res) => {
         res.status(401).end();
 });
 
-router.put("/change-username/:uid", express.text(), async (req, res) => {
+router.put("/change-username/:uid", express.json(), async (req, res) => {
     const row = db.prepare("SELECT hash FROM users WHERE uid=?").get(req.params["uid"]);
     if (!row) return res.status(404).end();
 
-    if (await bcrypt.compare(req.body, row.hash)) {
-        if ( db.prepare("SELECT * FROM users WHERE username=?").get(req.body) )
+    if (await bcrypt.compare(req.body.password, row.hash)) {
+        if ( db.prepare("SELECT * FROM users WHERE username=?").get(req.body.username) )
             return res.status(409).end();
 
-        db.prepare("UPDATE users SET username=? WHERE uid=?").run(req.body, req.params["uid"]);
+        db.prepare("UPDATE users SET username=? WHERE uid=?").run(req.body.username, req.params["uid"]);
+        res.status(200).end();
+    }
+    else res.status(401).end();
+});
+
+router.put("/change-password/:uid", express.json(), async (req, res) => {
+    const row = db.prepare("SELECT hash FROM users WHERE uid=?").get(req.params["uid"]);
+    if (!row) return res.status(404).end();
+
+    if (await bcrypt.compare(req.body.oldPassword, row.hash)) {
+
+        db.prepare("UPDATE users SET hash=? WHERE uid=?").run(
+            await bcrypt.hash(req.body.newPassword, 11),
+            req.params["uid"]
+        );
         res.status(200).end();
     }
     else res.status(401).end();

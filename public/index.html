@@ -14,6 +14,7 @@
         <link rel="stylesheet" href="css/main.css">
         <link rel="stylesheet" href="css/sidebar.css">
         <link rel="stylesheet" href="css/titlescreen.css">
+        <link rel="stylesheet" href="css/notifications.css">
 
 
         <script type="module" src="js/view/dropdown.js" ></script> 
@@ -340,7 +341,7 @@
                         </div>
 
                         <button id="change-username__btn"> change username </button>
-                        <div id="change-username__inputs">
+                        <div id="change-username__content">
                             <input id="change-username__username" type="text" placeholder="new username">
                             <input id="change-username__password" type="text" placeholder="password">
                             <p id="change-username__error" class="error-msg"></p>
@@ -348,7 +349,7 @@
                         </div>
 
                         <button id="change-password__btn"> change password </button>
-                        <div id="change-password__inputs">
+                        <div id="change-password__content">
                             <input id="change-password__old-password" type="text" placeholder="old password">
                             <input id="change-password__new-password" type="text" placeholder="new password">
                             <input id="change-password__repeat-password" type="text" placeholder="repeat new password">
@@ -400,5 +401,6 @@
 
         </div>
         
+        <div id="notifications"></div>
     </body>
 </html>
