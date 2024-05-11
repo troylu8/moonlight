@@ -7,7 +7,6 @@ const { dirname, basename, resolve } = require("path");
 const fs = require('fs');
 const { promisify } = require('util');
 const { randomBytes, createCipheriv, createDecipheriv } = require("crypto");
-const { parseFile } = require('music-metadata');
 const chokidar = require('chokidar');
 
 global.resources = __dirname + "/resources";
@@ -169,14 +168,22 @@ export async function getFileSize(path) {
 }
 
 
-/**  insert sid into end of path if path already exists*/
-export async function makeUnique(path, sid) {
+/**  insert sid into end of basename if already used by another song*/
+export async function makeUnique(basename, sid, ignoreMissingFiles) {
+    
+    // if theres no songs with this filename, and no error songs waiting for this filename
+    if ( !(allFiles.get(basename) instanceof Song) && (ignoreMissingFiles || !missingFiles.has(basename)) ) return basename;
 
-    if (!(await pathExists(path))) return path;
-
-    const i = path.lastIndexOf(".");
-    return path.substring(0, i) + " " + sid + path.substring(i);
+    const i = basename.lastIndexOf(".");
+    return basename.substring(0, i) + " " + sid + basename.substring(i);
 }
+
+const getDuration = promisify(
+    (path, cb) => {
+        const audio = new Audio(path);
+        audio.addEventListener("loadedmetadata", () => cb(null, audio.duration));
+    }
+);
 
 /**
  * @callback uploadSongCallback
@@ -206,8 +213,10 @@ export const uploadSongFile = promisify(
 
         const originalBase = tracker.titleElem.textContent = basename(path);
 
-        const dest = await makeUnique(global.userDir + "/songs/" + originalBase, sid);
+        const dest = global.userDir + "/songs/" + await makeUnique(originalBase, sid, !createSongData);
         const newBase = basename(dest);
+
+        console.log(await getDuration(path));
 
         const songData = createSongData ? {
             id: acc.genID(14),
@@ -215,7 +224,7 @@ export const uploadSongFile = promisify(
             title: originalBase.replace(/\.[^\/.]+$/, ""), // regex to remove extensions
             artist: "uploaded by you",
             size: size,
-            duration: (await parseFile(path)).format.duration
+            duration: await getDuration(path)
         } : undefined;
 
         if (inSongFolder(path)) {

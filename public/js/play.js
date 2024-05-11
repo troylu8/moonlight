@@ -246,9 +246,12 @@ export class PlaylistCycle {
         
         // SHUFFLE OFF: prev in cycle
         if (!data.settings.shuffle) {
-            let entry = data.curr.song.songEntries.get(this.playlist);
-            
-            do entry = entry.previousElementSibling ?? entry.parentElement.lastElementChild;
+            const start = data.curr.song.songEntries.get(this.playlist);
+            let entry = start;
+            do {
+                entry = entry.previousElementSibling ?? entry.parentElement.lastElementChild;
+                if (entry === start) return;
+            } 
             while ( !entry.song || !setSong(entry.song) );
         }
         
@@ -286,9 +289,12 @@ export class PlaylistCycle {
         
         // SHUFFLE OFF
         if (!data.settings.shuffle) {
-            let entry = data.curr.song.songEntries.get(this.playlist);
-            
-            do entry = entry.nextElementSibling ?? entry.parentElement.firstElementChild;
+            const start = data.curr.song.songEntries.get(this.playlist);
+            let entry = start;
+            do {
+                entry = entry.nextElementSibling ?? entry.parentElement.firstElementChild;
+                if (entry === start) return;
+            } 
             while ( !entry.song || !setSong(entry.song) );
         }
         // SHUFFLE ON

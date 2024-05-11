@@ -165,6 +165,7 @@ export function setToolTip(parent, innerHTML, gap) {
     
     tooltip.classList.add("tooltip");
     tooltip.innerHTML = innerHTML;
+    tooltip.addEventListener("mousedown", e => e.stopPropagation());
 
     let baseAncestor = parent;
     while (baseAncestor.parentElement != primary) baseAncestor = baseAncestor.parentElement;

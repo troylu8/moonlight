@@ -4,7 +4,7 @@ import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
 import { removeTooltip, sendNotification, setToolTip, showError } from "./fx.js";
 import { syncData } from "../account/account.js";
-import { allFiles, deleteSongFile, getFileSize, uploadSongFile } from "../account/files.js";
+import { allFiles, deleteSongFile, getFileSize, missingFiles, uploadSongFile } from "../account/files.js";
 import * as yt from "../new-song/getyt.js";
 import { initNewSong } from "../new-song/newSong.js";
 import { dragabbleEntry } from "./entryDrag.js";
@@ -196,11 +196,14 @@ export function createSongEntry(song, playlist, before) {
             
             try {
                 const basename = await uploadSongFile(song.id, dialog.filePaths[0], false);
+                missingFiles.delete(song.filename);
                 song.filename = basename;
+                allFiles.set(song.filename, song);
+                
                 song.setState("playable");
             } catch (err) {
                 if (err.message === "file in use") 
-                    sendNotification("file used by another song!", "var(--error-color)");
+                    sendNotification("file in use by another song!", "var(--error-color)");
             }
 
         });

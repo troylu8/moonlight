@@ -314,5 +314,6 @@ export async function uploadData() {
 
 
 export function fetchErrHandler(err) {
-    sendNotification(err.message, "var(--error-color)");
+    if (err.message === "Failed to fetch")
+        sendNotification("can't connect to server", "var(--error-color)");
 }

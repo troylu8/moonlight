@@ -173,7 +173,8 @@ export async function downloadSong(ytsid, cb, title) {
 
     tracker.titleElem.textContent = info.videoDetails.title;
 
-    const filename = await makeUnique(cleanFileName(info.videoDetails.title) + ".mp3", ytsid);
+    const sid = genID(14);
+    const filename = await makeUnique(cleanFileName(info.videoDetails.title) + ".mp3", sid);
     const path = global.userDir + "/songs/" + filename;
     reserved.add(filename);
     
@@ -191,7 +192,7 @@ export async function downloadSong(ytsid, cb, title) {
 
     dlstream.on("end", () => 
         cb(null, {
-            "id": genID(14),
+            "id": sid,
             "filename": filename,
             "title": info.videoDetails.title,
             "artist": info.videoDetails.author.name,
