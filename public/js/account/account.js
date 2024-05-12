@@ -2,7 +2,7 @@ import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
 import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles, missingFiles, reserved, deviceID } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
-import { sendNotification, setRPM, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
+import { sendNotification, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
 
 /**
  * @param {number} len 
@@ -78,10 +78,9 @@ window.addEventListener("load", async () => {
     console.log("saved jwt: ", jwt);
     if (!jwt) return;
 
-    await loadAcc(jwt, info.uid, info.username);
+    await loadAcc(jwt);
     
     setTitleScreen(false);
-    
 
     if (!isGuest()) {
         const serverJSON = await getData(jwt);
@@ -146,7 +145,7 @@ export async function fetchAccData(USERNAME, PASSWORD) {
 }
 
 /** [stack overflow link](https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library) */
-function parseJWT(jwt) {    
+export function parseJWT(jwt) {    
     const base64Url = jwt.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {

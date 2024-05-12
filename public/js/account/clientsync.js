@@ -1,4 +1,5 @@
-import { jwt, uid } from "./account.js";
+import { sendNotification } from "../view/fx.js";
+import { jwt, parseJWT, setAccInfo, uid } from "./account.js";
 import { deviceID } from "./files.js";
 
 const Zip = require("adm-zip");
@@ -67,14 +68,19 @@ export async function syncToServer(changes) {
     }
 
     //TODO: remove this dependency
-    const newItems = await axios({
+    const res = await axios({
         method: 'POST',
         url: `https://localhost:5001/sync/${jwt}/${deviceID}`, 
         data: zip.toBuffer(), 
         maxContentLength: Infinity,
         maxBodyLength: Infinity,
-        responseType: "arraybuffer"
     });
 
-    await extractAllToPromise(new Zip(Buffer.from(newItems.data)), resourcesDir);
+    if (res.data.newJWT) {
+        const info = parseJWT(res.data.newJWT);
+        setAccInfo(res.data.newJWT, info.uid, info.username);
+        sendNotification("username was changed to ", info.username);
+    }
+
+    await extractAllToPromise(new Zip(Buffer.from(res.data.data)), resourcesDir);
 }

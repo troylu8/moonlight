@@ -14,7 +14,10 @@ db.prepare("CREATE TABLE IF NOT EXISTS users (uid TEXT, username TEXT, hash TEXT
 const secretKey = fs.readFileSync(__dirname + "/../auth/secret.key", "utf8");
 console.log("secretkey:", secretKey);
 
-const createJWT = promisify(jwt.sign);
+
+const createJWT = promisify(
+    (payload, cb) => jwt.sign(payload, secretKey, cb)
+);
 const verifyJWT = promisify(
     (someJWT, cb) => jwt.verify(someJWT, secretKey, cb)
 );
@@ -36,7 +39,7 @@ router.post("/create-account-dir/:uid", express.json(), async (req, res) => {
             "songs": {}
         }),
     );
-    res.status(200).end(await createJWT({uid: req.params["uid"], username: req.body.username}, secretKey));
+    res.status(200).end(await createJWT({uid: req.params["uid"], username: req.body.username}));
 });
 
 router.post("/sign-in", express.json(), async (req, res) => {
@@ -44,7 +47,7 @@ router.post("/sign-in", express.json(), async (req, res) => {
     if (!row) return res.status(404).end();
 
     if (await bcrypt.compare(req.body.password, row.hash))   
-        res.status(200).end(await createJWT({uid: row.uid, username: req.body.username}, secretKey));
+        res.status(200).end(await createJWT({uid: row.uid, username: req.body.username}));
     else 
         res.status(401).end();
 });
@@ -58,6 +61,7 @@ router.put("/change-username/:uid", express.json(), async (req, res) => {
             return res.status(409).end();
 
         db.prepare("UPDATE users SET username=? WHERE uid=?").run(req.body.username, req.params["uid"]);
+        
         res.status(200).end();
     }
     else res.status(401).end();
@@ -119,4 +123,4 @@ router.put("/upload-data/:jwt", express.json(), async (req, res) => {
 
 
 
-module.exports = { router, db, verifyJWT };
+module.exports = { router, db, createJWT, verifyJWT };

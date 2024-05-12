@@ -4,7 +4,7 @@ const Zip = require("adm-zip");
 const { join } = require("path");
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
-const { db, verifyJWT } = require("./reception.js");
+const { db, verifyJWT, createJWT } = require("./reception.js");
 
 
 fs.mkdir(__dirname + "/../userfiles", {recursive: true}, () => {});
@@ -70,7 +70,7 @@ router.post('/:jwt/:deviceID', express.raw( {type: "*/*", limit: Infinity} ), as
         }
     }
 
-    const row = db.prepare("SELECT userdata FROM users WHERE uid=? ").get(decoded.uid);
+    const row = db.prepare("SELECT username,userdata FROM users WHERE uid=? ").get(decoded.uid);
     if (!row) return res.status(404).end("userdata missing")
     const data = JSON.parse(row.userdata);
     
@@ -113,8 +113,13 @@ router.post('/:jwt/:deviceID', express.raw( {type: "*/*", limit: Infinity} ), as
         if (!entry) console.log("couldnt find ", filepath);
         toClient.addFile(entry.entryName, await getDataPromise(entry));
     }
+
+    const responseJSON = toClient.toBuffer().toJSON();
     
-    res.send(toClient.toBuffer());
+    if (decoded.username !== row.username) 
+        responseJSON.newJWT = await createJWT({uid: decoded.uid, username: row.username});
+
+    res.json(responseJSON);
     
 });
 

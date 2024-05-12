@@ -2,7 +2,7 @@ import * as acc from "../account/account.js"
 import Dropdown from "./dropdown.js";
 import { audio } from "../play.js";
 import { writeSavedJWT } from "../account/files.js";
-import { showError } from "./fx.js";
+import { shiftDown, showError } from "./fx.js";
 import { nullifyData } from "../account/userdata.js";
 
 const titlescreen = document.getElementById("titlescreen");
@@ -62,7 +62,7 @@ document.getElementById("account__continue").addEventListener("click", async () 
     updateForUsername("[guest]", true);
 });
 
-document.getElementById("sign-out").addEventListener("click", () => {
+document.getElementById("sign-out").addEventListener("click", async () => {
     setSignInActive(true);
 
     setTitleScreen(true);
