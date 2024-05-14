@@ -28,11 +28,12 @@
 
         <script type="module" src="js/new-song/newSong.js" ></script>
         <script type="module" src="js/new-song/searchyt.js" ></script>
-
+        
+        <script type="module" src="js/play.js"></script>
+        
         <script type="module" src="js/account/userdata.js" ></script>
         <script type="module" src="js/account/account.js" ></script>
         
-        <script type="module" src="js/play.js"></script>
 
         <script type="module" src="js/temp.js"></script> 
     </head>
@@ -73,7 +74,7 @@
             <nav id="options-div">
 
                 <div id="search-yt">
-                    <input id="search-yt__input" type="text" placeholder="search" value="PLSPVXMrD_iNGtdYWjCqrvXnsF08jity9h">
+                    <input id="search-yt__input" type="text" placeholder="search youtube.." value="PLSPVXMrD_iNGtdYWjCqrvXnsF08jity9h">
 
                     <div id="search-results" class="hiding-scroll"></div>
                 </div>
@@ -105,7 +106,7 @@
                         <input id="song-upload__input" type="file" accept="audio/*">
                         
                         <div id="paste-link">
-                            <input id="paste-link__input" type="text" placeholder="paste link" value="LaEgpNBt-bQ" >
+                            <input id="paste-link__input" type="text" placeholder="paste youtube link" value="LaEgpNBt-bQ" >
                             <div id="paste-link__btn">
                                 <div class="svg-cont">
                                     <svg stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" fill="none" fill-rule="evenodd" viewBox="0 0 24 24" >
@@ -283,7 +284,7 @@
 
                         <div id="song-settings__metadata" class="soft-link">
                             <p id="song-settings__filename"> music.mp3 </p>
-                            <p> • <span id="song-settings__size"> 123 mb </span> </p>
+                            <p>&nbsp;&nbsp;•&nbsp;&nbsp;<span id="song-settings__size"> 123 mb </span> </p>
                         </div>
                         
                         <div class="settings__field">
@@ -339,7 +340,12 @@
                             </div>
                         </div>
 
-                        <button id="change-username__btn"> change username </button>
+                        <div id="change-username__header">
+                            <button id="change-username__btn"> change username </button>
+                            <svg id="change-username__info" width="20px" height="20px" fill="var(--primary-color)" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 3a7 7 0 100 14 7 7 0 000-14zm-9 7a9 9 0 1118 0 9 9 0 01-18 0zm8-4a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm.01 8a1 1 0 102 0V9a1 1 0 10-2 0v5z"/>
+                            </svg>
+                        </div>
                         <div id="change-username__content">
                             <input id="change-username__username" type="text" placeholder="new username">
                             <input id="change-username__password" type="text" placeholder="password">
@@ -390,8 +396,17 @@
                                 <label for="sort-playlist-options"> sort playlist options </label>    
                             </div>
                         </div>
+
+                        <div class="expander"></div>
                         
-                        <p> total space used: <span>456 mb</span> </p>
+                        <p> total space used: <span id="total-space-used"> 456 mb</span> </p>
+
+                        <div id="discord">
+                            <p> report a bug: </p>
+                            <svg fill="var(--primary-color)" width="20px" height="20px" viewBox="0 -28.5 256 256" preserveAspectRatio="xMidYMid">
+                                <path fill-rule="nonzero" d="M216.856339,16.5966031 C200.285002,8.84328665 182.566144,3.2084988 164.041564,0 C161.766523,4.11318106 159.108624,9.64549908 157.276099,14.0464379 C137.583995,11.0849896 118.072967,11.0849896 98.7430163,14.0464379 C96.9108417,9.64549908 94.1925838,4.11318106 91.8971895,0 C73.3526068,3.2084988 55.6133949,8.86399117 39.0420583,16.6376612 C5.61752293,67.146514 -3.4433191,116.400813 1.08711069,164.955721 C23.2560196,181.510915 44.7403634,191.567697 65.8621325,198.148576 C71.0772151,190.971126 75.7283628,183.341335 79.7352139,175.300261 C72.104019,172.400575 64.7949724,168.822202 57.8887866,164.667963 C59.7209612,163.310589 61.5131304,161.891452 63.2445898,160.431257 C105.36741,180.133187 151.134928,180.133187 192.754523,160.431257 C194.506336,161.891452 196.298154,163.310589 198.110326,164.667963 C191.183787,168.842556 183.854737,172.420929 176.223542,175.320965 C180.230393,183.341335 184.861538,190.991831 190.096624,198.16893 C211.238746,191.588051 232.743023,181.531619 254.911949,164.955721 C260.227747,108.668201 245.831087,59.8662432 216.856339,16.5966031 Z M85.4738752,135.09489 C72.8290281,135.09489 62.4592217,123.290155 62.4592217,108.914901 C62.4592217,94.5396472 72.607595,82.7145587 85.4738752,82.7145587 C98.3405064,82.7145587 108.709962,94.5189427 108.488529,108.914901 C108.508531,123.290155 98.3405064,135.09489 85.4738752,135.09489 Z M170.525237,135.09489 C157.88039,135.09489 147.510584,123.290155 147.510584,108.914901 C147.510584,94.5396472 157.658606,82.7145587 170.525237,82.7145587 C183.391518,82.7145587 193.761324,94.5189427 193.539891,108.914901 C193.539891,123.290155 183.391518,135.09489 170.525237,135.09489 Z">
+                            </svg>
+                        </div>
                     </div>
         
                 </div>

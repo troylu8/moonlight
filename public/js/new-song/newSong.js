@@ -19,48 +19,55 @@ export const new__dropdown = new Dropdown(
     () => error.textContent = ""
 );
 
-async function getYTSID(link) {
+function getYTID(link) {
     link = link.trim();
-
-    if (!isValidLink(link)) throw new Error("invalid link");
-
-    const ytid = link.slice(-11);
-        
-    error.textContent = "";
-    return ytid;
+    
+    if (/^([0-9a-z]|-|_){11}$/i.test(link)) return {type: "song", id: link};
+    if (/^([0-9a-z]|-|_){34}$/i.test(link)) return {type: "playlist", id: link};
+    
+    const url = new URL(link);
+    if (url.hostname === "youtu.be") return { type: "song", id: link.slice(-11) };
+    if (url.hostname !== "youtube.com" && url.hostname !== "www.youtube.com") throw new Error("not a youtube link");
+    
+    if (url.searchParams.has("v")) return {type: "song", id: url.searchParams.get("v")};
+    if (url.searchParams.has("list")) return {type: "playlist", id: url.searchParams.get("list")};
+    
+    throw new Error("invalid link");
 }
 
 button.onclick = async () => {
-    if (!data.curr.viewPlaylist) return showError(error, "select a playlist to add song");
 
-    let ytsid;
-    try {ytsid = await getYTSID(input.value); }
+    try { 
+        const idInfo = getYTID(input.value);
+        if (idInfo.type === "song") {
+
+            if (!data.curr.viewPlaylist) return showError(error, "select a playlist to add song");
+            
+            yt.downloadSong(
+                idInfo.id, 
+                (err, songData) => {
+                    if (err) return showError(error, err.message);
+                    if (songData) initNewSong(songData);  // video downloaded successfully
+                }
+            ); 
+        }
+        else yt.downloadPlaylist(idInfo.id, () => {});
+        
+    }
     catch (err) { return showError(error, err.message); }
     
-    yt.downloadSong(
-        ytsid, 
-        (err, songData) => {
-            if (err) return showError(error, err.message);
-            if (songData) initNewSong(songData);  // video downloaded successfully
-        }
-    ); 
+    error.textContent = "";
     
 }
 
 input.onkeydown = (e) => { if (e.key === "Enter") button.onclick(); }
 
-
-
-/** 
- * @param {string} input yt link 
- */
-function isValidLink(input) {
-    return  /^([0-9a-z]|-|_){11}$/i.test(input)  || // yt id 
-            input.startsWith("https://www.youtube.com/watch?v=") ||
-            input.startsWith("www.youtube.com/watch?v=") || 
-            input.startsWith("youtube.com/watch?v=") || 
-            input.startsWith("youtu.be/watch?v=")
-}
+// eturn  /^([0-9a-z]|-|_){11}$/i.test(input)  || // yt song id 
+//             /^([0-9a-z]|-|_){34}$/i.test(input)  || // yt playlist id 
+// input.startsWith("https://www.youtube.com/watch?v=");
+//             input.startsWith("www.youtube.com/watch?v=") || 
+//             input.startsWith("youtube.com/watch?v=") || 
+//             input.startsWith("youtu.be/watch?v=")
 
 export async function initNewSong(songData, playlist, openSettings, before) {    
     const song = new Song(songData.id, songData);

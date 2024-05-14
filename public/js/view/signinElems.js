@@ -75,15 +75,22 @@ document.getElementById("sign-out").addEventListener("click", async () => {
 });
 
 const usernameDisplay = document.getElementById("username-display");
+const changeU__btn = document.getElementById("change-username__btn");
+const changeP__btn = document.getElementById("change-password__btn");
 
 /** updates DOM elements to reflect new username */
 export function updateForUsername(username, isGuest) {
     usernameDisplay.textContent = signedInAs.textContent = username;
 
-    if (isGuest)  accountDropdown.appendChild(fromGuestBtn);
+    if (isGuest)  {
+        accountDropdown.appendChild(fromGuestBtn);
+        fromGuest.username.value = fromGuest.password.value = fromGuest.repeatPassword.value = "";
+    }
     else          fromGuestBtn.remove();
 
     accDropdown.close();
+
+    changeU__btn.style.display = changeP__btn.style.display = isGuest? "none" : "inline-block";
 }
 
 const repeatPassword = document.getElementById("account__repeat-password");

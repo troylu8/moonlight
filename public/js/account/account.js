@@ -297,21 +297,6 @@ export async function getData(jwt) {
     if (res && res.ok) return await res.json();
 }
 
-export async function uploadData() {
-    await fetch(`https://localhost:5001/upload-data/${uid}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: data.stringify({
-            "pass": password,
-            "userdata": data
-        }, ["curr", "settings", "trashqueue", "edited"])
-    })
-    .catch(fetchErrHandler);
-}
-
-
 export function fetchErrHandler(err) {
     if (err.message === "Failed to fetch")
         sendNotification("can't connect to server", "var(--error-color)");

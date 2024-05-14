@@ -4,7 +4,7 @@ import { PlaylistCycle } from "../play.js";
 import { updateSongEntries } from "../settings/songSettings.js";
 import * as acc from "./account.js";
 import { deleteSongFile, missingFiles, readUserdata, writeUserdata } from "./files.js";
-import { initSettings } from "../settings/settings.js";
+import { initSettingsCheckboxes } from "../settings/settings.js";
 import * as fx from "../view/fx.js";
 const { ipcRenderer } = require("electron");
 
@@ -332,9 +332,11 @@ export async function loadLocaldata(uid) {
     elems.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);
 
     data.settings = json.settings;
-    initSettings();
+    initSettingsCheckboxes();
     play.setShuffle(json.settings.shuffle);
     play.audio.volume = json.settings.volume;
+    document.body.style.setProperty("--sidebar-div-width", data.settings.sidebarWidth);
+    document.body.style.setProperty("--playlists-div-width", data.settings.playlistsWidth);
 }
 
 export function nullifyData() { data = null; }

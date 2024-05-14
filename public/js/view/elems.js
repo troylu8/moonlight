@@ -435,18 +435,13 @@ export function createSearchResultEntry(searchResult) {
     downloadBtn.addEventListener("click", async () => {
         searchResults.close();
 
-        if (searchResult.type === "list") {
-
-            const infoReq = await fetch(`https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/playlist?list=${searchResult.listId}`);
-            
-            yt.downloadPlaylist(searchResult.listId, () => {}, (await infoReq.json()).title);
-        }
+        if (searchResult.type === "list") yt.downloadPlaylist(searchResult.listId, () => {});
         else {
             if (!data.curr.viewPlaylist) return console.log("select a playlist to add song");
             
             yt.downloadSong(searchResult.videoId, (err, songData) => {
                 if (songData) initNewSong(songData);  // video downloaded successfully
-            }, searchResult.title);
+            });
         }
     });
 }

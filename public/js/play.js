@@ -39,7 +39,7 @@ class SpinningAudio extends Audio {
     get volume() { return super.volume; }
     get muted() { return super.muted; }
 }
-export const audio = new SpinningAudio();
+export let audio = new SpinningAudio();
 
 export const titleElem = document.getElementById("info__title");
 export const artistElem = document.getElementById("info__artist");

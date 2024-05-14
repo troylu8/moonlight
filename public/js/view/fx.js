@@ -169,9 +169,10 @@ export function setToolTip(parent, innerHTML, gap) {
 
     let baseAncestor = parent;
     while (baseAncestor.parentElement != primary) baseAncestor = baseAncestor.parentElement;
-
+    
     /** moves tooltip to be centered on elem */
     function reposition() {
+        console.log("reposition called");
         const a = parent.getBoundingClientRect();
         const b = tooltip.getBoundingClientRect();
         const bounds = baseAncestor.getBoundingClientRect();
@@ -227,6 +228,8 @@ export function removeTooltip(elem) {
 ].forEach(pair => {
     setToolTip(document.getElementById(pair[0]), pair[1], -10);
 });
+
+setToolTip(document.getElementById("change-username__info"), "on other devices, username change <br> won't appear until syncing with server", 10, true);
 
 // ERROR DISPLAYS
 export function showError(errorElem, text) {
@@ -297,8 +300,8 @@ function createResizeDragger(dragger, ondrag, onmousedown, onmouseup) {
             if (onmousedown) onmousedown();
         },
         () => { 
-            document.body.style.setProperty("--movement-transition", "0.2s"); 
             if (onmouseup) onmouseup();
+            document.body.style.setProperty("--movement-transition", "0.2s"); 
         }
     );
 }
@@ -328,14 +331,18 @@ createResizeDragger(
         activeTextAreas = activeSidebarElem.querySelectorAll("textarea");
         maxSidebarWidth = calculateMaxWidth("--playlists-div-width");
     },
-    () => activeTextAreas = null
+    () => {
+        activeTextAreas = null;
+        data.settings.sidebarWidth = getComputedStyle(document.body).getPropertyValue("--sidebar-div-width");
+    } 
 );
 
 let maxPlaylistsWidth;
 createResizeDragger(
     document.getElementById("playlists__dragger"), 
     (e) => document.body.style.setProperty("--playlists-div-width", clamp(e.clientX, 100, maxPlaylistsWidth) + "px"),
-    () => maxPlaylistsWidth = calculateMaxWidth("--sidebar-div-width")
+    () => maxPlaylistsWidth = calculateMaxWidth("--sidebar-div-width"),
+    () => data.settings.playlistsWidth = getComputedStyle(document.body).getPropertyValue("--playlists-div-width")
 );
 
 

@@ -20,7 +20,7 @@ function cleanFileName(str) {
 
 /**
  * @param {string} ytpid youtube playlist id
- * @returns {Promise< Map<string, {ytsid: string, index: number}> >} `song title` ->  `{ytsid: (youtube songID), index: (song index) }`
+ * @returns {Promise< Array< {ytsid: string, index: number} >} `song title` ->  `{ytsid: (youtube songID), index: (song index) }`
  */
 async function getPlaylistSongs(ytpid) {
     const YT_API_KEY = "AIzaSyBKrluI981e6nye-M8qHs_N3kDx3m7N8wg";
@@ -31,11 +31,11 @@ async function getPlaylistSongs(ytpid) {
         return await res.json();
     }
 
-    const songs = new Map();
+    const songs = [];
     
     const pushToSongs = (items) => {
         for (const video of items) {
-            songs.set(video.snippet.title, {
+            songs.push({
                 ytsid: video.snippet.resourceId.videoId,
                 index: songs.size
             });
@@ -108,9 +108,14 @@ class BST {
 }
 
 
-export async function downloadPlaylist(ytpid, cb, title) {
+export async function downloadPlaylist(ytpid, cb) {
+    const url = "https://www.youtube.com/playlist?list=" + ytpid;
+
+    const oembed = await ytOEmbed(url);
+    if ( !oembed ) return cb(new Error("playlist doesnt exist"));
+
     const songs = await getPlaylistSongs(ytpid);
-    const playlist = new Playlist(genID(14), {title: title, desc: "downloaded from https://www.youtube.com/playlist?list=" + ytpid});
+    const playlist = new Playlist(genID(14), {title: oembed.title, desc: "downloaded from " + url});
     setViewPlaylist(playlist);
 
     const indexToEntry = new BST();
@@ -119,16 +124,16 @@ export async function downloadPlaylist(ytpid, cb, title) {
 
     let unavailable = 0;
 
-    for (const s of songs.entries()) {
-        downloadSong(s[1].ytsid, (err, songData) => {
+    for (const s of songs) {
+        downloadSong(s.ytsid, (err, songData) => {
             if (err) {
                 unavailable++;
                 return complete++;
             } 
 
             const song = new Song(songData.id, songData);
-            const entry = song.addToPlaylist(playlist, true, indexToEntry.getAfter(s[1].index))[0];
-            indexToEntry.add(s[1].index, entry);
+            const entry = song.addToPlaylist(playlist, true, indexToEntry.getAfter(s.index))[0];
+            indexToEntry.add(s.index, entry);
             allFiles.set(song.filename, song);
 
             if (++complete === songs.size) {
@@ -143,28 +148,28 @@ export async function downloadPlaylist(ytpid, cb, title) {
                 }
                 cb(playlist);
             } 
-        }, s[0]);   
+        });   
     }
 }
 
-async function videoExists(id) {
-    const res = await fetch("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + id);
-    return res.status === 200; 
+async function ytOEmbed(url) {
+    const res = await fetch("https://www.youtube.com/oembed?format=json&url=" + url);
+    return await res.json(); 
 }
 
 
 /**  download mp3, then create song object with song data
  * @param {string} ytsid youtube song id
  * @param {function(Error | undefined, object | undefined)} cb called with songdata download was successful
- * @param {string} title temporarily used as the tracker title until the song info is fetched
  */
-export async function downloadSong(ytsid, cb, title) {
+export async function downloadSong(ytsid, cb) {
     new__dropdown.open();
     let stop = false;
     
-    if ( !(await videoExists(ytsid)) ) return cb(new Error("video doesnt exist"));
+    const oembed = await ytOEmbed("https://www.youtube.com/watch?v=" + ytsid);
+    if ( !oembed ) return cb(new Error("video doesnt exist"));
 
-    const tracker = new Tracker(title ?? "fetching info", Infinity, () => stop = true);
+    const tracker = new Tracker(oembed.title, Infinity, () => stop = true);
 
     await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
 

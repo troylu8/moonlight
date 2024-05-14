@@ -3,7 +3,6 @@ import { jwt, parseJWT, setAccInfo, uid } from "./account.js";
 import { deviceID } from "./files.js";
 
 const Zip = require("adm-zip");
-const axios = require('axios');
 const { join } = require("path");
 const { promisify } = require('util');
 
@@ -67,20 +66,20 @@ export async function syncToServer(changes) {
             zip.addLocalFile( join(resourcesDir, "songs", song.filename), "songs/" );
     }
 
-    //TODO: remove this dependency
-    const res = await axios({
-        method: 'POST',
-        url: `https://localhost:5001/sync/${jwt}/${deviceID}`, 
-        data: zip.toBuffer(), 
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
+    const res = await fetch(`https://localhost:5001/sync/${jwt}/${deviceID}`, {
+        method: 'PUT',
+        body: JSON.stringify(zip.toBuffer().toJSON()),
+        headers: {
+            "Content-Type": "application/json"
+        }
     });
 
-    if (res.data.newJWT) {
-        const info = parseJWT(res.data.newJWT);
-        setAccInfo(res.data.newJWT, info.uid, info.username);
+    const resJSON = await res.json()
+    if (resJSON.newJWT) {
+        const info = parseJWT(resJSON.newJWT);
+        setAccInfo(resJSON.newJWT, info.uid, info.username);
         sendNotification("username was changed to ", info.username);
     }
 
-    await extractAllToPromise(new Zip(Buffer.from(res.data.data)), resourcesDir);
+    await extractAllToPromise(new Zip(Buffer.from(resJSON.data)), resourcesDir);
 }

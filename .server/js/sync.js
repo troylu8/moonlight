@@ -42,12 +42,13 @@ function writeZip(zip, targetfilename, cb) {
 }
 const writeZipPromise = promisify(writeZip);
 
-router.post('/:jwt/:deviceID', express.raw( {type: "*/*", limit: Infinity} ), async (req, res) => {
+router.put('/:jwt/:deviceID', express.json({limit: Infinity}), async (req, res) => {
 
     let decoded;
     try { decoded = await verifyJWT(req.params["jwt"]); }
     catch (err) { return res.status(401).end(); }
 
+    
     
     const zipPath = join(__dirname, "../userfiles", decoded.uid + ".zip");
 
@@ -55,7 +56,7 @@ router.post('/:jwt/:deviceID', express.raw( {type: "*/*", limit: Infinity} ), as
     console.log(zipPath, createdNewFile);
     
     const userfiles = new Zip(createdNewFile? undefined : zipPath);
-    const arrived = new Zip(req.body);
+    const arrived = new Zip(Buffer.from(req.body.data));
 
     // add new files to zip
     for (const entry of arrived.getEntries()) {
@@ -114,12 +115,12 @@ router.post('/:jwt/:deviceID', express.raw( {type: "*/*", limit: Infinity} ), as
         toClient.addFile(entry.entryName, await getDataPromise(entry));
     }
 
-    const responseJSON = toClient.toBuffer().toJSON();
+    const resJSON = toClient.toBuffer().toJSON();
     
     if (decoded.username !== row.username) 
-        responseJSON.newJWT = await createJWT({uid: decoded.uid, username: row.username});
+        resJSON.newJWT = await createJWT({uid: decoded.uid, username: row.username});
 
-    res.json(responseJSON);
+    res.json(resJSON);
     
 });
 

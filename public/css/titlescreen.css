@@ -45,7 +45,7 @@
     margin-top: 20px;
 }
 
-#titlescreen__bottom input[type="text"] {
+#titlescreen__bottom input[type="text"], #account__submit {
     margin-top: 8px;
 }
 

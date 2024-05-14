@@ -24,7 +24,8 @@ const verifyJWT = promisify(
 
 
 function exists(searchColumn, value) {
-    return db.prepare("SELECT uid FROM users WHERE ?=?").get(searchColumn, value) != undefined;
+    const query = `SELECT uid FROM users WHERE ${searchColumn}=?`;
+    return db.prepare(query).get(value) != undefined;
 }
 
 router.post("/create-account-dir/:uid", express.json(), async (req, res) => {
@@ -57,8 +58,7 @@ router.put("/change-username/:uid", express.json(), async (req, res) => {
     if (!row) return res.status(404).end();
 
     if (await bcrypt.compare(req.body.password, row.hash)) {
-        if ( db.prepare("SELECT * FROM users WHERE username=?").get(req.body.username) )
-            return res.status(409).end();
+        if (exists("username", req.body.username)) return res.status(409).end();
 
         db.prepare("UPDATE users SET username=? WHERE uid=?").run(req.body.username, req.params["uid"]);
         
@@ -109,18 +109,6 @@ router.get("/get-data/:jwt", express.text(), async (req, res) => {
     res.status(200).json(JSON.parse(row.userdata));
     
 });
-
-router.put("/upload-data/:jwt", express.json(), async (req, res) => {
-
-    let decoded;
-    try { decoded = await verifyJWT(req.params["jwt"]); }
-    catch (err) { return res.status(401).end(); }
-
-    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(req.body.userdata, decoded.uid);
-    res.status(200).end();
-    
-});
-
 
 
 module.exports = { router, db, createJWT, verifyJWT };

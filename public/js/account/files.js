@@ -128,10 +128,12 @@ ipcRenderer.on("cleanup", () => {
 });
 
 const defaultUserData = JSON.stringify({
-    // other default settings should be indicated in index.html - theyre applied in initSettings() 
+    // other default settings should be indicated in index.html - theyre applied in initSettingsCheckboxes() 
     "settings": {
         "shuffle": false,
         "volume": 0.5,
+        "sidebarWidth": "350px",
+        "playlistsWidth": "220px"
     },
     "curr": {},
     "playlists": {},
@@ -275,16 +277,32 @@ export const missingFiles = new Map();
  */
 export const reserved = new Set();
 
-
 let watcher;
+const totalSpaceUsed = document.getElementById("total-space-used");
 
+async function getDirSize(dir) {
+    const files = await fs.promises.readdir(dir, {withFileTypes: true});
+    let res = 0;
+
+    for (const f of files) {
+        const path = dir + "/" + f.name;
+        if (f.isDirectory()) res += getDirSize(path);
+        else res += (await fs.promises.stat(path)).size;
+    }
+
+    return res;
+}
+
+export async function updateTotalSize() {
+    totalSpaceUsed.textContent = getSizeDisplay(await getDirSize(global.userDir + "/songs"));
+}
 
 export async function watchFiles(dir) {
     if (watcher) watcher.close();
     allFiles.clear();
     missingFiles.clear();
     
-    await fs.promises.mkdir(dir, {recursive: true});
+    await ensurePathThen(updateTotalSize);
 
     // scan songs and add them to allFiles or mark them as error
     data.songs.forEach(async (s) => {
@@ -305,6 +323,11 @@ export async function watchFiles(dir) {
     watcher = chokidar.watch(songsDir, {cwd: songsDir});
     
     watcher.on("ready", () => {
+        watcher.on("all", async () => {
+            console.log("raw event");
+            totalSpaceUsed.textContent = getSizeDisplay((await fs.promises.stat(dir)).size)
+        });
+
         watcher.on("add", (filename) => {
             
             if (missingFiles.has(filename)) {
@@ -315,6 +338,8 @@ export async function watchFiles(dir) {
                 if (reserved.has(filename)) reserved.delete(filename);
                 else createStragglerEntry(filename);
             } 
+
+            updateTotalSize();
         });
     
         watcher.on("unlink", (filename) => {
@@ -331,6 +356,8 @@ export async function watchFiles(dir) {
             } 
     
             allFiles.delete(filename);
+
+            updateTotalSize();
         });
     
         watcher.on("change", (filename, stats) => {
@@ -340,6 +367,9 @@ export async function watchFiles(dir) {
             if (obj instanceof HTMLElement) {
                 obj.querySelector(".straggler__size").textContent = getSizeDisplay(stats.size);
             }
-        })
+
+            updateTotalSize();
+        });
+        
     });
 }

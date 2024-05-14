@@ -22,7 +22,7 @@ document.getElementById("user-settings-btn").addEventListener("click", () => {
     accDropdown.close();
 });
 
-export async function initSettings() {
+export async function initSettingsCheckboxes() {
     for (const elem of document.getElementsByClassName("settings-field")) {    
         const updateMap = () => data.settings[elem.id] = elem.checked ?? elem.value;
         elem.addEventListener("change", updateMap);
