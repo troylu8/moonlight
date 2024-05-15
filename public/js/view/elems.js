@@ -198,6 +198,7 @@ export function createSongEntry(song, playlist, before) {
                 const basename = await uploadSongFile(song.id, dialog.filePaths[0], false);
                 missingFiles.delete(song.filename);
                 song.filename = basename;
+                song.size = await getFileSize(global.userDir + "/songs/" + basename);
                 allFiles.set(song.filename, song);
                 
                 song.setState("playable");
@@ -362,7 +363,7 @@ export const stragglers = document.getElementById("stragglers");
 export const stragglersList = document.getElementById("stragglers__list");
 
 
-export async function createStragglerEntry(basename) {
+export async function createStragglerEntry(basename, isDirectory) {
     stragglers.style.display = "flex";
 
     const stragglerEntry = createElement("div", null, "straggler", stragglersList);
@@ -370,15 +371,28 @@ export async function createStragglerEntry(basename) {
 
     const straggler__delete = createElement("div", null, "straggler__delete", stragglerEntry);
     straggler__delete.addEventListener("click", async () => {
-        await deleteSongFile(basename);
+        await deleteSongFile(basename, isDirectory);
     });
     createElement("div", null, "svg-cont", straggler__delete).innerHTML = icons.trash;
 
-    createElement("div", null, "straggler__size", stragglerEntry, getSizeDisplay(await getFileSize(global.userDir + "/songs/" + basename)));
+    
+    const straggler__size = createElement("div", null, "straggler__size", stragglerEntry);
+
+    stragglerEntry.isDirectory = isDirectory;
+    if (isDirectory) {
+        stragglerEntry.size = 0;
+        straggler__size.textContent = "dir";
+    } else {
+        stragglerEntry.size = await getFileSize(global.userDir + "/songs/" + basename);
+        straggler__size.textContent = getSizeDisplay(stragglerEntry.size);
+    }
+
     createElement("div", null, "straggler__basename soft-link", stragglerEntry, basename)
         .addEventListener("click", () => {
             ipcRenderer.invoke("show-file", global.userDir + "/songs/" + basename); 
         });
+    
+    return stragglerEntry;
 }
 export async function deleteStragglerEntry(basename) {
     const stragglerEntry = allFiles.get(basename);

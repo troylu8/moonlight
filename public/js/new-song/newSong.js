@@ -16,11 +16,12 @@ export const new__dropdown = new Dropdown(
     document.getElementById("new"), 
     document.getElementById("new__dropdown"),
     removeClosedTrackerElems,
-    () => error.textContent = ""
+    () => input.value = error.textContent = ""
 );
 
 function getYTID(link) {
     link = link.trim();
+    if (link.length === 0) throw new Error("link cannot be empty");
     
     if (/^([0-9a-z]|-|_){11}$/i.test(link)) return {type: "song", id: link};
     if (/^([0-9a-z]|-|_){34}$/i.test(link)) return {type: "playlist", id: link};
@@ -36,7 +37,6 @@ function getYTID(link) {
 }
 
 button.onclick = async () => {
-
     try { 
         const idInfo = getYTID(input.value);
         if (idInfo.type === "song") {

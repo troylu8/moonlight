@@ -22,6 +22,8 @@ searchResults.close = () => {
 
     search.style.borderRadius = "5px";
     search.style.outline = "";
+
+    search.value = "";
 }
 
 search.addEventListener("keydown", async (e) => {

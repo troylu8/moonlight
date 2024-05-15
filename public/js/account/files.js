@@ -162,8 +162,8 @@ export async function writeUserdata(uid, userdataStr) {
 
 
 
-export async function deleteSongFile(basename) {
-    await fs.promises.unlink(global.userDir + "/songs/" + basename);
+export async function deleteSongFile(name) {
+    await fs.promises.rm(global.userDir + "/songs/" + name, {recursive: true});
 }
 export async function getFileSize(path) {
     return (await fs.promises.stat(path)).size;
@@ -218,8 +218,6 @@ export const uploadSongFile = promisify(
         const dest = global.userDir + "/songs/" + await makeUnique(originalBase, sid, !createSongData);
         const newBase = basename(dest);
 
-        console.log(await getDuration(path));
-
         const songData = createSongData ? {
             id: acc.genID(14),
             filename: newBase,
@@ -237,6 +235,7 @@ export const uploadSongFile = promisify(
         }
 
         reserved.add(newBase);
+        console.log("reserving", newBase);
 
         const readStream = fs.createReadStream(path);
         const writeStream = fs.createWriteStream(dest);
@@ -245,9 +244,12 @@ export const uploadSongFile = promisify(
             readStream.destroy();
             writeStream.end(() => fs.unlink(dest, () => {}));
         };
-        tracker.oncomplete = () => { 
+        tracker.oncomplete = async () => { 
             console.log("done"); 
             deleteStragglerEntry(newBase);
+
+            addBytes(await getFileSize(dest));
+
             return cb(null, songData ?? newBase);
         };
 
@@ -280,21 +282,34 @@ export const reserved = new Set();
 let watcher;
 const totalSpaceUsed = document.getElementById("total-space-used");
 
-async function getDirSize(dir) {
+async function doForAllFiles(dir, func, prefix = "") {
     const files = await fs.promises.readdir(dir, {withFileTypes: true});
-    let res = 0;
-
+    
     for (const f of files) {
-        const path = dir + "/" + f.name;
-        if (f.isDirectory()) res += getDirSize(path);
-        else res += (await fs.promises.stat(path)).size;
+        const path = dir + "\\" + f.name;
+        const name = prefix + f.name;
+        
+        if (f.isDirectory()) {
+            await func(path, name, true);
+            await doForAllFiles(path, func, f.name + "\\");
+        }
+        
+        else await func(path, name);
     }
+}
 
+async function getDirSize(dir) {
+    let res = 0;
+    await doForAllFiles(dir, async (path) => {
+        res += (await fs.promises.stat(path)).size;
+    });
     return res;
 }
 
-export async function updateTotalSize() {
-    totalSpaceUsed.textContent = getSizeDisplay(await getDirSize(global.userDir + "/songs"));
+let totalBytes;
+export function addBytes(bytes) {
+    totalBytes += bytes;
+    totalSpaceUsed.textContent = getSizeDisplay(totalBytes);
 }
 
 export async function watchFiles(dir) {
@@ -302,7 +317,11 @@ export async function watchFiles(dir) {
     allFiles.clear();
     missingFiles.clear();
     
-    await ensurePathThen(updateTotalSize);
+    await ensurePathThen( async () => {
+        await fs.promises.mkdir(global.userDir + "/songs", {recursive: true});
+        totalBytes = 0;
+        addBytes(await getDirSize(global.userDir + "/songs"));
+    });
 
     // scan songs and add them to allFiles or mark them as error
     data.songs.forEach(async (s) => {
@@ -315,34 +334,31 @@ export async function watchFiles(dir) {
     });
     
     // create stragglers from files that dont have songs
-    (await fs.promises.readdir(dir)).forEach(filename => {
-        if (!allFiles.has(filename)) createStragglerEntry(filename);
+    await doForAllFiles(dir, (_, name, isDirectory) => {
+        if (!allFiles.has(name)) createStragglerEntry(name, isDirectory);
     });
 
     const songsDir = global.userDir + "/songs";
     watcher = chokidar.watch(songsDir, {cwd: songsDir});
     
     watcher.on("ready", () => {
-        watcher.on("all", async () => {
-            console.log("raw event");
-            totalSpaceUsed.textContent = getSizeDisplay((await fs.promises.stat(dir)).size)
-        });
 
-        watcher.on("add", (filename) => {
+        watcher.on("add", async (filename) => {
             
-            if (missingFiles.has(filename)) {
-                missingFiles.get(filename).setState("playable");
+            const song = missingFiles.get(filename);
+            if (song) {
+                song.setState("playable");
+                addBytes(song.size);
                 missingFiles.delete(filename);
             } 
             else {
                 if (reserved.has(filename)) reserved.delete(filename);
-                else createStragglerEntry(filename);
+                else addBytes( (await createStragglerEntry(filename)).size );
             } 
-
-            updateTotalSize();
         });
     
         watcher.on("unlink", (filename) => {
+            console.log(filename, "unlink");
     
             const obj = allFiles.get(filename);
     
@@ -356,19 +372,23 @@ export async function watchFiles(dir) {
             } 
     
             allFiles.delete(filename);
-
-            updateTotalSize();
+            addBytes(-obj.size);
         });
+
+        watcher.on("addDir", (path) => createStragglerEntry(path, true));
+        watcher.on("unlinkDir", deleteStragglerEntry);
     
         watcher.on("change", (filename, stats) => {
                 
             // update size display
-            const obj = allFiles.get(filename);
-            if (obj instanceof HTMLElement) {
-                obj.querySelector(".straggler__size").textContent = getSizeDisplay(stats.size);
-            }
+            const stragglerEntry = allFiles.get(filename);
+            if (stragglerEntry instanceof HTMLElement) {
+                const difference = stats.size - stragglerEntry.size;
+                addBytes(difference);
 
-            updateTotalSize();
+                stragglerEntry.size = stats.size;
+                stragglerEntry.querySelector(".straggler__size").textContent = getSizeDisplay(stats.size);
+            }
         });
         
     });

@@ -1,4 +1,4 @@
-import {  allFiles, makeUnique, reserved } from '../account/files.js';
+import {  addBytes, allFiles, makeUnique, reserved } from '../account/files.js';
 import { Playlist, Song } from '../account/userdata.js';
 import { Tracker } from './tracker.js';
 import { genID } from '../account/account.js';
@@ -195,7 +195,8 @@ export async function downloadSong(ytsid, cb) {
     dlstream.pipe(writeStream);
     dlstream.on("progress", (chunk, downloaded, total) => tracker.setProgress(downloaded, total));
 
-    dlstream.on("end", () => 
+    dlstream.on("end", () => {
+        addBytes(tracker.total);
         cb(null, {
             "id": sid,
             "filename": filename,
@@ -204,6 +205,6 @@ export async function downloadSong(ytsid, cb) {
             "size": tracker.total,
             "duration": Number(info.videoDetails.lengthSeconds)
         })
-    );
+    });
 }
 
