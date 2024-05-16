@@ -137,7 +137,7 @@ export async function downloadPlaylist(ytpid, cb) {
             allFiles.set(song.filename, song);
 
             if (++complete === songs.size) {
-                sendNotification("finished downloading " + playlist.title);
+                sendNotification("downloaded playlist " + playlist.title);
                 if (unavailable !== 0) {
                     sendNotification(
                         unavailable + 
@@ -197,6 +197,7 @@ export async function downloadSong(ytsid, cb) {
 
     dlstream.on("end", () => {
         addBytes(tracker.total);
+        sendNotification("downloaded " + info.videoDetails.title);
         cb(null, {
             "id": sid,
             "filename": filename,

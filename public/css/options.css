@@ -149,6 +149,16 @@
     align-self: center;
 }
 
+#search-yt__btn {
+    width: 30px;
+    height: 30px;
+    padding: 3px;
+}
+
+#search-yt__x {
+    display: none;
+}
+
 #search-yt {
     position: relative;
     width: calc(100% - 80px);
@@ -160,6 +170,7 @@
     box-sizing: border-box;
     width: 100%;
     z-index: 1;
+    display: none;
 }
 
 #search-results {

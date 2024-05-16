@@ -32,7 +32,6 @@
 
     cursor: grab;
     user-select: none;
-    /* position: relative; */
 }
 
 .song__left, .song__right {
@@ -44,6 +43,13 @@
     height: 100%;
     overflow: hidden;
 }
+
+.song__info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
 .song__right {
     justify-content: end;
     gap: 10px;
@@ -55,7 +61,6 @@
 .song__state {
     min-width: 23px;
     width: 23px;
-    min-height: 100%;
     cursor: default;
 }
 
@@ -71,7 +76,14 @@
     fill: var(--accent-color);
 }
 
+.song__duration {
+    margin-left: min(50px, 15%);
+}
 
+.syncStatus {
+    min-width: 20px;
+    min-height: 20px;
+}
 .song__state svg, .syncStatus svg {
     width: 20px;
     height: 20px;
@@ -100,6 +112,7 @@
     font-weight: bold;
 }
 .song__artist {
+    font-size: x-small;
     font-weight: 400;
 }
 

@@ -13,32 +13,48 @@ export async function searchYT(query) {
     else for (const result of all) createSearchResultEntry(result);
 }
 
-const search = document.getElementById("search-yt__input");
+let searchOpen = false;
+
+const searchBtn = document.getElementById("search-yt__btn");
+const glassSVG = document.getElementById("search-yt__glass");
+const xSVG = document.getElementById("search-yt__x");
+
+const searchInput = document.getElementById("search-yt__input");
 const searchResults = document.getElementById("search-results");
+
+searchBtn.addEventListener("click", () => {
+    searchOpen = !searchOpen;
+    
+    searchInput.style.display = searchOpen? "block" : "none";
+    glassSVG.style.display = searchOpen? "none" : "block";
+    xSVG.style.display = searchOpen? "block" : "none";
+
+    if (!searchOpen) searchResults.close();
+});
 
 searchResults.close = () => {
     searchResults.style.display = "none";
     searchResults.innerHTML = "";
 
-    search.style.borderRadius = "5px";
-    search.style.outline = "";
+    searchInput.style.borderRadius = "5px";
+    searchInput.style.outline = "";
 
-    search.value = "";
+    searchInput.value = "";
 }
 
-search.addEventListener("keydown", async (e) => {
+searchInput.addEventListener("keydown", async (e) => {
     if (e.key !== "Enter") return;
 
     searchResults.style.display = "block";
-    search.style.borderRadius = "5px 5px 0 0";
-    search.style.outline = "solid 3px var(--accent-color)";
+    searchInput.style.borderRadius = "5px 5px 0 0";
+    searchInput.style.outline = "solid 3px var(--accent-color)";
     
     let c = 0;
     const loadingAnimation = setInterval(() => {
         searchResults.innerHTML = "searching" + "...".substring(0, c++ % 4);
     }, 100);
 
-    await searchYT(search.value);
+    await searchYT(searchInput.value);
     
     clearInterval(loadingAnimation);
 });

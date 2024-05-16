@@ -172,7 +172,6 @@ export function setToolTip(parent, innerHTML, gap) {
     
     /** moves tooltip to be centered on elem */
     function reposition() {
-        console.log("reposition called");
         const a = parent.getBoundingClientRect();
         const b = tooltip.getBoundingClientRect();
         const bounds = baseAncestor.getBoundingClientRect();
@@ -312,15 +311,19 @@ let activeTextAreas;
 
 function clamp(x, min, max) { return (max < min)? max : Math.max( Math.min(x, max), min ); }
 
+/** minimum pixels between playlists and sidebar */
+const MIN_GAP = 50;
+
 /**
  * @param {string} opposingWidthcssvar css variable with a width in `px`
  */
 function calculateMaxWidth(opposingWidthcssvar) {
     const str = getComputedStyle(document.body).getPropertyValue(opposingWidthcssvar);
-    return window.innerWidth - Number(str.substring(0, str.length-2)) - 50;
+    return window.innerWidth - Number(str.substring(0, str.length-2)) - MIN_GAP;
 }
 
 let maxSidebarWidth;
+
 createResizeDragger(
     document.getElementById("sidebar__dragger"), 
     (e) => {

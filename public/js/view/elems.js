@@ -110,7 +110,6 @@ function getSongEntry(groupElem, song) {
 }
 
 
-
 /** 
  * @param {Song} song
  * @param {Playlist} playlist 
@@ -133,9 +132,10 @@ export function createSongEntry(song, playlist, before) {
             <span class="song__duration"> ${getTimeDisplay(song.duration)} </span>
         </div>`
 
-    const song__title = createElement("span", null, "song__title song__title:" + song.id, songEntry.firstChild, song.title);
-
-    const song__artist = createElement("span", null, "song__artist song__artist:" + song.id, songEntry.firstChild, song.artist);
+    const song__info = createElement("div", null, "song__info", songEntry.firstChild);
+    
+    const song__title = createElement("span", null, "song__title song__title:" + song.id, song__info, song.title);
+    const song__artist = createElement("span", null, "song__artist song__artist:" + song.id, song__info, song.artist);
 
     const syncStatusIcon = createElement("div", null, "syncStatus", songEntry.lastChild);
     setToolTip(syncStatusIcon, "", 10).style.whiteSpace = "nowrap";
@@ -145,7 +145,7 @@ export function createSongEntry(song, playlist, before) {
     song__options.addEventListener("click", (e) => {
         songSettings.openSongSettings(song, song__title, song__artist);
         e.stopPropagation();
-    } );
+    });
     songEntry.addEventListener("contextmenu", (e) => {
         songSettings.openSongSettings(song, song__title, song__artist);
         e.preventDefault();
@@ -160,7 +160,7 @@ export function createSongEntry(song, playlist, before) {
         if (data.curr.viewPlaylist !== data.curr.listenPlaylist) data.updateListenPlaylist();
         data.curr.listenPlaylist.cycle.updateCurrIndex();
     });
-    songEntry.firstChild.insertBefore(song__state, song__title);
+    songEntry.firstChild.insertBefore(song__state, song__info);
 
     
 
@@ -227,7 +227,7 @@ export function createSongEntry(song, playlist, before) {
         menuOn = false;
         songEntry.tooltip.textContent = "[click] resolve missing file";
     });
-
+    
     setEntryState(songEntry, song.state);
     setEntrySyncStatus(songEntry, song.syncStatus);
     dragabbleEntry(songEntry, playlist);
@@ -250,6 +250,7 @@ export function deleteSongEntry(song, playlist) {
 export const mainDiv = document.getElementById("main-div");
 const playlistsNav = document.getElementById("playlists__nav");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
+const playlistsError = document.getElementById("song-settings__playlists__error");
 
 /** PLAYLIST OPTION IN SONG SETTINGS */
 export function createPlaylistCheckboxEntry(playlist) {
@@ -259,11 +260,18 @@ export function createPlaylistCheckboxEntry(playlist) {
     const checkbox = createElement("input", "song-settings__playlist:" + playlist.id, null, option);
     checkbox.type = "checkbox";
     checkbox.playlist = playlist;
-    checkbox.addEventListener("change", () => {        
-        if (checkbox.checked)
+    checkbox.addEventListener("change", () => {
+        if (checkbox.checked) {
             songSettings.currentlyEditing.addToPlaylist(playlist);
-        else
+        } 
+        else {
+            if (songSettings.currentlyEditing.playlists.size === 1) {
+                checkbox.checked = true;
+                return showError(playlistsError, "must be in at least 1 playlist");
+            }
             songSettings.currentlyEditing.removeFromPlaylist(playlist);
+        }
+        playlistsError.textContent = "";
     })
     
     const label = createElement("label", null, null, option, playlist.title);

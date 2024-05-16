@@ -3,7 +3,7 @@ import { data, Song } from "../account/userdata.js";
 import { genID } from "../account/account.js";
 import * as yt from "./getyt.js";
 import { allFiles, uploadSongFile } from "../account/files.js";
-import { showError } from "../view/fx.js";
+import { sendNotification, showError } from "../view/fx.js";
 import { removeClosedTrackerElems } from "./tracker.js";
 import Dropdown from "../view/dropdown.js";
 const { ipcRenderer } = require("electron");
@@ -99,5 +99,6 @@ document.getElementById("song-upload").addEventListener("click", async () => {
 
     const songData = await uploadSongFile(genID(14), dialog.filePaths[0], true);
     initNewSong(songData);
+    sendNotification("uploaded song " + songData.title);
 });
 

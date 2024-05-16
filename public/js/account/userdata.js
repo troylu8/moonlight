@@ -185,7 +185,10 @@ export class Playlist {
 
         if (this === data.curr.viewPlaylist) elems.setViewPlaylist(null, this === data.curr.listenPlaylist);
 
-        for (const song of this.songs) song.removeFromPlaylist(this);
+        for (const song of this.songs) {
+            song.removeFromPlaylist(this);
+            if (song.playlists.size === 0) song.delete();
+        } 
         
         data.playlists.delete(this.id);
 

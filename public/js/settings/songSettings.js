@@ -13,6 +13,7 @@ const size = document.getElementById("song-settings__size");
 const titleArea = document.getElementById("song-settings__title");
 const artistArea = document.getElementById("song-settings__artist");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
+const playlistsError = document.getElementById("song-settings__playlists__error");
 const deleteBtn = document.getElementById("song-settings__delete");
 const deleteErr = document.getElementById("song-settings__delete__error");
 
@@ -47,8 +48,7 @@ export function openSongSettings(song, song__title, song__artist) {
 
     const notchecked = [];
 
-    for (const checkboxDiv of playlistCheckboxes.childNodes) 
-        checkboxDiv.remove();
+    for (const checkboxDiv of playlistCheckboxes.childNodes) checkboxDiv.remove();
     
     for (const playlist of data.playlists.values()) {
         const hasCurrentlyEditing = currentlyEditing.playlists.has(playlist);
@@ -58,10 +58,10 @@ export function openSongSettings(song, song__title, song__artist) {
         else                        notchecked.push(playlist.checkboxDiv);
         
     }
-    for (const checkboxDiv of notchecked) 
-        playlistCheckboxes.appendChild(checkboxDiv);
+    for (const checkboxDiv of notchecked) playlistCheckboxes.appendChild(checkboxDiv);
 
     deleteBtn.reset();
+    playlistsError.textContent = "";
 
     sidebar.setSidebarContent(songSettings);
 }
@@ -119,6 +119,6 @@ export function updateSongEntries() {
 }
 
 function setTitleArtistText(songElem, title, artist) {
-    songElem.firstElementChild.lastElementChild.previousElementSibling.textContent = title;
-    songElem.firstElementChild.lastElementChild.textContent = artist;
+    songElem.querySelector("song__title").textContent = title;
+    songElem.querySelector("song__artist").textContent = artist;
 }
