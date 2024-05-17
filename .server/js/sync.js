@@ -43,7 +43,7 @@ function writeZip(zip, targetfilename, cb) {
 }
 const writeZipPromise = promisify(writeZip);
 
-router.put('/:uid/:hash1/:deviceID', express.json({limit: Infinity}), async (req, res) => {
+router.put('/:uid/:username/:hash1/:deviceID', express.json({limit: Infinity}), async (req, res) => {
 
     const row = db.prepare("SELECT hash2,username,userdata FROM users WHERE uid=? ").get(decoded.uid);
     if (!row) return res.status(404).end()
@@ -114,11 +114,10 @@ router.put('/:uid/:hash1/:deviceID', express.json({limit: Infinity}), async (req
 
     const resJSON = toClient.toBuffer().toJSON();
     
-    if (decoded.username !== row.username) 
-        resJSON.newJWT = await createJWT({uid: decoded.uid, username: row.username});
+    // if username was changed
+    if (req.params["username"] !== row.username) resJSON.newUsername = row.username;
 
     res.json(resJSON);
-    
 });
 
 module.exports = router;

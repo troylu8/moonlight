@@ -6,7 +6,6 @@ import * as acc from "./account.js";
 import { deleteSongFile, missingFiles, readUserdata, writeUserdata } from "./files.js";
 import { initSettingsCheckboxes } from "../settings/settings.js";
 import * as fx from "../view/fx.js";
-const { ipcRenderer } = require("electron");
 
 export class Song {
     constructor(id, options, changeSyncStatus) {
@@ -303,14 +302,12 @@ class UserData {
     };
     
     async saveDataLocal() {   
-        writeUserdata(acc.user.uid, this.stringify());
+        await writeUserdata(acc.user.uid, this.stringify());
     }
 };
 
 /** @type {UserData}  */
 export let data;
-
-ipcRenderer.on("cleanup", () => {if (data) data.saveDataLocal()} );
 
 export async function loadLocaldata(uid) {
     if (data) {

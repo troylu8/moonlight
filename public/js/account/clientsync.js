@@ -1,5 +1,4 @@
 import { sendNotification } from "../view/fx.js";
-import { user } from "./account.js";
 import { deviceID } from "./files.js";
 
 const Zip = require("adm-zip");

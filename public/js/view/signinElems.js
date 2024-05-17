@@ -1,7 +1,6 @@
 import * as acc from "../account/account.js"
 import Dropdown from "./dropdown.js";
 import { audio } from "../play.js";
-import { encryptLocalData } from "../account/files.js";
 import { sendNotification, showError } from "./fx.js";
 import { nullifyData } from "../account/userdata.js";
 
@@ -40,6 +39,10 @@ function initAccCreator(elems) {
 
     submit.addEventListener("click", async () => {
         const signingIn = getComputedStyle(repeatPassword).display === "none";
+        
+        username.value = username.value.trim();
+        password.value = password.value.trim();
+        repeatPassword.value = repeatPassword.value.trim();
 
         const res = inputErrors(username.value, password.value, repeatPassword.value, signingIn) ??
                     (signingIn? 
@@ -67,12 +70,12 @@ document.getElementById("sign-out").addEventListener("click", async () => {
     setSignInActive(true);
 
     setTitleScreen(true);
-    acc.user.clearInfo();
-    nullifyData();
 
     console.log("clearing cache");
-    
-    encryptLocalData("jwt", null); // clear saved jwt
+    acc.user.clearInfo();
+    acc.user.saveLocal();
+
+    nullifyData();
 });
 
 const usernameDisplay = document.getElementById("username-display");

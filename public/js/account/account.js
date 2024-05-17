@@ -1,9 +1,10 @@
 import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
-import { decryptLocalData, getLocalData, setLocalData, watchFiles, missingFiles, reserved, deviceID } from "./files.js";
+import { decryptLocalData, getLocalData, setLocalData, watchFiles, missingFiles, reserved, deviceID, encryptLocalData } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
 import { sendNotification, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
 const { createHash } = require('crypto');
+const { ipcRenderer } = require("electron");
 
 /**
  * @param {number} len 
@@ -30,14 +31,16 @@ function saveNewGuestID() {
     setLocalData("guest id", guestID);
 }
 
+export function isGuest() { return data && user.uid === guestID; }
+
 export let user = {
 
-    uid,
-    username,
-    password,
-    hash1,
+    uid: null,
+    username: null,
+    password: null,
+    hash1: null,
     
-    setInfo(uid, username, password) {
+    setInfo(uid, username, password, hash1) {
         if (uid === "guest") {
             if (!guestID && !fetchGuestID() ) {
                 console.log("no guest id, making one");
@@ -46,27 +49,33 @@ export let user = {
             uid = guestID;
             username = "";
         }
+        else {
+            console.log(uid, username, password, hash1);
+            this.password = password;
+            this.hash1 = hash1 ?? createHash("sha256").update(password).digest("hex");    
+        }
         this.setUID(uid);
         this.setUsername(username);
-        this.setPassword(password);
     },
     setUID(uid) {
         this.uid = uid;
-        global.userDir = uid? global.resources + "/users/" + uid : null;
+        global.userDir = global.resources + "/users/" + uid;
     },
     setUsername(username) {
         this.username = username;
         updateForUsername(username, isGuest());
     },
-    setPassword(password) {
-        this.password = password;
-        this.hash1 = createHash("sha256").update(password).digest("hex");
-    },
 
     clearInfo() {
         this.setUID(null);
         this.setUsername(null);
-        this.setPassword(null);
+        this.password = this.hash1 = null;
+    },
+
+    async saveLocal() {
+        setLocalData("uid", isGuest()? "guest" : this.uid);
+        setLocalData("username", isGuest()? null : this.username);
+        await encryptLocalData("key", isGuest()? null : this.password);
     }
 }
 
@@ -76,14 +85,12 @@ export async function loadAcc(uid, username, password) {
     watchFiles(global.userDir + "/songs");
 }
 
-export function isGuest() { return data && user.uid === guestID; }
-
 window.addEventListener("load", async () => {
 
-    const uid = await decryptLocalData("uid");
+    const uid = getLocalData("uid");
     if (!uid) return;
 
-    const username = await decryptLocalData("username");
+    const username = getLocalData("username");
     const password = await decryptLocalData("key");
     console.log("saved pass: ", password);
 
@@ -92,20 +99,28 @@ window.addEventListener("load", async () => {
     setTitleScreen(false);
 
     if (!isGuest()) {
-        const serverJSON = await getData(uid, password);
+        const serverJSON = await getData();
         getDoomed(serverJSON, "songs");
         getDoomed(serverJSON, "playlists");
-
-        pass = getLocalData("key to server");
     }
 });
 
+ipcRenderer.on("cleanup", async () => {
+    if (data) {
+        await data.saveDataLocal();
+        if (data.settings["stay-signed-in"]) await user.saveLocal();
+    }
+    console.log("done");
+    ipcRenderer.send("cleanup-done");
+});
 
 /** @returns {Promise<"username taken" | "success">} */
-export async function createAccData(username, hash1) {
+export async function createAccData(username, password) {
     const fromGuest = isGuest();
     console.log("fromGuest", fromGuest);
+
     const uid = fromGuest? guestID : genID(14);
+    const hash1 = createHash("sha256").update(password).digest("hex");
     
     // create account at server
     const res = await fetch(`https://localhost:5001/create-account-dir/${uid}`, {
@@ -126,8 +141,7 @@ export async function createAccData(username, hash1) {
     if (fromGuest) saveNewGuestID();
 
     if (!fromGuest) await loadLocaldata(uid);
-    user.setUID(uid);
-    user.setUsername(username);
+    user.setInfo(uid, username, password, hash1);
 
     watchFiles(global.userDir + "/songs")
 
@@ -135,7 +149,9 @@ export async function createAccData(username, hash1) {
 }
 
 /** @returns {Promise<"username not found" | "unauthorized" | "success">} */
-export async function fetchAccData(username, hash1) {
+export async function fetchAccData(username, password) {
+
+    const hash1 = createHash("sha256").update(password).digest("hex");
 
     const res = await fetch("https://localhost:5001/sign-in", {
         method: "POST",
@@ -152,7 +168,7 @@ export async function fetchAccData(username, hash1) {
     if (res.status === 404) return "username not found";
     if (res.status === 401) return "wrong password"
 
-    await loadAcc(await res.text());
+    await loadAcc(await res.text(), username, password, hash1);
 
     return "success";
 }
@@ -226,7 +242,7 @@ export async function syncData() {
 
     startSyncSpin();
 
-    const serverJSON = await getData(jwt);
+    const serverJSON = await getData();
 
     const changes = new SyncChanges();
     
@@ -305,8 +321,8 @@ export async function syncData() {
     sendNotification("sync complete!");
 }
 
-export async function getData(jwt) {
-    const res = await fetch(`https://localhost:5001/get-data/${jwt}`).catch(fetchErrHandler); 
+export async function getData() {
+    const res = await fetch(`https://localhost:5001/get-data/${user.uid}/${user.hash1}`).catch(fetchErrHandler); 
     if (res && res.ok) return await res.json();
 }
 

@@ -18,7 +18,11 @@ app.whenReady().then( async () => {
         show: false
     });
 
-    win.on("close", () => win.webContents.send("cleanup"));
+    win.once("close", (e) => {
+        win.webContents.send("cleanup");
+        e.preventDefault();
+    });
+    ipcMain.on("cleanup-done", () => app.quit());
 
     win.setMenu(null);
 
@@ -27,7 +31,7 @@ app.whenReady().then( async () => {
     win.maximize();
 });
 
-app.on('window-all-closed', () => app.quit());
+
 
 app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
     event.preventDefault();
@@ -48,6 +52,7 @@ ipcMain.handle("show-folder", (e, path) => shell.openPath(path));
 
 ipcMain.handle("encrypt", (e, text) => safeStorage.encryptString(text).toString("hex"));
 ipcMain.handle("decrypt", (e, hex) => safeStorage.decryptString(Buffer.from(hex, "hex")));
+
 
 const server = express();
 server.use(cors());

@@ -61,18 +61,13 @@ export async function pathExists(path) {
     
 
 export function setLocalData(key, value) {
-
-    // only wrap in apostrophes if not null
-    const str = value? ` '${value}' `: "null";
-
-    db.prepare(`DELETE FROM local WHERE key='${key}' `).run();
-    db.prepare(`INSERT INTO local VALUES ( '${key}', ${str} ) `).run();
-
+    db.prepare("DELETE FROM local WHERE key=? ").run(key);
+    db.prepare("INSERT INTO local VALUES ( ?, ? ) ").run(key, value);
     return value;
 }
 
 export function getLocalData(key) {
-    const row = db.prepare(`SELECT value FROM local WHERE key='${key}' `).get();
+    const row = db.prepare(`SELECT value FROM local WHERE key=? `).get(key);
     return row? row.value : undefined;
 }
 
@@ -84,12 +79,6 @@ export async function decryptLocalData(key) {
 export async function encryptLocalData(key, value) { 
     setLocalData(key, value? ( await ipcRenderer.invoke("encrypt", value) ) : null);
 }
-ipcRenderer.on("cleanup", () => {
-    if (data && data.settings["stay-signed-in"]) {
-        console.log("saving", acc.isGuest()? "guest" : acc.jwt);
-        encryptLocalData("jwt", acc.isGuest()? "guest" : acc.jwt);
-    } 
-});
 
 const defaultUserData = JSON.stringify({
     // other default settings should be indicated in index.html - theyre applied in initSettingsCheckboxes() 

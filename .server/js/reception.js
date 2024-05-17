@@ -44,7 +44,7 @@ router.post("/create-account-dir/:uid", express.json(), async (req, res) => {
 });
 
 router.post("/sign-in", express.json(), async (req, res) => {
-    const row = db.prepare("SELECT uid, hash FROM users WHERE username=?").get(req.body.username);
+    const row = db.prepare("SELECT uid, hash2 FROM users WHERE username=?").get(req.body.username);
     if (!row) return res.status(404).end();
 
     if (await bcrypt.compare(req.body.hash1, row.hash2))   
@@ -84,7 +84,7 @@ router.put("/change-password/:uid", express.json(), async (req, res) => {
 
 router.get("/get-data/:uid/:hash1", express.text(), async (req, res) => {
 
-    const row = db.prepare("SELECT hash2,userdata FROM users WHERE uid=?").get(decoded.uid);
+    const row = db.prepare("SELECT hash2,userdata FROM users WHERE uid=?").get(req.params["uid"]);
     if (!row) return res.status(404).end();
 
     if (! (await bcrypt.compare(req.params["hash1"], row.hash2)) ) return res.status(401).end();
