@@ -35,9 +35,9 @@ document.body.addEventListener("keydown", async (e) => {
         case "I":
             console.log({
                 gid: acc.guestID,
-                uid: acc.uid,
+                uid: acc.user.uid,
                 jwt: acc.jwt,
-                username: acc.username
+                username: acc.user.username
             });
             break;
         case "S":
@@ -55,4 +55,4 @@ document.body.addEventListener("keydown", async (e) => {
         
     }
     
-})
+});

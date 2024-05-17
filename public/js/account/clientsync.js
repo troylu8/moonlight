@@ -1,5 +1,5 @@
 import { sendNotification } from "../view/fx.js";
-import { jwt, parseJWT, setAccInfo, uid } from "./account.js";
+import { user } from "./account.js";
 import { deviceID } from "./files.js";
 
 const Zip = require("adm-zip");
@@ -77,6 +77,7 @@ export async function syncToServer(changes) {
     const resJSON = await res.json()
     if (resJSON.newJWT) {
         const info = parseJWT(resJSON.newJWT);
+        
         setAccInfo(resJSON.newJWT, info.uid, info.username);
         sendNotification("username was changed to ", info.username);
     }

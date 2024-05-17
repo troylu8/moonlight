@@ -303,7 +303,7 @@ class UserData {
     };
     
     async saveDataLocal() {   
-        writeUserdata(acc.uid, this.stringify());
+        writeUserdata(acc.user.uid, this.stringify());
     }
 };
 

@@ -2,7 +2,6 @@ import { addDragEvent } from "./view/fx.js";
 import { getTimeDisplay } from "./view/elems.js";
 import { setSpin, updateVolumeIcon } from "./view/fx.js";
 import { data, Playlist, Song } from "./account/userdata.js";
-import { uid } from "./account/account.js";
 
 
 class SpinningAudio extends Audio {
@@ -76,7 +75,7 @@ export function setSong(song) {
 
     if (song.state === "error") return false;
 
-    const path = `resources/users/${uid}/songs/${encodeURIComponent(song.filename)}`;
+    const path = global.userDir + `/songs/${encodeURIComponent(song.filename)}`;
 
     audio.src = path;
     data.curr.song = song;

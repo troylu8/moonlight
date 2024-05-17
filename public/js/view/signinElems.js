@@ -67,7 +67,7 @@ document.getElementById("sign-out").addEventListener("click", async () => {
     setSignInActive(true);
 
     setTitleScreen(true);
-    acc.clearAccInfo();
+    acc.user.clearInfo();
     nullifyData();
 
     console.log("clearing cache");

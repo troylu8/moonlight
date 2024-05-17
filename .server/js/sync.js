@@ -4,7 +4,8 @@ const Zip = require("adm-zip");
 const { join } = require("path");
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
-const { db, verifyJWT, createJWT } = require("./reception.js");
+const { db } = require("./reception.js");
+const bcrypt = require('bcrypt');
 
 
 fs.mkdir(__dirname + "/../userfiles", {recursive: true}, () => {});
@@ -42,13 +43,11 @@ function writeZip(zip, targetfilename, cb) {
 }
 const writeZipPromise = promisify(writeZip);
 
-router.put('/:jwt/:deviceID', express.json({limit: Infinity}), async (req, res) => {
+router.put('/:uid/:hash1/:deviceID', express.json({limit: Infinity}), async (req, res) => {
 
-    let decoded;
-    try { decoded = await verifyJWT(req.params["jwt"]); }
-    catch (err) { return res.status(401).end(); }
-
-    
+    const row = db.prepare("SELECT hash2,username,userdata FROM users WHERE uid=? ").get(decoded.uid);
+    if (!row) return res.status(404).end()
+    if ( !(await bcrypt.compare(req.params["hash1"], row.hash2)) ) return res.status(401).end();
     
     const zipPath = join(__dirname, "../userfiles", decoded.uid + ".zip");
 
@@ -71,8 +70,6 @@ router.put('/:jwt/:deviceID', express.json({limit: Infinity}), async (req, res) 
         }
     }
 
-    const row = db.prepare("SELECT username,userdata FROM users WHERE uid=? ").get(decoded.uid);
-    if (!row) return res.status(404).end("userdata missing")
     const data = JSON.parse(row.userdata);
     
     const changes = JSON.parse( await getDataPromise(arrived.getEntry("changes.json")) );

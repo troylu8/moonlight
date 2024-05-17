@@ -6,6 +6,7 @@ import { stragglersList } from "../view/elems.js";
 import * as acc from "../account/account.js";
 const fs = require("fs");
 const { ipcRenderer } = require("electron");
+const { createHash } = require('crypto');
 
 
 const generalSettings = document.getElementById("settings");
@@ -83,13 +84,13 @@ initAccEditor(
         const username = changeU__username.value.trim();
 
         if (username === "") return showError(changeU__error, "username cannot be empty");
-        if (username === acc.username) return showError(changeU__error, "this is your current username");
+        if (username === acc.user.username) return showError(changeU__error, "this is your current username");
 
-        const res = await fetch(`https://localhost:5001/change-username/${acc.uid}`, {
+        const res = await fetch(`https://localhost:5001/change-username/${acc.user.uid}`, {
             method: "PUT",
             body: JSON.stringify({
                 username: username,
-                password: changeU__password.value.trim()
+                hash1: createHash("sha256").update(changeU__password.value.trim()).digest("hex")
             }),
             headers: {
                 "Content-Type": "application/json"
@@ -121,23 +122,26 @@ initAccEditor(
         submit: document.getElementById("change-password__submit")
     },
     async () => {
+        const oldPassword = changeP__old.value.trim();
         const newPassword = changeP__new.value.trim();
         if (newPassword !== changeP__repeat.value.trim()) return showError(changeP__error, "passwords don't match");
         
-        const res = await fetch(`https://localhost:5001/change-password/${acc.uid}`, {
+        const res = await fetch(`https://localhost:5001/change-password/${acc.user.uid}`, {
             method: "PUT",
             body: JSON.stringify({
-                oldPassword: changeP__old.value.trim(),
-                newPassword: newPassword
+                oldHash1: createHash("sha256").update(oldPassword).digest("hex"),
+                newHash1: createHash("sha256").update(newPassword).digest("hex")
             }),
             headers: {
                 "Content-Type": "application/json"
             },
         }).catch(acc.fetchErrHandler);
         if (!res) return;
-        
         if (res.status === 401) return showError(changeP__error, "wrong password");
 
+        
+        //TODO: SYNC TO GET ALL DATA, RE-ENCRYPT WITH NEW PASSWORD AND UPLOAD
+        
         sendNotification("password change success");
         return true;
     }

@@ -3,7 +3,7 @@ import { syncToServer } from "./clientsync.js";
 import { decryptLocalData, getLocalData, setLocalData, watchFiles, missingFiles, reserved, deviceID } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
 import { sendNotification, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
-const { ipcRenderer } = require('electron');
+const { createHash } = require('crypto');
 
 /**
  * @param {number} len 
@@ -30,60 +30,69 @@ function saveNewGuestID() {
     setLocalData("guest id", guestID);
 }
 
-export let uid;
-export let username;
+export let user = {
 
-/** @type {string} */
-export let jwt;
-
-export function setAccInfo(JWT, UID, USERNAME) {
-    if (JWT === "guest") {
-        if (!guestID && !fetchGuestID() ) {
-            console.log("no guest id, making one");
-            saveNewGuestID();
+    uid,
+    username,
+    password,
+    hash1,
+    
+    setInfo(uid, username, password) {
+        if (uid === "guest") {
+            if (!guestID && !fetchGuestID() ) {
+                console.log("no guest id, making one");
+                saveNewGuestID();
+            }
+            uid = guestID;
+            username = "";
         }
-    
-        jwt = null;
-        uid = guestID;
-        username = "[guest]";
-    }
-    else {
-        jwt = JWT ?? jwt;
-        uid = UID ?? uid;
-        username = USERNAME ?? username;
-    }
+        this.setUID(uid);
+        this.setUsername(username);
+        this.setPassword(password);
+    },
+    setUID(uid) {
+        this.uid = uid;
+        global.userDir = uid? global.resources + "/users/" + uid : null;
+    },
+    setUsername(username) {
+        this.username = username;
+        updateForUsername(username, isGuest());
+    },
+    setPassword(password) {
+        this.password = password;
+        this.hash1 = createHash("sha256").update(password).digest("hex");
+    },
 
-    updateForUsername(username, isGuest());
-    
-    global.userDir = global.resources + "/users/" + uid;
+    clearInfo() {
+        this.setUID(null);
+        this.setUsername(null);
+        this.setPassword(null);
+    }
 }
-export function clearAccInfo() { jwt = uid = username = null; }
 
-export async function loadAcc(jwt) {
-    if (jwt === "guest") setAccInfo("guest");
-    else {
-        const info = parseJWT(jwt);
-        setAccInfo(jwt, info.uid, info.username);
-    }
-    
-    await loadLocaldata(uid);
+export async function loadAcc(uid, username, password) {
+    user.setInfo(uid, username, password);
+    await loadLocaldata(user.uid);
     watchFiles(global.userDir + "/songs");
 }
 
-export function isGuest() { return data && uid === guestID; }
+export function isGuest() { return data && user.uid === guestID; }
 
 window.addEventListener("load", async () => {
 
-    const jwt = await decryptLocalData("jwt");
-    console.log("saved jwt: ", jwt);
-    if (!jwt) return;
+    const uid = await decryptLocalData("uid");
+    if (!uid) return;
 
-    await loadAcc(jwt);
+    const username = await decryptLocalData("username");
+    const password = await decryptLocalData("key");
+    console.log("saved pass: ", password);
+
+    await loadAcc(uid, username, password);
     
     setTitleScreen(false);
 
     if (!isGuest()) {
-        const serverJSON = await getData(jwt);
+        const serverJSON = await getData(uid, password);
         getDoomed(serverJSON, "songs");
         getDoomed(serverJSON, "playlists");
 
@@ -93,44 +102,46 @@ window.addEventListener("load", async () => {
 
 
 /** @returns {Promise<"username taken" | "success">} */
-export async function createAccData(USERNAME, PASSWORD) {
+export async function createAccData(username, hash1) {
     const fromGuest = isGuest();
     console.log("fromGuest", fromGuest);
     const uid = fromGuest? guestID : genID(14);
     
     // create account at server
-    const jwtReq = await fetch(`https://localhost:5001/create-account-dir/${uid}`, {
+    const res = await fetch(`https://localhost:5001/create-account-dir/${uid}`, {
         method: "POST",
         body: JSON.stringify({
-            username: USERNAME,
-            password: PASSWORD
+            username: username,
+            hash1: hash1
         }),
         headers: {
             "Content-Type": "application/json"
         },
     }).catch(fetchErrHandler);
-    if (!jwtReq) return;
+    if (!res) return;
 
-    if (jwtReq.status === 409) return "username taken";
+    if (res.status === 409) return "username taken";
 
     // i was going to clear guest id here, but might as well save a new one
     if (fromGuest) saveNewGuestID();
 
     if (!fromGuest) await loadLocaldata(uid);
-    setAccInfo(await jwtReq.text(), uid, USERNAME);
+    user.setUID(uid);
+    user.setUsername(username);
+
     watchFiles(global.userDir + "/songs")
 
     return "success";
 }
 
 /** @returns {Promise<"username not found" | "unauthorized" | "success">} */
-export async function fetchAccData(USERNAME, PASSWORD) {
+export async function fetchAccData(username, hash1) {
 
     const res = await fetch("https://localhost:5001/sign-in", {
         method: "POST",
         body: JSON.stringify({
-            username: USERNAME,
-            password: PASSWORD
+            username: username,
+            hash1: hash1
         }),
         headers: {
             "Content-Type": "application/json"
@@ -147,15 +158,15 @@ export async function fetchAccData(USERNAME, PASSWORD) {
 }
 
 /** [stack overflow link](https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library) */
-export function parseJWT(jwt) {    
-    const base64Url = jwt.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
+// export function parseJWT(jwt) {    
+//     const base64Url = jwt.split('.')[1];
+//     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+//     const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+//         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+//     }).join(''));
 
-    return JSON.parse(jsonPayload);
-}
+//     return JSON.parse(jsonPayload);
+// }
 
 const syncBtn = document.getElementById("sync");
 
