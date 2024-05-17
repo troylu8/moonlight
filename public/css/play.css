@@ -11,8 +11,6 @@
 
     height: var(--play-div-height);
     padding: 0 15px;
-
-    /* z-index: 3; */
 }
 
 #info {

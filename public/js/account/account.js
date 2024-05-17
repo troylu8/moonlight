@@ -1,8 +1,9 @@
 import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
 import { syncToServer } from "./clientsync.js";
-import { readSavedJWT, getLocalData, setLocalData, readKey, watchFiles, missingFiles, reserved, deviceID } from "./files.js";
+import { decryptLocalData, getLocalData, setLocalData, watchFiles, missingFiles, reserved, deviceID } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
 import { sendNotification, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
+const { ipcRenderer } = require('electron');
 
 /**
  * @param {number} len 
@@ -72,9 +73,8 @@ export async function loadAcc(jwt) {
 export function isGuest() { return data && uid === guestID; }
 
 window.addEventListener("load", async () => {
-    await readKey();
 
-    const jwt = readSavedJWT();
+    const jwt = await decryptLocalData("jwt");
     console.log("saved jwt: ", jwt);
     if (!jwt) return;
 
@@ -86,6 +86,8 @@ window.addEventListener("load", async () => {
         const serverJSON = await getData(jwt);
         getDoomed(serverJSON, "songs");
         getDoomed(serverJSON, "playlists");
+
+        pass = getLocalData("key to server");
     }
 });
 

@@ -6,7 +6,6 @@ const { ipcRenderer } = require("electron");
 const { dirname, basename, resolve } = require("path");
 const fs = require('fs');
 const { promisify } = require('util');
-const { randomBytes, createCipheriv, createDecipheriv } = require("crypto");
 const chokidar = require('chokidar');
 
 global.resources = __dirname + "/resources";
@@ -59,37 +58,6 @@ export async function pathExists(path) {
         throw err;
     }
 }
-
-let secretKey;
-export async function readKey() {
-    const data = await readFileOrDefault(global.resources + "/client.key", randomBytes(32), "hex");
-    return secretKey = data instanceof Buffer? data : Buffer.from(data, "hex");
-}
-
-
-function encrypt(text) {
-    if (!text) return;
-
-    const iv = randomBytes(16);
-
-    const cipher = createCipheriv("aes-256-gcm", secretKey, iv);
-
-    return  iv.toString("hex") + ":" + 
-            cipher.update(text, "utf8", "hex") + cipher.final("hex") + ":" +
-            cipher.getAuthTag().toString("hex");
-}
-
-function decrypt(text) {
-    if (!text) return;
-
-
-    const [ iv, ciphertext, authTag ] = text.split(":");
-
-    const decipher = createDecipheriv("aes-256-gcm", secretKey, Buffer.from(iv, "hex"));
-    decipher.setAuthTag(Buffer.from(authTag, "hex"));
-
-    return decipher.update(ciphertext, "hex", "utf8") + decipher.final("utf8");
-}
     
 
 export function setLocalData(key, value) {
@@ -108,22 +76,18 @@ export function getLocalData(key) {
     return row? row.value : undefined;
 }
 
-export function printLocalData() {
-    db.each("SELECT * FROM local", (err, row) => {
-        console.log(row);
-    })
+export async function decryptLocalData(key) {
+    const ciphertext = getLocalData(key);
+    console.log("cipher", ciphertext);
+    return ciphertext? ( await ipcRenderer.invoke("decrypt", ciphertext) ) : null;
 }
-
-export function readSavedJWT() {
-    return decrypt(getLocalData("saved jwt"));
-}
-export async function writeSavedJWT(jwt) { 
-    setLocalData("saved jwt", encrypt(jwt)); 
+export async function encryptLocalData(key, value) { 
+    setLocalData(key, value? ( await ipcRenderer.invoke("encrypt", value) ) : null);
 }
 ipcRenderer.on("cleanup", () => {
     if (data && data.settings["stay-signed-in"]) {
         console.log("saving", acc.isGuest()? "guest" : acc.jwt);
-        writeSavedJWT(acc.isGuest()? "guest" : acc.jwt);
+        encryptLocalData("jwt", acc.isGuest()? "guest" : acc.jwt);
     } 
 });
 

@@ -1,8 +1,8 @@
 import * as acc from "../account/account.js"
 import Dropdown from "./dropdown.js";
 import { audio } from "../play.js";
-import { writeSavedJWT } from "../account/files.js";
-import { shiftDown, showError } from "./fx.js";
+import { encryptLocalData } from "../account/files.js";
+import { sendNotification, showError } from "./fx.js";
 import { nullifyData } from "../account/userdata.js";
 
 const titlescreen = document.getElementById("titlescreen");
@@ -49,6 +49,7 @@ function initAccCreator(elems) {
         if (res === "success")  {
             setTitleScreen(false);
             updateForUsername(username.value);
+            sendNotification("welcome, " + username.value);    
         }
         else showError(error, res);
     });
@@ -71,7 +72,7 @@ document.getElementById("sign-out").addEventListener("click", async () => {
 
     console.log("clearing cache");
     
-    writeSavedJWT(null); // clear saved jwt
+    encryptLocalData("jwt", null); // clear saved jwt
 });
 
 const usernameDisplay = document.getElementById("username-display");

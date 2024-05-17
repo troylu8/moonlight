@@ -25,7 +25,6 @@ export function dragabbleEntry(entry, playlist) {
     let destination;
     let dragBuffer;
 
-
     addDragEvent(entry, 
         (e) => {
             entry.style.top = (pos[1] += e.movementY) + "px";
@@ -45,6 +44,7 @@ export function dragabbleEntry(entry, playlist) {
             entry.style.left = rect.x + "px";
             entry.style.position = "fixed";
             entry.style.pointerEvents = "none";
+            entry.style.backgroundColor = "var(--background-color)";
             pos = [rect.x, rect.y];
 
             dragBuffer = document.createElement("div");
@@ -56,7 +56,7 @@ export function dragabbleEntry(entry, playlist) {
         },
 
         (e) => {
-            ["width", "height", "top", "left", "position", "pointer-events"]
+            ["width", "height", "top", "left", "position", "pointer-events", "background-color"]
                 .forEach(p => entry.style.removeProperty(p));
             
             dragBuffer.replaceWith(entry);

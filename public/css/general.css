@@ -6,13 +6,19 @@
 
     --movement-transition: 0.2s;
 
-    --background-color: #17181a;
-    --background-color-side: #232427;
-    --background-color-main: #3a3c42;
-    --primary-color: #DBE4F0;
+    --background-color: #202020;
+    --background-color-side: #2c2c2c;
+    --background-color-main: #434343;
+    --primary-color: #e4e8ea;
     --accent-color: #9C55E8;
     --warning-color: rgb(215, 169, 140);
     --error-color: #d13030;
+
+    /* --background-color: #f8f1e0;
+    --background-color-side: #f8f1e0;
+    --background-color-main: #f8f1e0;
+    --primary-color: #2d2b2b;
+    --accent-color: #8b704b; */
 }
 
 @font-face {
@@ -23,8 +29,8 @@
 body, button, input[type="text"] {
     color: var(--primary-color);
 
-    font-family: SometypeMono, monospace;
-    font-weight: 600;
+    font-family: SometypeMono;
+    font-weight:500;
     font-optical-sizing: auto;
 }
 
@@ -199,6 +205,7 @@ input[type="file"] {
 }
 
 .horizontal-dragger {
+
     position: absolute;
     width: 10px;
     height: 100%;
@@ -207,12 +214,26 @@ input[type="file"] {
 
     z-index: 10;
 }
+.horizontal-dragger > div {
+    position: absolute;
+    width: 3px;
+    height: 80%;
+    background-color: var(--accent-color);
+    border-radius: 3px;
+
+    margin: auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
 #sidebar__dragger {
-    left: -5px;
+    right: -5px;
     display: none;
 }
 #playlists__dragger {
-    right: -5px;
+    left: -5px;
 }
 
 .expander {

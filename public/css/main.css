@@ -11,6 +11,8 @@
     flex-direction: column;
 
     transition: var(--movement-transition);
+
+    z-index: 2;
 }
 
 .playlist__group {
@@ -32,6 +34,8 @@
 
     cursor: grab;
     user-select: none;
+
+    border-radius: 5px;
 }
 
 .song__left, .song__right {
@@ -139,5 +143,7 @@
 
 .drag__buffer {
     background-color: var(--accent-color);
+    margin-right: 15px;
+    border-radius: 5px;
     /* height is programmatically set to equal songEntry height */
 }

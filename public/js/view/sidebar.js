@@ -32,14 +32,14 @@ export let activeSidebarElem;
 export function setSidebarContent(elem) {
     // if switching away from songsettings or to different song, update song entries of song we were just editing
     if (activeSidebarElem === songSettings) updateSongEntries();
-    if (activeSidebarElem === elem) return setSidebarOpen(true);
 
     if (activeSidebarElem) activeSidebarElem.classList.remove("sidebar__active");
-    
-    activeSidebarElem = elem;
-    activeSidebarElem.classList.add("sidebar__active");
 
-    setSidebarOpen(true);
+    setTimeout(() => {
+        activeSidebarElem = elem;
+        activeSidebarElem.classList.add("sidebar__active");
+        setSidebarOpen(true);
+    }, 70);
 }
 
 document.getElementById("sidebar__collapse").onclick = () => {

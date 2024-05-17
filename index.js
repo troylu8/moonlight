@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron/main')
+const { app, BrowserWindow, safeStorage} = require('electron');
 const express = require("express");
 const cors = require('cors');
 const { ipcMain, dialog, shell } = require('electron');
@@ -34,7 +34,6 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
     callback(true);
 });
 
-
 ipcMain.handle("show-dialog", async (e, options) => await dialog.showOpenDialog(options));
 ipcMain.handle("show-file", async (e, path) => {
     try {
@@ -46,6 +45,9 @@ ipcMain.handle("show-file", async (e, path) => {
     }
 });
 ipcMain.handle("show-folder", (e, path) => shell.openPath(path));
+
+ipcMain.handle("encrypt", (e, text) => safeStorage.encryptString(text).toString("hex"));
+ipcMain.handle("decrypt", (e, hex) => safeStorage.decryptString(Buffer.from(hex, "hex")));
 
 const server = express();
 server.use(cors());
