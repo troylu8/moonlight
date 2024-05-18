@@ -45,70 +45,52 @@ const writeZipPromise = promisify(writeZip);
 
 router.put('/:uid/:username/:hash1/:deviceID', express.json({limit: Infinity}), async (req, res) => {
 
-    const row = db.prepare("SELECT hash2,username,userdata FROM users WHERE uid=? ").get(decoded.uid);
+    const row = db.prepare("SELECT hash2,username,userdata FROM users WHERE uid=? ").get(req.params["uid"]);
     if (!row) return res.status(404).end()
     if ( !(await bcrypt.compare(req.params["hash1"], row.hash2)) ) return res.status(401).end();
     
-    const zipPath = join(__dirname, "../userfiles", decoded.uid + ".zip");
+    const zipPath = join(__dirname, "../userfiles", req.params["uid"] + ".zip");
 
     const createdNewFile = await createFile(zipPath);
-    console.log(zipPath, createdNewFile);
     
-    const userfiles = new Zip(createdNewFile? undefined : zipPath);
-    const arrived = new Zip(Buffer.from(req.body.data));
+    const userZip = new Zip(createdNewFile? undefined : zipPath);
+    const receivedZip = new Zip(Buffer.from(req.body.data));
 
-    // add new files to zip
-    for (const entry of arrived.getEntries()) {
-        if (entry.name === "changes.json") continue;
+    // add new files to user zip
+    for (const entry of receivedZip.getEntries()) {
+        if (entry.name === "meta.json") continue;
 
         try {
             const data = await getDataPromise(entry);
-            userfiles.addFile(entry.entryName, data);
+            userZip.addFile(entry.entryName, data);
             console.log("added file ", entry.entryName);
         } catch (err) {
             console.log(err);
         }
     }
-
-    const data = JSON.parse(row.userdata);
     
-    const changes = JSON.parse( await getDataPromise(arrived.getEntry("changes.json")) );
-    
-    console.log("server backend got: ", changes);
+    const meta = JSON.parse( await getDataPromise(receivedZip.getEntry("meta.json")) );
+    console.log("server backend got: ", meta);
 
-    // merge json data
-    for (const song of changes["unsynced-songs"]) {
-        song.lastUpdatedBy = req.params["deviceID"];
-        data.songs[song.id] = song;
-        console.log("added", song.title, " to data");
-    }
-    for (const playlist of changes["unsynced-playlists"]) {
-        playlist.lastUpdatedBy = req.params["deviceID"];
-        data.playlists[playlist.id] = playlist;
-        console.log("added", playlist.title, " to data");
-    }
-    // clear trash
-    for (const info of changes.trash) {
-        const objPath = info[0].split(".");
-        delete data[ objPath[0] ][ objPath[1] ];
-
-        userfiles.deleteFile(info[1]);
-        console.log("deleted", info[0], info[1]);
-    }
-
-    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(JSON.stringify(data), decoded.uid);
+    // update userdata
+    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(JSON.stringify(meta.userdata), req.params["uid"]);
     console.log("finished editing data");
+
+    // delete files
+    for (const path of meta.files.delete) {
+        userZip.deleteFile(path);
+        console.log("deleted", path );
+    }
     
-    await writeZipPromise(userfiles, zipPath);
+    await writeZipPromise(userZip, zipPath);
     console.log("finished writing zip");
 
     const toClient = new Zip();
 
     // send back requested files
-    for (const filepath of changes.requestedFiles) {
-        console.log("packing ", filepath);
-        const entry = userfiles.getEntry(filepath);
-        if (!entry) console.log("couldnt find ", filepath);
+    for (const path of meta.files.sendToClient) {
+        console.log("packing ", path);
+        const entry = userZip.getEntry(path);
         toClient.addFile(entry.entryName, await getDataPromise(entry));
     }
 

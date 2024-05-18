@@ -20,8 +20,8 @@ export class Song {
         this.size = options.size;
         this.duration = options.duration;
 
-        /** @type {"new" | "edited" | "synced" | "doomed"} */
-        this.syncStatus = options.syncStatus ?? "new";
+        /** @type {"local" | "synced" | "doomed"} */
+        this.syncStatus = options.syncStatus ?? "local";
 
         /** @type {Map<Playlist, HTMLElement>} */
         this.songEntries = new Map();
@@ -36,12 +36,11 @@ export class Song {
         }
     }
     
-    /** @param {"new" | "edited" | "synced" | "doomed"} syncStatus cannot set `syncStatus` to `edited` when it is `new`*/
+    /** @param {"local" | "synced" | "doomed"} syncStatus cannot set `syncStatus` to `local` when it is `new`*/
     setSyncStatus(syncStatus) {
-        if (syncStatus === "edited" && this.syncStatus === "new") return;
         this.syncStatus = syncStatus;
 
-        if (syncStatus === "edited" || syncStatus === "new") fx.setSynced(false);
+        if (syncStatus === "local") fx.setSynced(false);
 
         for (const songEntry of this.songEntries.values())
             elems.setEntrySyncStatus(songEntry, syncStatus);
@@ -52,7 +51,7 @@ export class Song {
         this.state = state;
 
         if (state === "error") {
-            this.setSyncStatus("edited");
+            this.setSyncStatus("local");
             if (data.curr.song === this) play.setSong(null);
         } 
         
@@ -74,7 +73,7 @@ export class Song {
 
     /** 
      * @param {Playlist} playlist
-     * @param {boolean} changeSyncStatus `true` if adding to playlist should set `.syncStatus` of song and playlist to `"edited"`
+     * @param {boolean} changeSyncStatus `true` if adding to playlist should set `.syncStatus` of song and playlist to `"local"`
      * @param {HTMLElement} before 
      */
     addToPlaylist(playlist, changeSyncStatus, before) {
@@ -83,8 +82,8 @@ export class Song {
         if (!playlist || playlist.songs.has(this)) return;
         
         if ( changeSyncStatus ?? true ) {
-            this.setSyncStatus("edited");
-            playlist.setSyncStatus("edited");
+            this.setSyncStatus("local");
+            playlist.setSyncStatus("local");
         }
 
         playlist.songs.add(this);
@@ -103,8 +102,8 @@ export class Song {
     removeFromPlaylist(playlist) {
         if (!playlist.songs.has(this)) return;
 
-        this.setSyncStatus("edited");
-        playlist.setSyncStatus("edited");
+        this.setSyncStatus("local");
+        playlist.setSyncStatus("local");
 
         playlist.songs.delete(this);
         this.playlists.delete(playlist);
@@ -122,8 +121,7 @@ export class Song {
             else data.curr.listenPlaylist.cycle.setSongNext(!play.audio.paused);
         }
 
-        if (this.syncStatus !== "new")
-            data.trashqueue.set("songs." + this.id, "songs/" + this.filename);
+        data.trashqueue.set(this.id, "songs/" + this.filename);
 
         for (const playlist of this.playlists) 
             this.removeFromPlaylist(playlist);
@@ -154,8 +152,8 @@ export class Playlist {
         /** @type {PlaylistCycle} */
         this.cycle = null;
 
-        /** @type {"new" | "edited" | "synced" | "doomed"} */
-        this.syncStatus = options.syncStatus ?? "new";
+        /** @type {"local" | "synced" | "doomed"} */
+        this.syncStatus = options.syncStatus ?? "local";
 
         elems.createPlaylistEntry(this);
         elems.createPlaylistCheckboxEntry(this);
@@ -167,21 +165,17 @@ export class Playlist {
         }
     }
 
-    /** @param {"new" | "edited" | "synced" | "doomed"} syncStatus cannot set `syncStatus` to `edited` when it is `new`*/
+    /** @param {"local" | "synced" | "doomed"} syncStatus cannot set `syncStatus` to `local` when it is `new`*/
     setSyncStatus(syncStatus) {
-        if (syncStatus === "edited" && this.syncStatus === "new") return;
         this.syncStatus = syncStatus;
 
-        if (syncStatus === "edited" || syncStatus === "new") fx.setSynced(false);
+        if (syncStatus === "local") fx.setSynced(false);
 
         elems.setEntrySyncStatus(this.playlistEntry, syncStatus);
     }
 
     delete() {
         
-        if (this.syncStatus !== "new")
-            data.trashqueue.set("playlists." + this.id, "playlists/ dummy value");
-
         if (this === data.curr.viewPlaylist) elems.setViewPlaylist(null, this === data.curr.listenPlaylist);
 
         for (const song of this.songs) {

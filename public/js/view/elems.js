@@ -3,7 +3,7 @@ import { togglePlay } from "../play.js";
 import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
 import { removeTooltip, sendNotification, setToolTip, showError } from "./fx.js";
-import { syncData } from "../account/account.js";
+import { syncData } from "../account/clientsync.js";
 import { allFiles, deleteSongFile, getFileSize, missingFiles, uploadSongFile } from "../account/files.js";
 import * as yt from "../new-song/getyt.js";
 import { initNewSong } from "../new-song/newSong.js";
@@ -31,7 +31,7 @@ const icons = {
                 </svg>`,
     
     // icons for syncStatus
-    unsynced:  `<svg fill="var(--warning-color)" viewBox="0 0 24 24" >
+    local:     `<svg fill="var(--warning-color)" viewBox="0 0 24 24" >
                     <path d="M16.71,16.29h0l-13-13A1,1,0,0,0,2.29,4.71L5.65,8.06a7,7,0,0,0-.59,2A4,4,0,0,0,6,18h9.59l2.7,2.71a1,1,0,0,0,1.42,0,1,1,0,0,0,0-1.42ZM6,16a2,2,0,0,1,0-4,1,1,0,0,0,1-1,5,5,0,0,1,.2-1.39L13.59,16ZM18.42,8.22A7,7,0,0,0,12,4a6.74,6.74,0,0,0-2.32.4,1,1,0,0,0,.66,1.88A4.91,4.91,0,0,1,12,6a5,5,0,0,1,4.73,3.39,1,1,0,0,0,.78.67,3,3,0,0,1,1.85,4.79,1,1,0,0,0,.16,1.4,1,1,0,0,0,.62.22,1,1,0,0,0,.78-.38,5,5,0,0,0-2.5-7.87Z"/>
                 </svg>`,
     doomed:    `<svg viewBox="0 -0.5 20 20">
@@ -42,6 +42,7 @@ const icons = {
     check:     `<svg fill="none" viewBox="0 0 24 24">
                     <path stroke="green" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M6 12L10.2426 16.2426L18.727 7.75732"/>
                 </svg>`,
+
     musicnote: `<svg viewBox="0 0 24 24" fill="none" >
                     <path stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12.5 8.89001V18.5M12.5 8.89001V5.57656C12.5 5.36922 12.5 5.26554 12.5347 5.17733C12.5653 5.09943 12.615 5.03047 12.6792 4.97678C12.752 4.91597 12.8503 4.88318 13.047 4.81761L17.447 3.35095C17.8025 3.23245 17.9803 3.17319 18.1218 3.20872C18.2456 3.23982 18.3529 3.31713 18.4216 3.42479C18.5 3.54779 18.5 3.73516 18.5 4.10989V7.42335C18.5 7.63069 18.5 7.73436 18.4653 7.82258C18.4347 7.90048 18.385 7.96943 18.3208 8.02313C18.248 8.08394 18.1497 8.11672 17.953 8.18229L13.553 9.64896C13.1975 9.76746 13.0197 9.82671 12.8782 9.79119C12.7544 9.76009 12.6471 9.68278 12.5784 9.57512C12.5 9.45212 12.5 9.26475 12.5 8.89001ZM12.5 18.5C12.5 19.8807 10.933 21 9 21C7.067 21 5.5 19.8807 5.5 18.5C5.5 17.1192 7.067 16 9 16C10.933 16 12.5 17.1192 12.5 18.5Z" />
                 </svg>`,
@@ -76,21 +77,17 @@ export function setEntryState(entry, state) {
 
 /** 
  * @param {HTMLElement} entry 
- * @param {"new" | "edited" | "synced" | "doomed"} state
+ * @param {"local" | "synced" | "doomed"} state
  */
 export function setEntrySyncStatus(entry, syncStatus) {
     const icon = entry.querySelector(".syncStatus");
 
-    let svg;
-    if (syncStatus === "new" || syncStatus === "edited") svg = icons.unsynced;
-    else svg = icons[syncStatus] ?? "";
-
     const svgElem = icon.querySelector("svg");
     if (svgElem) icon.removeChild(svgElem);
-    icon.insertAdjacentHTML("afterbegin", svg);
+    if (syncStatus !== "synced") icon.insertAdjacentHTML("afterbegin", icons[syncStatus]);
 
     let tooltipText = "";
-    if (svg === icons.unsynced)         tooltipText = "not synced with server";
+    if (syncStatus === "local")         tooltipText = "not synced with server";
     else if (syncStatus === "doomed")   tooltipText = "will be deleted upon sync";
 
     icon.tooltip.innerHTML = tooltipText;
@@ -176,7 +173,7 @@ export function createSongEntry(song, playlist, before) {
 
         const resolve__sync = createElement("button", null, "resolve__sync menu-option", resolve__nav, "get from server");
         // can only resolve via sync if songfile exists on server (song isnt new) and TODO: if theres wifi
-        if (song.syncStatus !== "new") {
+        if (song.syncStatus === "synced") {
             resolve__sync.addEventListener("click", () => syncData());
         }
         else resolve__sync.classList.add("menu-option__disabled");

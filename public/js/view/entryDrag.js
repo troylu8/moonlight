@@ -62,7 +62,7 @@ export function dragabbleEntry(entry, playlist) {
             dragBuffer.replaceWith(entry);
             dragBuffer = destination = null;
 
-            playlist.setSyncStatus("edited");
+            playlist.setSyncStatus("local");
         }
     )
 }
