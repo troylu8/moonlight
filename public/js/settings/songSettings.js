@@ -119,6 +119,6 @@ export function updateSongEntries() {
 }
 
 function setTitleArtistText(songElem, title, artist) {
-    songElem.querySelector("song__title").textContent = title;
-    songElem.querySelector("song__artist").textContent = artist;
+    songElem.querySelector(".song__title").textContent = title;
+    songElem.querySelector(".song__artist").textContent = artist;
 }

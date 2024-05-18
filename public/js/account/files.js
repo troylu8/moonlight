@@ -314,6 +314,7 @@ export async function watchFiles(dir) {
             console.log(filename, "unlink");
     
             const obj = allFiles.get(filename);
+            console.log("unlinked obj", obj);
     
             // if removed file was a straggler
             if (obj instanceof HTMLElement) deleteStragglerEntry(filename);

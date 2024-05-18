@@ -2,7 +2,7 @@ import * as acc from "../account/account.js"
 import Dropdown from "./dropdown.js";
 import { audio } from "../play.js";
 import { sendNotification, showError } from "./fx.js";
-import { nullifyData } from "../account/userdata.js";
+import { data, nullifyData } from "../account/userdata.js";
 
 const titlescreen = document.getElementById("titlescreen");
 const primary = document.getElementById("primary");
@@ -10,7 +10,7 @@ const primary = document.getElementById("primary");
 export function setTitleScreen(active) {
     titlescreen.style.display = active? "grid" : "none";
     primary.style.display = active? "none" : "block";
-
+    
     if (active) audio.pause();
 }
 
@@ -75,6 +75,7 @@ document.getElementById("sign-out").addEventListener("click", async () => {
     acc.user.clearInfo();
     acc.user.saveLocal();
 
+    await data.saveDataLocal();
     nullifyData();
 });
 

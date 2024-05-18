@@ -35,10 +35,7 @@ router.post("/create-account-dir/:uid", express.json(), async (req, res) => {
         req.params["uid"],
         req.body.username,
         await bcrypt.hash(req.body.hash1, 11),
-        JSON.stringify({
-            "playlists": {},
-            "songs": {}
-        }),
+        null,
     );
     res.status(200).end();
 });
@@ -89,8 +86,7 @@ router.get("/get-data/:uid/:hash1", express.text(), async (req, res) => {
 
     if (! (await bcrypt.compare(req.params["hash1"], row.hash2)) ) return res.status(401).end();
 
-    res.status(200).json(JSON.parse(row.userdata));
-    
+    res.status(200).end(row.userdata);
 });
 
 

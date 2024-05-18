@@ -1,8 +1,8 @@
-import { data, Song, Playlist, loadLocaldata } from "./userdata.js";
-import { decryptLocalData, getLocalData, setLocalData, watchFiles, missingFiles, reserved, deviceID, encryptLocalData } from "./files.js";
+import { data, loadLocaldata } from "./userdata.js";
+import { decryptLocalData, getLocalData, setLocalData, watchFiles, encryptLocalData } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
-import { sendNotification, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
-import { getDoomed } from "./clientsync.js";
+import { sendNotification } from "../view/fx.js";
+import { deriveKey, getDoomed } from "./clientsync.js";
 const { createHash } = require('crypto');
 const { ipcRenderer } = require("electron");
 
@@ -37,7 +37,6 @@ export let user = {
 
     uid: null,
     username: null,
-    password: null,
     hash1: null,
     
     setInfo(uid, username, password, hash1) {
@@ -49,11 +48,8 @@ export let user = {
             uid = guestID;
             username = "";
         }
-        else {
-            console.log(uid, username, password, hash1);
-            this.password = password;
-            this.hash1 = hash1 ?? createHash("sha256").update(password).digest("hex");    
-        }
+        else this.setPassword(password, hash1);
+        
         this.setUID(uid);
         this.setUsername(username);
     },
@@ -65,11 +61,16 @@ export let user = {
         this.username = username;
         updateForUsername(username, isGuest());
     },
+    setPassword(password, hash1) {
+        this.password = password;
+        deriveKey(password);
+        this.hash1 = hash1 ?? createHash("sha256").update(password).digest("hex");    
+    },
 
     clearInfo() {
         this.setUID(null);
         this.setUsername(null);
-        this.password = this.hash1 = null;
+        this.setPassword(null);
     },
 
     async saveLocal() {
@@ -180,11 +181,6 @@ export async function fetchAccData(username, password) {
 //     return JSON.parse(jsonPayload);
 // }
 
-
-export async function getData() {
-    const res = await fetch(`https://localhost:5001/get-data/${user.uid}/${user.hash1}`).catch(fetchErrHandler); 
-    if (res && res.ok) return await res.json();
-}
 
 export function fetchErrHandler(err) {
     if (err.message === "Failed to fetch")

@@ -51,7 +51,6 @@ export class Song {
         this.state = state;
 
         if (state === "error") {
-            this.setSyncStatus("local");
             if (data.curr.song === this) play.setSong(null);
         } 
         
@@ -278,7 +277,6 @@ class UserData {
 
         return JSON.stringify(obj, 
             function(key, value) {
-                if (value instanceof Function) return undefined;
                 if (ignore.includes(key)) return undefined;
                 
                 if (value instanceof Set) {

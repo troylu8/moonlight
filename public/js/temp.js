@@ -37,11 +37,6 @@ document.body.addEventListener("keydown", async (e) => {
         case "S":
             console.log(userdata.data.settings);
             break;
-        case "Z":
-            const serverJSON = await getData(jwt);
-            getDoomed(serverJSON, "songs");
-            getDoomed(serverJSON, "playlists");
-            break;
 
         case "M":
             console.log(allFiles);

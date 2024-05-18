@@ -1,76 +1,19 @@
 import { data, Song, Playlist } from "./userdata.js";
-import {  missingFiles, reserved, deviceID } from "./files.js";
+import {  missingFiles, reserved, deviceID, allFiles } from "./files.js";
 import { sendNotification, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
-import { getData, isGuest, user } from "./account.js";
+import { fetchErrHandler, isGuest, user } from "./account.js";
 const fs = require('fs');
 const Zip = require("adm-zip");
 const { promisify } = require('util');
+const { createCipheriv, createDecipheriv, randomBytes, pbkdf2 } = require("crypto");
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-
-/** sent to server */
-class SyncChanges {
-    constructor() {
-        /** @type {Array<Song>} songs to be merged with server's data.json*/
-        this["unsynced-songs"] = [],
-
-        /** @type {Array<Playlist>} playlists to be merged with server's data.json  */
-        this["unsynced-playlists"] = [],
-
-        /** @type {Array<string>} all files that client wants from server: error state songs + songs that server has client doesnt*/
-        this.requestedFiles = Array.from(missingFiles.keys())
-                            .filter(fn => missingFiles.get(fn).syncStatus !== "local")
-                            .map(fn => "songs/" + fn),
-
-        /** @type {Array<string>} files that the client deleted, so the server should too */
-        this.trash = Array.from(data.trashqueue.values()),
-
-        /** @type {Array<Song | Playlist>} items that will be deleted from client (not sent to server) */
-        this.doomed = [],
-
-        this.update = [],
-
-        /** if syncing is successful, these items will be created */
-        this.newItems = {
-            /** @type {Array<object>} array of song data client will receive from server */
-            songs: [],
-
-            /** @type {Array<object>} array of playlist data client will receive from server */
-            playlists: []
-        }
-    }
-}
-
-
-/**
- * @param {import('adm-zip')} zip 
- * @param {string} targetPath
- * @param {function(err)} cb 
- */
-function extractAllToAsync(zip, targetPath, cb) {
-    const total = zip.getEntryCount();
-    let done = 0;
-    
-    if (total === 0) return cb();
-
-    zip.extractAllTo(targetPath);
-    cb();
-
-    //TODO: change back to async when its fixed: https://github.com/cthackers/adm-zip/issues/484
-    // zip.extractAllToAsync(targetPath, false, false, (err) => {
-    //     console.log(done, "/", total);
-    //     if (++done === total) cb();
-    // });
-}
-const extractAllToPromise = promisify(extractAllToAsync);
 
 export async function syncData() {
     
     if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not signed in!");
 
     startSyncSpin();
-    
     const serverJSON = await getData();
     const requestedFiles = Array.from(missingFiles.keys())
                             .filter(fn => missingFiles.get(fn).syncStatus !== "local")
@@ -79,6 +22,9 @@ export async function syncData() {
 
     /** if sync is successful, call `.setSyncStatus("synced")` on all these items */
     const unsynced = [];
+
+     /** if sync is successful, delete these items */
+    const deleted = [];
     const newItems = {
         songs: [],
         playlists: []
@@ -119,9 +65,10 @@ export async function syncData() {
                 unsynced.push(item);
 
                 // if song didn't exist in serverJSON before, add file
-                if (category === "songs" && !serverJSON[category][item.id]) {
-                    const buf = await fs.promises.readFile(global.userDir + "/songs/" + item.filename);
-                    zipToServer.addFile("songs/" + item.filename, buf); //TODO: enc
+                if (category === "songs" && !serverJSON[category][item.id]) {                    
+                    const filename = encrypt("songs/" + item.filename, "utf8");
+                    const buf = encrypt(await fs.promises.readFile(global.userDir + "/songs/" + item.filename));
+                    zipToServer.addFile(filename, buf); 
                 }
 
                 // update/override serverJSON with local item
@@ -129,51 +76,49 @@ export async function syncData() {
                 serverJSON[category][item.id] = item;
             } 
 
-            else if (!serverJSON[category][item.id]) {
-                item.delete();
-            }
+            else if (!serverJSON[category][item.id]) deleted.push(item);
         }
         
     }
 
-    syncCategory("songs");
-    syncCategory("playlists");
-
-    console.log("serverJSON before stringify", serverJSON);
-
+    await syncCategory("songs");
+    await syncCategory("playlists");
+    
     try {
-        const a = JSON.parse(JSON.stringify( {
-                userdata: serverJSON,
-                files: {
-                    sendToClient: requestedFiles,
-                    delete: Array.from(data.trashqueue.values())
+        const toServer = {
+            userdata: encrypt( JSON.stringify(serverJSON,
+                function(key, value) {
+                
+                    if ([                            
+                        "groupElem",
+                        "songEntries",
+                        "playlistEntry",
+                        "checkboxDiv",
+                        "id",
+                        "cycle",
+                        "syncStatus",
+                        "state"
+                    ].includes(key)) return undefined;
+    
+    
+                    if (key === "songs" && this.getOrderedSIDs) return this.getOrderedSIDs();
+    
+                    // remove song.playlists, but keep serverJSON.playlists
+                    if (key === "playlists") return this.songs? value : undefined;
+    
+                    return value;
                 }
-            }, 
-            function(key, value) {
-                if ([                            
-                    "groupElem",
-                    "songEntries",
-                    "playlistEntry",
-                    "checkboxDiv",
-                    "cycle",
-                    "syncStatus",
-                    "state"
-                ].includes(key)) return undefined;
-
-                if (key === "songs" && this.getOrderedSIDs) return this.getOrderedSIDs();
-
-                // remove song.playlists, but keep serverJSON.playlists
-                if (key === "playlists") return this.songs? value : undefined;
-
-                return value;
+            ) ),
+            files: {
+                sendToClient: requestedFiles,
+                delete: Array.from(data.trashqueue.values())
             }
-        ));
+        };
 
-        console.log("sending to server: ", a);
+        console.log("sending to server: ", toServer);
         
-        zipToServer.addFile("meta.json", 
-            JSON.stringify(a)
-        );
+        zipToServer.addFile("meta.json", JSON.stringify(toServer));
+
         const res = await fetch(`https://localhost:5001/sync/${user.uid}/${user.username}/${user.hash1}/${deviceID}`, {
             method: 'PUT',
             body: JSON.stringify(zipToServer.toBuffer().toJSON()),
@@ -190,19 +135,32 @@ export async function syncData() {
             sendNotification("username was changed to ", resJSON.newUsername);
         }
 
-        await extractAllToPromise(new Zip(Buffer.from(resJSON.data)), global.userDir);
+        const serverZIP = new Zip(Buffer.from(resJSON.data));
 
+        for (const entry of serverZIP.getEntries()) {
+            entry.getDataAsync( async (buf, err) => {
+                if (err) return console.log(err);
+    
+                await fs.promises.writeFile(
+                    targetPath + "/" + decrypt(entry.entryName, "utf8"), 
+                    decrypt(buf.toString())
+                );
+            })
+        }
         
+
         for (const item of unsynced) item.setSyncStatus("synced");
         for (const songData of newItems.songs) {
             songData.syncStatus = "synced";
-            new Song(songData.id, songData, false);
+            allFiles.set(songData.filename, new Song(songData.id, songData, false));
         } 
         for (const playlistData of newItems.playlists) {
             playlistData.syncStatus = "synced";
             new Playlist(playlistData.id, playlistData, false);
         } 
         data.trashqueue.clear();
+
+        for (const item of deleted) item.delete();
                 
     } catch (err) {console.log(err)}
 
@@ -234,49 +192,42 @@ export async function getDoomed() {
 }
 
 
+let key;
+export function deriveKey(password) {
+    if (!password) key = null;
+    pbkdf2(password, "should i use scrypt instead?", 100000, 32, "sha256", (err, buf) => {
+        console.log(key = buf);
+    } );
+}
 
-function encrypt(text) {
+
+function encrypt(text, inputEncoding) {
     if (!text) return;
 
     const iv = randomBytes(16);
 
-    const cipher = createCipheriv("aes-256-gcm", user.password, iv);
+    const cipher = createCipheriv("aes-256-gcm", key, iv);
 
-    return  iv.toString("hex") + ":" + 
-            cipher.update(text, "utf8", "hex") + cipher.final("hex") + ":" +
+    return  iv.toString("hex") + ".." + 
+            cipher.update(text, inputEncoding, "hex") + cipher.final("hex") + ".." +
             cipher.getAuthTag().toString("hex");
 }
 
-function decrypt(text) {
+function decrypt(text, outputEncoding) {
     if (!text) return;
 
-    const [ iv, ciphertext, authTag ] = text.split(":");
+    const [ iv, ciphertext, authTag ] = text.split("..");
 
-    const decipher = createDecipheriv("aes-256-gcm", user.password, Buffer.from(iv, "hex"));
+    const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "hex"));
     decipher.setAuthTag(Buffer.from(authTag, "hex"));
 
-    return decipher.update(ciphertext, "hex", "utf8") + decipher.final("utf8");
+    return decipher.update(ciphertext, "hex", outputEncoding) + decipher.final(outputEncoding);
 }
 
-// zip.addFile("changes.json", Buffer.from(
-//     JSON.stringify(changes, 
-//         function(key, value) {
-//             if ([
-//                 "doomed",
-//                 "newItems",
-                
-//                 "playlists",
-//                 "groupElem",
-//                 "songEntries",
-//                 "playlistEntry",
-//                 "checkboxDiv",
-//                 "cycle",
-//                 "syncStatus",
-//                 "state"
-//             ].includes(key)) return undefined;
-
-//             if (key === "songs") return this.getOrderedSIDs();
-
-//             return value;
-//         })
-// ));
+async function getData() {
+    const res = await fetch(`https://localhost:5001/get-data/${user.uid}/${user.hash1}`).catch(fetchErrHandler); 
+    if (!res) return;
+    
+    const ciphertext = await res.text();
+    return ciphertext? JSON.parse(decrypt(ciphertext)) : {playlists: {}, songs: {}};
+}
