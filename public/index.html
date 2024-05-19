@@ -355,7 +355,7 @@
                     <div id="user-settings" class="sidebar__item">
                         <h2> account settings </h2>
                         
-                        <h3> signed in as <span id="signed-in-as"> guest </span> </h3>
+                        <h3> <span> signed in as <span id="signed-in-as"> guest </span> </span> </h3>
                         
                         <div>
                             <div>
@@ -370,9 +370,11 @@
 
                         <div id="change-username__header">
                             <button id="change-username__btn"> change username </button>
-                            <svg id="change-username__info" width="20px" height="20px" fill="var(--primary-color)" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 3a7 7 0 100 14 7 7 0 000-14zm-9 7a9 9 0 1118 0 9 9 0 01-18 0zm8-4a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm.01 8a1 1 0 102 0V9a1 1 0 10-2 0v5z"/>
-                            </svg>
+                            <div id="change-username__info">
+                                <svg  width="20px" height="20px" fill="var(--primary-color)" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 3a7 7 0 100 14 7 7 0 000-14zm-9 7a9 9 0 1118 0 9 9 0 01-18 0zm8-4a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm.01 8a1 1 0 102 0V9a1 1 0 10-2 0v5z"/>
+                                </svg>
+                            </div>
                         </div>
                         <div id="change-username__content">
                             <input id="change-username__username" type="text" placeholder="new username">
@@ -381,7 +383,14 @@
                             <button id="change-username__submit"> change </button>
                         </div>
 
-                        <button id="change-password__btn"> change password </button>
+                        <div id="change-password__header">
+                            <button id="change-password__btn"> change password </button>
+                            <div id="change-password__info">
+                                <svg width="20px" height="20px" fill="var(--primary-color)" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 3a7 7 0 100 14 7 7 0 000-14zm-9 7a9 9 0 1118 0 9 9 0 01-18 0zm8-4a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm.01 8a1 1 0 102 0V9a1 1 0 10-2 0v5z"/>
+                                </svg>
+                            </div>
+                        </div>
                         <div id="change-password__content">
                             <input id="change-password__old-password" type="text" placeholder="old password">
                             <input id="change-password__new-password" type="text" placeholder="new password">

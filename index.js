@@ -1,7 +1,5 @@
-const { app, BrowserWindow, safeStorage} = require('electron');
-const express = require("express");
-const cors = require('cors');
-const { ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, safeStorage, shell} = require('electron');
+const { ipcMain, dialog } = require('electron');
 const fs = require('fs');
 const { dirname } = require('path');
 
@@ -17,6 +15,7 @@ app.whenReady().then( async () => {
         },
         show: false
     });
+    win.setMenu(null);
 
     win.once("close", (e) => {
         win.webContents.send("cleanup");
@@ -24,7 +23,6 @@ app.whenReady().then( async () => {
     });
     ipcMain.on("cleanup-done", () => app.quit());
 
-    win.setMenu(null);
 
     await win.loadFile('./public/index.html');
     win.webContents.openDevTools();    
@@ -52,10 +50,3 @@ ipcMain.handle("show-folder", (e, path) => shell.openPath(path));
 
 ipcMain.handle("encrypt", (e, text) => safeStorage.encryptString(text).toString("hex"));
 ipcMain.handle("decrypt", (e, hex) => safeStorage.decryptString(Buffer.from(hex, "hex")));
-
-
-const server = express();
-server.use(cors());
-server.use(express.static("./public"));
-
-server.listen(5000, () => console.log("listening.."));

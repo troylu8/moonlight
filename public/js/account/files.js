@@ -225,7 +225,7 @@ export const allFiles = new Map();
 export const missingFiles = new Map();
 
 
-/** reserved filenames are not considered stragglers when added to songs folder
+/** reserved filenames are not considered stragglers
  * @type {Set<string>} 
  */
 export const reserved = new Set();
@@ -317,10 +317,11 @@ export async function watchFiles(dir) {
             if (obj instanceof HTMLElement) deleteStragglerEntry(filename);
             
             // otherwise set song to error state
-            else {
+            else if (!reserved.has(filename)) {
+                reserved.delete(filename);
                 missingFiles.set(filename, obj);
                 obj.setState("error");
-            } 
+            }
     
             allFiles.delete(filename);
             addBytes(-obj.size);

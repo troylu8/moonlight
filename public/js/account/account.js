@@ -64,7 +64,7 @@ export let user = {
     },
     setUsername(username) {
         this.username = username;
-        updateForUsername(username, isGuest());
+        if (username) updateForUsername(username, isGuest());
     },
     async setPassword(password, hash1) {
         this.password = password;
@@ -189,6 +189,5 @@ export async function fetchAccData(username, password) {
 
 
 export function fetchErrHandler(err) {
-    if (err.message === "Failed to fetch")
-        sendNotification("can't connect to server", "var(--error-color)");
+    sendNotification("can't connect to server", "var(--error-color)");
 }

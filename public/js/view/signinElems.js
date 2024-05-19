@@ -63,7 +63,7 @@ document.getElementById("account__continue").addEventListener("click", async () 
     await acc.loadAcc("guest");
 
     setTitleScreen(false);
-    updateForUsername("[guest]", true);
+    updateForUsername("", true);
 });
 
 document.getElementById("sign-out").addEventListener("click", async () => {
@@ -80,22 +80,24 @@ document.getElementById("sign-out").addEventListener("click", async () => {
 });
 
 const usernameDisplay = document.getElementById("username-display");
-const changeU__btn = document.getElementById("change-username__btn");
-const changeP__btn = document.getElementById("change-password__btn");
+const changeU__header = document.getElementById("change-username__header");
+const changeP__header = document.getElementById("change-password__header");
 
 /** updates DOM elements to reflect new username */
 export function updateForUsername(username, isGuest) {
-    usernameDisplay.textContent = signedInAs.textContent = username;
+    console.log("updating for", username, isGuest);
+    usernameDisplay.textContent = username;
+    signedInAs.textContent = isGuest? "guest" : username;
 
     if (isGuest)  {
         accountDropdown.appendChild(fromGuestBtn);
         fromGuest.username.value = fromGuest.password.value = fromGuest.repeatPassword.value = "";
     }
-    else          fromGuestBtn.remove();
+    else fromGuestBtn.remove();
 
     accDropdown.close();
 
-    changeU__btn.style.display = changeP__btn.style.display = isGuest? "none" : "inline-block";
+    changeU__header.style.display = changeP__header.style.display = isGuest? "none" : "flex";
 }
 
 const repeatPassword = document.getElementById("account__repeat-password");

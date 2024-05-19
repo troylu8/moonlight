@@ -11,6 +11,7 @@ const { createCipheriv, createDecipheriv, randomBytes, pbkdf2 } = require("crypt
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
+
 /**
  * @param {boolean} complete if true, delete all userfiles at server and upload everything
  */
@@ -175,7 +176,8 @@ export async function syncData(complete) {
         for (const item of deleted) item.delete();
 
         stopSyncSpin();
-                
+        sendNotification("sync complete!");
+
     } catch (err) {
         if (err.message === "wrong password") {
             syncDropdown.open();
@@ -187,11 +189,14 @@ export async function syncData(complete) {
     
 }
 
-
+let syncing = false;
 export async function syncBtnHandler() {
+    if (syncing) return;
+    syncing = true;
     await syncData();
-    sendNotification("sync complete!");
+    syncing = false;
 }
+
 
 const syncBtn = document.getElementById("sync");
 
@@ -228,12 +233,13 @@ verifyBtn.addEventListener("click", async () => {
     if (res.status === 401) return showError(verifyError, "wrong password");
 
     syncDropdown.close();
-    syncBtnHandler();
+    await syncData();
     
-})
+});
 
 export async function getDoomed() {
     const serverJSON = await getData();
+    if (!serverJSON) return;
 
     for (const category of ["songs", "playlists"]) {
         for (const item of data[category].values()) {

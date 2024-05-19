@@ -32,7 +32,7 @@ searchBtn.addEventListener("click", () => {
     if (!searchOpen) searchResults.close();
 });
 
-searchResults.close = () => {
+searchResults.close = (hideSearchBar) => {
     searchResults.style.display = "none";
     searchResults.innerHTML = "";
 
@@ -40,6 +40,12 @@ searchResults.close = () => {
     searchInput.style.outline = "";
 
     searchInput.value = "";
+
+    if (hideSearchBar) {
+        searchInput.style.display = xSVG.style.display = "none";
+        glassSVG.style.display = "block";
+        searchOpen = false;
+    }
 }
 
 searchInput.addEventListener("keydown", async (e) => {

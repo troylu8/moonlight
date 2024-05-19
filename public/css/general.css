@@ -252,6 +252,7 @@ input[type="file"] {
     gap: 10px;
 
     pointer-events: none;
+    z-index: 10;
 }
 
 .notification {

@@ -3,7 +3,7 @@ import * as play from "../play.js";
 import { PlaylistCycle } from "../play.js";
 import { updateSongEntries } from "../settings/songSettings.js";
 import * as acc from "./account.js";
-import { deleteSongFile, missingFiles, readUserdata, writeUserdata } from "./files.js";
+import { deleteSongFile, missingFiles, readUserdata, reserved, writeUserdata } from "./files.js";
 import { initSettingsCheckboxes } from "../settings/settings.js";
 import * as fx from "../view/fx.js";
 
@@ -122,13 +122,15 @@ export class Song {
 
         data.trashqueue.set(this.id, "songs/" + this.filename);
 
-        for (const playlist of this.playlists) 
-            this.removeFromPlaylist(playlist);
+        for (const playlist of this.playlists) this.removeFromPlaylist(playlist);
 
         play.toBeDeleted.delete();
         data.songs.delete(this.id);
 
-        if (this.state !== "error") deleteSongFile(this.filename);
+        if (this.state !== "error") {
+            reserved.add(this.filename);
+            deleteSongFile(this.filename);
+        }
         missingFiles.delete(this.filename);
     }
 }

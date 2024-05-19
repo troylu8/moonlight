@@ -183,11 +183,12 @@ export function setToolTip(parent, innerHTML, gap) {
         const a = parent.getBoundingClientRect();
         const b = tooltip.getBoundingClientRect();
         const bounds = baseAncestor.getBoundingClientRect();
-
+        
         const centerX = a.x + a.width/2;
         const finalX = clamp(centerX - b.width/2, bounds.x, bounds.x + bounds.width - b.width);
         
         tooltip.style.left = finalX + "px";
+        tooltip.style.maxWidth = bounds.width - 20 + "px";
         
         const finalY = 
             (gap === 0)?  a.y + a.height/2 - b.height/2: 
@@ -236,7 +237,8 @@ export function removeTooltip(elem) {
     setToolTip(document.getElementById(pair[0]), pair[1], -10);
 });
 
-setToolTip(document.getElementById("change-username__info"), "on other devices, username change <br> won't appear until syncing with server", 10, true);
+setToolTip(document.getElementById("change-username__info"), "other devices won't display new username until syncing with server", 10, true);
+setToolTip(document.getElementById("change-password__info"), "may take a while to re-encrypt all your data", 10, true);
 
 // ERROR DISPLAYS
 export function showError(errorElem, text) {

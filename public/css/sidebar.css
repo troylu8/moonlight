@@ -108,7 +108,7 @@
     white-space: nowrap;
 }
 
-#change-username__header {
+#change-username__header, #change-password__header {
     display: flex;
     align-items: center;
     gap: 15px;

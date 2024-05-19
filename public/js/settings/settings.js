@@ -4,7 +4,7 @@ import { data } from "../account/userdata.js";
 import { initDeleteBtn, sendNotification, showError } from "../view/fx.js";
 import { stragglersList } from "../view/elems.js";
 import * as acc from "../account/account.js";
-import { syncBtnHandler, syncData } from "../account/clientsync.js";
+import { syncData } from "../account/clientsync.js";
 const { ipcRenderer } = require("electron");
 const { createHash } = require('crypto');
 

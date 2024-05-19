@@ -135,9 +135,9 @@ export async function downloadPlaylist(ytpid, cb) {
 
             const entry = song.addToPlaylist(playlist, true, indexToEntry.getAfter(s.index))[0];
             indexToEntry.add(s.index, entry);
-
-            if (++complete === songs.size) {
-                sendNotification("downloaded playlist " + playlist.title);
+            
+            if (++complete === songs.length) {
+                sendNotification("downloaded playlist " + playlist.title, "green");
                 if (unavailable !== 0) {
                     sendNotification(
                         unavailable + 
