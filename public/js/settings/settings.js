@@ -1,10 +1,10 @@
 import { setSidebarContent } from "../view/sidebar.js";
 import { accDropdown } from "../view/signinElems.js";
-import {data} from "../account/userdata.js";
+import { data } from "../account/userdata.js";
 import { initDeleteBtn, sendNotification, showError } from "../view/fx.js";
 import { stragglersList } from "../view/elems.js";
 import * as acc from "../account/account.js";
-const fs = require("fs");
+import { syncData } from "../account/clientsync.js";
 const { ipcRenderer } = require("electron");
 const { createHash } = require('crypto');
 
@@ -124,13 +124,14 @@ initAccEditor(
     async () => {
         const oldPassword = changeP__old.value.trim();
         const newPassword = changeP__new.value.trim();
+        const newHash1 = createHash("sha256").update(newPassword).digest("hex");
         if (newPassword !== changeP__repeat.value.trim()) return showError(changeP__error, "passwords don't match");
         
         const res = await fetch(`https://localhost:5001/change-password/${acc.user.uid}`, {
             method: "PUT",
             body: JSON.stringify({
                 oldHash1: createHash("sha256").update(oldPassword).digest("hex"),
-                newHash1: createHash("sha256").update(newPassword).digest("hex")
+                newHash1: newHash1
             }),
             headers: {
                 "Content-Type": "application/json"
@@ -139,9 +140,18 @@ initAccEditor(
         if (!res) return;
         if (res.status === 401) return showError(changeP__error, "wrong password");
 
-        
-        //TODO: SYNC TO GET ALL DATA, RE-ENCRYPT WITH NEW PASSWORD AND UPLOAD
-        
+        console.log("password change success, syncing");
+
+        // sync with updated hash but still using old key 
+        acc.user.hash1 = newHash1;
+        await syncData();
+        sendNotification("sync complete!");
+
+        // sync again with the new key
+        await acc.user.setPassword(newPassword, newHash1);
+        console.log(acc.user);
+        await syncData(true);
+
         sendNotification("password change success");
         return true;
     }

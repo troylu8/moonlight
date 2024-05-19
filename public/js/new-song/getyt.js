@@ -130,8 +130,6 @@ export async function downloadPlaylist(ytpid, cb) {
                 return complete++;
             }
 
-            console.log(s);
-
             const song = new Song(songData.id, songData);
             allFiles.set(song.filename, song);
 

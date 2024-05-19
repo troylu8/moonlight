@@ -77,9 +77,12 @@ router.put('/:uid/:username/:hash1/:deviceID', express.json({limit: Infinity}), 
     console.log("finished editing data");
 
     // delete files
-    for (const path of meta.files.delete) {
-        userZip.deleteFile(path);
-        console.log("deleted", path );
+    if (meta.files.delete === "*") await fs.promises.rm(zipPath);
+    else {
+        for (const path of meta.files.delete) {
+            userZip.deleteFile(path);
+            console.log("deleted", path );
+        }
     }
     
     await writeZipPromise(userZip, zipPath);

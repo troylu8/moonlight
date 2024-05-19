@@ -44,7 +44,7 @@ export let user = {
     iv: null,
     key: null,
     
-    setInfo(uid, username, password, hash1) {
+    async setInfo(uid, username, password, hash1) {
         if (uid === "guest") {
             if (!guestID && !fetchGuestID() ) {
                 console.log("no guest id, making one");
@@ -53,7 +53,7 @@ export let user = {
             uid = guestID;
             username = "";
         }
-        else this.setPassword(password, hash1);
+        else await this.setPassword(password, hash1);
         
         this.setUID(uid);
         this.setUsername(username);
@@ -87,7 +87,7 @@ export let user = {
 }
 
 export async function loadAcc(uid, username, password) {
-    user.setInfo(uid, username, password);
+    await user.setInfo(uid, username, password);
     await loadLocaldata(user.uid);
     watchFiles(global.userDir + "/songs");
 }
@@ -144,7 +144,7 @@ export async function createAccData(username, password) {
     if (fromGuest) saveNewGuestID();
 
     if (!fromGuest) await loadLocaldata(uid);
-    user.setInfo(uid, username, password, hash1);
+    await user.setInfo(uid, username, password, hash1);
 
     watchFiles(global.userDir + "/songs")
 

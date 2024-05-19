@@ -70,7 +70,7 @@ router.put("/change-password/:uid", express.json(), async (req, res) => {
 
     if (await bcrypt.compare(req.body.oldHash1, row.hash2)) {
 
-        db.prepare("UPDATE users SET hash=? WHERE uid=?").run(
+        db.prepare("UPDATE users SET hash2=? WHERE uid=?").run(
             await bcrypt.hash(req.body.newHash1, 11),
             req.params["uid"]
         );
@@ -83,7 +83,6 @@ router.get("/get-data/:uid/:hash1", express.text(), async (req, res) => {
 
     const row = db.prepare("SELECT hash2,userdata FROM users WHERE uid=?").get(req.params["uid"]);
     if (!row) return res.status(404).end();
-
     if (! (await bcrypt.compare(req.params["hash1"], row.hash2)) ) return res.status(401).end();
 
     res.status(200).end(row.userdata);

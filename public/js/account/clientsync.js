@@ -9,12 +9,17 @@ const { createCipheriv, createDecipheriv, randomBytes, pbkdf2 } = require("crypt
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-export async function syncData() {
+/**
+ * @param {boolean} complete if true, delete all userfiles at server and upload everything
+ */
+export async function syncData(complete) {
     
     if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not signed in!");
 
     startSyncSpin();
-    const serverJSON = await getData();
+
+    const serverJSON = complete? {playlists:{}, songs:{}} : await getData();
+
     const requestedFiles = Array.from(missingFiles.keys())
                             .filter(fn => missingFiles.get(fn).syncStatus !== "local")
                             .map(fn => "songs/" + fn);
@@ -61,7 +66,7 @@ export async function syncData() {
             // ignore errored local songs
             if (item.state === "error" && item.syncStatus === "local") continue;
             
-            else if (item.syncStatus === "local") {
+            else if (item.syncStatus === "local" || complete) {
                 unsynced.push(item);
 
                 // if song didn't exist in serverJSON before, add file
@@ -114,7 +119,7 @@ export async function syncData() {
                     console.log(path);
                     return encrypt(path, "utf8", user.iv)
                 } ),
-                delete: Array.from(data.trashqueue.values()).map(filename => encrypt(filename, "utf8", user.iv)),
+                delete: complete? "*" : Array.from(data.trashqueue.values()).map(filename => encrypt(filename, "utf8", user.iv)),
             }
         };
 
@@ -168,8 +173,6 @@ export async function syncData() {
     } catch (err) {console.log(err)}
 
     stopSyncSpin();
-
-    sendNotification("sync complete!");
 }
 
 
@@ -177,7 +180,10 @@ export async function syncData() {
 
 const syncBtn = document.getElementById("sync");
 
-syncBtn.addEventListener("click", () => syncData());
+syncBtn.addEventListener("click", async () => {
+    await syncData();
+    sendNotification("sync complete!");
+} );
 syncBtn.addEventListener("mouseenter", () => showError(syncBtn.tooltip.lastElementChild, ""));
 
 export async function getDoomed() {
@@ -197,7 +203,6 @@ export async function getDoomed() {
 
 export const deriveBytes = promisify(
     (password, length, cb) => {
-        console.log("deriving key with ", password, password.length);
         if (!password) return null;
         pbkdf2(password, "should i use scrypt instead?", 100000, length, "sha256", cb);
     }
@@ -234,10 +239,5 @@ async function getData() {
     if (!res) return;
     
     const ciphertext = await res.text();
-
-    console.log("ciphertext", ciphertext);
-    console.log("key", user.key);
-    console.log(decrypt(ciphertext, "utf8"));
-
     return ciphertext? JSON.parse(decrypt(ciphertext, "utf8")) : {playlists: {}, songs: {}};
 }
