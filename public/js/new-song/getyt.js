@@ -20,7 +20,7 @@ function cleanFileName(str) {
 
 /**
  * @param {string} ytpid youtube playlist id
- * @returns {Promise< Array< {ytsid: string, index: number} >} `song title` ->  `{ytsid: (youtube songID), index: (song index) }`
+ * @returns {Promise< Array< {ytsid: string, index: number} >} ` [ {ytsid: string, index: number}, ...] `
  */
 async function getPlaylistSongs(ytpid) {
     const YT_API_KEY = "AIzaSyBKrluI981e6nye-M8qHs_N3kDx3m7N8wg";
@@ -37,7 +37,7 @@ async function getPlaylistSongs(ytpid) {
         for (const video of items) {
             songs.push({
                 ytsid: video.snippet.resourceId.videoId,
-                index: songs.size
+                index: songs.length
             });
         }
         return items.length;
@@ -121,7 +121,6 @@ export async function downloadPlaylist(ytpid, cb) {
     const indexToEntry = new BST();
 
     let complete = 0;
-
     let unavailable = 0;
 
     for (const s of songs) {
@@ -129,12 +128,15 @@ export async function downloadPlaylist(ytpid, cb) {
             if (err) {
                 unavailable++;
                 return complete++;
-            } 
+            }
+
+            console.log(s);
 
             const song = new Song(songData.id, songData);
+            allFiles.set(song.filename, song);
+
             const entry = song.addToPlaylist(playlist, true, indexToEntry.getAfter(s.index))[0];
             indexToEntry.add(s.index, entry);
-            allFiles.set(song.filename, song);
 
             if (++complete === songs.size) {
                 sendNotification("downloaded playlist " + playlist.title);

@@ -66,7 +66,7 @@ export async function syncData() {
 
                 // if song didn't exist in serverJSON before, add file
                 if (category === "songs" && !serverJSON[category][item.id]) {                    
-                    const filename = encrypt("songs/" + item.filename, "utf8");
+                    const filename = encrypt("songs/" + item.filename, "utf8", user.iv);
                     const buf = encrypt(await fs.promises.readFile(global.userDir + "/songs/" + item.filename));
                     zipToServer.addFile(filename, buf); 
                 }
@@ -108,10 +108,13 @@ export async function syncData() {
     
                     return value;
                 }
-            ) ),
+            ), "utf8" ),
             files: {
-                sendToClient: requestedFiles,
-                delete: Array.from(data.trashqueue.values())
+                sendToClient: requestedFiles.map(path => {
+                    console.log(path);
+                    return encrypt(path, "utf8", user.iv)
+                } ),
+                delete: Array.from(data.trashqueue.values()).map(filename => encrypt(filename, "utf8", user.iv)),
             }
         };
 
@@ -142,7 +145,7 @@ export async function syncData() {
                 if (err) return console.log(err);
     
                 await fs.promises.writeFile(
-                    targetPath + "/" + decrypt(entry.entryName, "utf8"), 
+                    global.userDir + "/" + decrypt(entry.entryName, "utf8"), 
                     decrypt(buf.toString())
                 );
             })
@@ -157,7 +160,7 @@ export async function syncData() {
         for (const playlistData of newItems.playlists) {
             playlistData.syncStatus = "synced";
             new Playlist(playlistData.id, playlistData, false);
-        } 
+        }
         data.trashqueue.clear();
 
         for (const item of deleted) item.delete();
@@ -192,21 +195,21 @@ export async function getDoomed() {
 }
 
 
-let key;
-export function deriveKey(password) {
-    if (!password) key = null;
-    pbkdf2(password, "should i use scrypt instead?", 100000, 32, "sha256", (err, buf) => {
-        console.log(key = buf);
-    } );
-}
+export const deriveBytes = promisify(
+    (password, length, cb) => {
+        console.log("deriving key with ", password, password.length);
+        if (!password) return null;
+        pbkdf2(password, "should i use scrypt instead?", 100000, length, "sha256", cb);
+    }
+);
 
 
-function encrypt(text, inputEncoding) {
+function encrypt(text, inputEncoding, IV) {
     if (!text) return;
 
-    const iv = randomBytes(16);
+    const iv = IV ?? randomBytes(16);
 
-    const cipher = createCipheriv("aes-256-gcm", key, iv);
+    const cipher = createCipheriv("aes-256-gcm", user.key, iv);
 
     return  iv.toString("hex") + ".." + 
             cipher.update(text, inputEncoding, "hex") + cipher.final("hex") + ".." +
@@ -218,16 +221,23 @@ function decrypt(text, outputEncoding) {
 
     const [ iv, ciphertext, authTag ] = text.split("..");
 
-    const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "hex"));
+    const decipher = createDecipheriv("aes-256-gcm", user.key, Buffer.from(iv, "hex"));
     decipher.setAuthTag(Buffer.from(authTag, "hex"));
 
-    return decipher.update(ciphertext, "hex", outputEncoding) + decipher.final(outputEncoding);
+    const res = decipher.update(ciphertext, "hex", outputEncoding);
+    return outputEncoding? res + decipher.final(outputEncoding) : Buffer.concat([res, decipher.final()])
 }
+
 
 async function getData() {
     const res = await fetch(`https://localhost:5001/get-data/${user.uid}/${user.hash1}`).catch(fetchErrHandler); 
     if (!res) return;
     
     const ciphertext = await res.text();
-    return ciphertext? JSON.parse(decrypt(ciphertext)) : {playlists: {}, songs: {}};
+
+    console.log("ciphertext", ciphertext);
+    console.log("key", user.key);
+    console.log(decrypt(ciphertext, "utf8"));
+
+    return ciphertext? JSON.parse(decrypt(ciphertext, "utf8")) : {playlists: {}, songs: {}};
 }

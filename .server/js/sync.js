@@ -73,7 +73,7 @@ router.put('/:uid/:username/:hash1/:deviceID', express.json({limit: Infinity}), 
     console.log("server backend got: ", meta);
 
     // update userdata
-    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(JSON.stringify(meta.userdata), req.params["uid"]);
+    db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(meta.userdata, req.params["uid"]);
     console.log("finished editing data");
 
     // delete files

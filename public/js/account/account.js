@@ -2,7 +2,7 @@ import { data, loadLocaldata } from "./userdata.js";
 import { decryptLocalData, getLocalData, setLocalData, watchFiles, encryptLocalData } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
 import { sendNotification } from "../view/fx.js";
-import { deriveKey, getDoomed } from "./clientsync.js";
+import { deriveBytes, getDoomed } from "./clientsync.js";
 const { createHash } = require('crypto');
 const { ipcRenderer } = require("electron");
 
@@ -37,7 +37,12 @@ export let user = {
 
     uid: null,
     username: null,
+    password: null,
     hash1: null,
+
+    /** when encrypting filenames, the same filename should create the same ciphertext every time. so, a constant iv is used  */
+    iv: null,
+    key: null,
     
     setInfo(uid, username, password, hash1) {
         if (uid === "guest") {
@@ -61,9 +66,10 @@ export let user = {
         this.username = username;
         updateForUsername(username, isGuest());
     },
-    setPassword(password, hash1) {
+    async setPassword(password, hash1) {
         this.password = password;
-        deriveKey(password);
+        this.key = await deriveBytes(password, 32);
+        this.iv = await deriveBytes(password, 16)
         this.hash1 = hash1 ?? createHash("sha256").update(password).digest("hex");    
     },
 
