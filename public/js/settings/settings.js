@@ -1,7 +1,7 @@
 import { setSidebarContent } from "../view/sidebar.js";
 import { accDropdown } from "../view/signinElems.js";
 import { data } from "../account/userdata.js";
-import { initDeleteBtn, sendNotification, showError } from "../view/fx.js";
+import { disableBtn, enableBtn, initDeleteBtn, sendNotification, showError } from "../view/fx.js";
 import { stragglersList } from "../view/elems.js";
 import * as acc from "../account/account.js";
 import { syncIfNotSyncing } from "../account/clientsync.js";
@@ -71,7 +71,9 @@ function initAccEditor(elems, onsubmit) {
     }));
 
     submit.addEventListener("click", async () => {
+        disableBtn(submit);
         if (await onsubmit()) content.style.display = "none";
+        enableBtn(submit);
     });
 }
 

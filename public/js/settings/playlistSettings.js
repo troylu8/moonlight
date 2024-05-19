@@ -1,6 +1,6 @@
 import { setSidebarContent, setSidebarOpen } from "../view/sidebar.js";
 import { Playlist, data } from "../account/userdata.js";
-import { playlistHeader, playlistDesc, setViewPlaylist } from "../view/elems.js";
+import { playlistHeader, playlistDesc, setViewPlaylist, getTimeDisplay } from "../view/elems.js";
 import { genID } from "../account/account.js";
 import { initDeleteBtn } from "../view/fx.js";
 
@@ -16,6 +16,9 @@ const titleArea = document.getElementById("playlist-settings__title");
 const descArea = document.getElementById("playlist-settings__desc");
 descArea.allowNewline = true;
 
+const count = document.getElementById("playlist-settings__count");
+const duration = document.getElementById("playlist-settings__duration");
+
 const deleteBtn = document.getElementById("playlist-settings__delete");
 const deleteErr = document.getElementById("playlist-settings__delete__error");
 
@@ -28,6 +31,8 @@ export function openPlaylistSettings(playlist) {
 
     titleArea.setText(playlist.title);
     descArea.setText(playlist.desc.replaceAll("<br>", "\n"));
+    count.textContent = (playlist.songs.size === 1)? "1 song" : playlist.songs.size + " songs";
+    duration.textContent = getTimeDisplay(playlist.duration);
 
     deleteBtn.reset();
     

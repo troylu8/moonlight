@@ -43,10 +43,7 @@ export let user = {
     
     async setInfo(uid, username, password, hash1) {
         if (uid === "guest") {
-            if (!guestID && !fetchGuestID() ) {
-                console.log("no guest id, making one");
-                saveNewGuestID();
-            }
+            if (!guestID) saveNewGuestID();
             uid = guestID;
             username = "";
         }

@@ -1,6 +1,6 @@
 import { data, Song, Playlist } from "./userdata.js";
 import {  missingFiles, reserved, deviceID, allFiles } from "./files.js";
-import { sendNotification, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
+import { disableBtn, enableBtn, sendNotification, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
 import { fetchErrHandler, isGuest, user } from "./account.js";
 import Dropdown from "../view/dropdown.js";
 const fs = require('fs');
@@ -21,6 +21,7 @@ async function syncData(complete) {
 
     startSyncSpin();
     sendNotification("syncing...");
+
 
     try {
         const serverJSON = complete? {playlists:{}, songs:{}} : await getData();
@@ -210,6 +211,7 @@ verifyInput.addEventListener("keydown", (e) => { if (e.key === "Enter") verifyBt
 verifyBtn.addEventListener("click", async () => {
 
     startSyncSpin();
+    disableBtn(verifyBtn);
 
     await user.setPassword(verifyInput.value.trim());
 
@@ -223,8 +225,9 @@ verifyBtn.addEventListener("click", async () => {
             "Content-Type": "application/json"
         }
     }).catch(fetchErrHandler);
-
+    
     stopSyncSpin(false);
+    enableBtn(verifyBtn);
 
     if (!res) return;
     

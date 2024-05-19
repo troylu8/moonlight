@@ -1,7 +1,7 @@
 import * as acc from "../account/account.js"
 import Dropdown from "./dropdown.js";
 import { audio } from "../play.js";
-import { setSyncIcon, showError } from "./fx.js";
+import { disableBtn, enableBtn, setSyncIcon, showError } from "./fx.js";
 import { data, nullifyData } from "../account/userdata.js";
 
 const titlescreen = document.getElementById("titlescreen");
@@ -41,6 +41,8 @@ function initAccCreator(elems) {
 
     submit.addEventListener("click", async () => {
         const signingIn = getComputedStyle(repeatPassword).display === "none";
+
+        disableBtn(submit);
         
         username.value = username.value.trim();
         password.value = password.value.trim();
@@ -56,6 +58,8 @@ function initAccCreator(elems) {
             updateForUsername(username.value);
         }
         else showError(error, res);
+
+        enableBtn(submit);
     });
 
 }

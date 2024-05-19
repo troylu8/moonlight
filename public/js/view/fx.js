@@ -382,3 +382,12 @@ export function sendNotification(msg, color) {
     notif.addEventListener("click", closeNotification);
     setTimeout(closeNotification, 5000);
 }
+
+export function enableBtn(btn) {
+    btn.style.removeProperty("background-color");
+    btn.removeAttribute("disabled");
+}
+export function disableBtn(btn) {
+    btn.style.backgroundColor = "var(--disabled-color)";
+    btn.setAttribute("disabled", "");
+}

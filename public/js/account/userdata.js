@@ -88,6 +88,8 @@ export class Song {
         playlist.songs.add(this);
         this.playlists.add(playlist);
 
+        playlist.duration += this.duration;
+
         const songElems = elems.createSongEntry(this, playlist, before);
 
         if (this === data.curr.song && playlist === data.curr.listenPlaylist && playlist.songs.size !== 0) 
@@ -103,6 +105,8 @@ export class Song {
 
         this.setSyncStatus("local");
         playlist.setSyncStatus("local");
+
+        playlist.duration -= this.duration;
 
         playlist.songs.delete(this);
         this.playlists.delete(playlist);
@@ -142,6 +146,7 @@ export class Playlist {
         this.id = id;
         this.title = options.title;
         this.desc = options.desc ?? "";
+        this.duration = options.duration ?? 0;
         
         /** @type {HTMLElement} */
         this.playlistEntry = null;
