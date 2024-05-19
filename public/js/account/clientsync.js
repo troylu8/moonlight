@@ -4,6 +4,7 @@ import { sendNotification, showError, startSyncSpin, stopSyncSpin } from "../vie
 import { fetchErrHandler, isGuest, user } from "./account.js";
 import Dropdown from "../view/dropdown.js";
 const fs = require('fs');
+const snappy = require('snappy');
 const Zip = require("adm-zip");
 const { promisify } = require('util');
 const { createCipheriv, createDecipheriv, randomBytes, pbkdf2 } = require("crypto");
@@ -71,17 +72,17 @@ export async function syncData(complete) {
                 unsynced.push(item);
 
                 // if song didn't exist in serverJSON before, add file
-                if (category === "songs" && !serverJSON[category][item.id]) {                    
+                if (category === "songs" && !serverJSON[category][item.id]) {          
                     const filename = encrypt("songs/" + item.filename, "utf8", user.iv);
-                    const buf = encrypt(await fs.promises.readFile(global.userDir + "/songs/" + item.filename));
-                    zipToServer.addFile(filename, buf); 
+
+                    const compressed = await snappy.compress(await fs.promises.readFile(global.userDir + "\\songs\\" + item.filename), {copyOutputData: true});
+                    zipToServer.addFile(filename, encrypt(compressed));
                 }
 
                 // update/override serverJSON with local item
                 item.lastUpdatedBy = deviceID;
                 serverJSON[category][item.id] = item;
             } 
-
             else if (!serverJSON[category][item.id]) deleted.push(item);
         }
         
@@ -146,20 +147,20 @@ export async function syncData(complete) {
             sendNotification("username was changed to ", resJSON.newUsername);
         }
 
+
         const serverZIP = new Zip(Buffer.from(resJSON.data));
 
         for (const entry of serverZIP.getEntries()) {
             entry.getDataAsync( async (buf, err) => {
-                if (err) return console.log(err);
+                if (err) throw new Error(err);
     
                 await fs.promises.writeFile(
-                    global.userDir + "/" + decrypt(entry.entryName, "utf8"), 
-                    decrypt(buf.toString())
+                    global.userDir + "/" + decrypt(entry.entryName, "utf8", user.iv), 
+                    await snappy.uncompress(decrypt(buf.toString()), {copyOutputData: true})
                 );
-            })
+            });
         }
         
-
         for (const item of unsynced) item.setSyncStatus("synced");
         for (const songData of newItems.songs) {
             songData.syncStatus = "synced";
@@ -180,6 +181,7 @@ export async function syncData(complete) {
             syncDropdown.open();
             stopSyncSpin(false);
         }
+        else throw err;
     }
 
     
@@ -253,15 +255,15 @@ export const deriveBytes = promisify(
 );
 
 
-function encrypt(text, inputEncoding, IV) {
-    if (!text) return;
+function encrypt(input, inputEncoding, IV) {
+    if (!input) return;
 
     const iv = IV ?? randomBytes(16);
 
     const cipher = createCipheriv("aes-256-gcm", user.key, iv);
 
     return  iv.toString("hex") + ".." + 
-            cipher.update(text, inputEncoding, "hex") + cipher.final("hex") + ".." +
+            cipher.update(input, inputEncoding, "hex") + cipher.final("hex") + ".." +
             cipher.getAuthTag().toString("hex");
 }
 

@@ -59,40 +59,29 @@ router.put('/:uid/:username/:hash1/:deviceID', express.json({limit: Infinity}), 
     // add new files to user zip
     for (const entry of receivedZip.getEntries()) {
         if (entry.name === "meta.json") continue;
-
-        try {
-            const data = await getDataPromise(entry);
-            userZip.addFile(entry.entryName, data);
-            console.log("added file ", entry.entryName);
-        } catch (err) {
-            console.log(err);
-        }
+        const data = await getDataPromise(entry);
+        userZip.addFile(entry.entryName, data);
     }
     
     const meta = JSON.parse( await getDataPromise(receivedZip.getEntry("meta.json")) );
-    console.log("server backend got: ", meta);
 
     // update userdata
     db.prepare("UPDATE users SET userdata=? WHERE uid=?").run(meta.userdata, req.params["uid"]);
-    console.log("finished editing data");
 
     // delete files
     if (meta.files.delete === "*") await fs.promises.rm(zipPath);
     else {
         for (const path of meta.files.delete) {
             userZip.deleteFile(path);
-            console.log("deleted", path );
         }
     }
     
     await writeZipPromise(userZip, zipPath);
-    console.log("finished writing zip");
 
     const toClient = new Zip();
 
     // send back requested files
     for (const path of meta.files.sendToClient) {
-        console.log("packing ", path);
         const entry = userZip.getEntry(path);
         toClient.addFile(entry.entryName, await getDataPromise(entry));
     }
