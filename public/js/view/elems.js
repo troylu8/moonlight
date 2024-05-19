@@ -3,7 +3,7 @@ import { togglePlay } from "../play.js";
 import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
 import { removeTooltip, sendNotification, setToolTip, showError } from "./fx.js";
-import { syncData } from "../account/clientsync.js";
+import { syncBtnHandler, syncData } from "../account/clientsync.js";
 import { allFiles, deleteSongFile, getFileSize, missingFiles, uploadSongFile } from "../account/files.js";
 import * as yt from "../new-song/getyt.js";
 import { initNewSong } from "../new-song/newSong.js";
@@ -174,10 +174,7 @@ export function createSongEntry(song, playlist, before) {
         const resolve__sync = createElement("button", null, "resolve__sync menu-option", resolve__nav, "get from server");
         // can only resolve via sync if songfile exists on server (song isnt new) and TODO: if theres wifi
         if (song.syncStatus === "synced") {
-            resolve__sync.addEventListener("click", async () => {
-                await syncData();
-                sendNotification("sync complete!");
-            } );
+            resolve__sync.addEventListener("click", syncBtnHandler);
         }
         else resolve__sync.classList.add("menu-option__disabled");
         

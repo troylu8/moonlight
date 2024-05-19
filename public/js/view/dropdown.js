@@ -4,8 +4,9 @@ export default class Dropdown {
      * @param {HTMLElement} dropdown element with display: flex
      * @param {function() : any} onopen called when dropdown is opened 
      * @param {function() : any} onclose called when dropdown is closed 
+     * @param {boolean} manual if true, clicking parent does nothing. must open programmatically 
      */
-    constructor(parent, dropdown, onopen, onclose) {
+    constructor(parent, dropdown, onopen, onclose, manual) {
         this.visible = false;
         this.parent = parent;
         this.dropdown = dropdown;
@@ -13,12 +14,14 @@ export default class Dropdown {
         this.onopen = onopen;
         this.onclose = onclose;
         
-        parent.addEventListener("click", (e) => {
-            if (e.currentTarget !== parent) return;
-            
-            if (this.visible)   this.close();
-            else                this.open();
-        });
+        if (!manual) {
+            parent.addEventListener("click", (e) => {
+                if (e.currentTarget !== parent) return;
+                
+                if (this.visible)   this.close();
+                else                this.open();
+            });
+        }
         
         document.body.addEventListener("mousedown", (e) => {
             if (this.visible && !parent.contains(e.target)) {

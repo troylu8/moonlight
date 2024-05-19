@@ -33,7 +33,7 @@
     white-space: nowrap;
 }
 
-#new__dropdown, #account__dropdown {    
+#new__dropdown, #account__dropdown, #sync__dropdown {    
     position: absolute;
     top: 30px;
     right: 0;
@@ -49,12 +49,17 @@
     cursor: default;
 }
 
-#new__dropdown {
+#new__dropdown, #sync__dropdown {
     width: 200px;
     overflow: hidden;
 }
 
-#paste-link {
+#verify__header {
+    font-size: x-small;
+    opacity: 80%;
+}
+
+#paste-link, #verify-password {
     display: flex;
     gap: 5px;
     margin-top: 10px;
@@ -65,7 +70,7 @@
     padding: 4px 5px;
 }
 
-#paste-link__btn {
+#paste-link__btn, #verify-password__btn {
     background-color: var(--accent-color);
     width: 25px;
     height: 25px;

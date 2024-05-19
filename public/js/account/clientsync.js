@@ -2,6 +2,7 @@ import { data, Song, Playlist } from "./userdata.js";
 import {  missingFiles, reserved, deviceID, allFiles } from "./files.js";
 import { sendNotification, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
 import { fetchErrHandler, isGuest, user } from "./account.js";
+import Dropdown from "../view/dropdown.js";
 const fs = require('fs');
 const Zip = require("adm-zip");
 const { promisify } = require('util');
@@ -133,7 +134,9 @@ export async function syncData(complete) {
             headers: {
                 "Content-Type": "application/json"
             }
-        });
+        }).catch(fetchErrHandler);
+        if (!res) return;
+        if (res.status === 401) throw new Error("wrong password");
 
         const resJSON = await res.json();
         console.log("resJSON", resJSON);
@@ -169,22 +172,56 @@ export async function syncData(complete) {
         data.trashqueue.clear();
 
         for (const item of deleted) item.delete();
-                
-    } catch (err) {console.log(err)}
 
-    stopSyncSpin();
+        stopSyncSpin();
+                
+    } catch (err) {
+        if (err.message === "wrong password") {
+            syncDropdown.open();
+            stopSyncSpin(false);
+        }
+    }
+
+    
 }
 
 
-
+export async function syncBtnHandler() {
+    await syncData();
+    sendNotification("sync complete!");
+}
 
 const syncBtn = document.getElementById("sync");
 
-syncBtn.addEventListener("click", async () => {
-    await syncData();
-    sendNotification("sync complete!");
-} );
+syncBtn.addEventListener("click", syncBtnHandler);
 syncBtn.addEventListener("mouseenter", () => showError(syncBtn.tooltip.lastElementChild, ""));
+
+const syncDropdown = new Dropdown(syncBtn, document.getElementById("sync__dropdown"), null, null, true);
+const verifyInput = document.getElementById("verify-password__input");
+const verifyError = document.getElementById("verify-password__error");
+
+document.getElementById("verify-password__btn").addEventListener("click", async () => {
+
+    await user.setPassword(verifyInput.value.trim());
+
+    const res = await fetch("https://localhost:5001/sign-in", {
+        method: "POST",
+        body: JSON.stringify({
+            username: user.username,
+            hash1: user.hash1
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).catch(fetchErrHandler);
+    if (!res) return;
+
+    if (res.status === 401) return showError(verifyError, "wrong password");
+
+    syncDropdown.close();
+    syncBtnHandler();
+    
+})
 
 export async function getDoomed() {
     const serverJSON = await getData();

@@ -44,8 +44,8 @@ export function startSyncSpin() {
     setSynced(false);
     setRPM(sync__circle, 40);
 }
-export function stopSyncSpin() {
-    setSynced(true);
+export function stopSyncSpin(success = true) {
+    setSynced(success);
     setRPM(sync__circle, 0);
 }
 
