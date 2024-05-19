@@ -23,6 +23,7 @@
     overflow-x: hidden;
     text-wrap: nowrap;
     text-overflow: ellipsis;
+    white-space: pre-line;
 }
 
 .playlist__group {

@@ -113,6 +113,10 @@
     align-items: center;
     gap: 15px;
 }   
+#change-username__info, #change-password__info {
+    width: 20px;
+    height: 20px;
+}
 
 #change-username__btn, #change-password__btn {
     padding: 4px 5px;
@@ -121,7 +125,8 @@
 #change-username__content, #change-password__content {
     display: none;
     flex-direction: column;
-    gap: 10px
+    gap: 10px;
+    margin-bottom: 50px;
 }
 #change-username__submit, #change-password__submit {
     padding: 4px 5px;

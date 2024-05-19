@@ -4,7 +4,7 @@ import { data } from "../account/userdata.js";
 import { initDeleteBtn, sendNotification, showError } from "../view/fx.js";
 import { stragglersList } from "../view/elems.js";
 import * as acc from "../account/account.js";
-import { syncData } from "../account/clientsync.js";
+import { syncIfNotSyncing } from "../account/clientsync.js";
 const { ipcRenderer } = require("electron");
 const { createHash } = require('crypto');
 
@@ -101,7 +101,7 @@ initAccEditor(
         if (res.status === 409) return showError(changeU__error, "username taken");
         if (res.status === 401) return showError(changeU__error, "wrong password");
 
-        acc.setAccInfo(null, null, username);
+        acc.user.setUsername(username);
 
         sendNotification("set username as " + username)
         return true;
@@ -144,12 +144,12 @@ initAccEditor(
 
         // sync with updated hash but still using old key 
         acc.user.hash1 = newHash1;
-        await syncData();
+        await syncIfNotSyncing()
 
         // sync again with the new key
         await acc.user.setPassword(newPassword, newHash1);
         console.log(acc.user);
-        await syncData(true);
+        await syncIfNotSyncing(true);
 
         sendNotification("password change success");
         return true;

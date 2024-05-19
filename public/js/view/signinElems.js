@@ -14,7 +14,6 @@ export function setTitleScreen(active) {
     if (active) audio.pause();
 }
 
-const signedInAs = document.getElementById("signed-in-as");
 
 
 function inputErrors(username, password, repeatPassword, signingIn) {
@@ -79,23 +78,25 @@ document.getElementById("sign-out").addEventListener("click", async () => {
     acc.user.saveLocal();
 });
 
+const signedInAs = document.getElementById("signed-in-as");
 const usernameDisplay = document.getElementById("username-display");
 const changeU__header = document.getElementById("change-username__header");
 const changeP__header = document.getElementById("change-password__header");
 
+const syncAfterSignIn = document.getElementById("sync-after-sign-in").parentElement;
+
 /** updates DOM elements to reflect new username */
 export function updateForUsername(username, isGuest) {
-    console.log("updating for", username, isGuest);
+    accDropdown.close();
+
     usernameDisplay.textContent = username;
     signedInAs.textContent = isGuest? "guest" : username;
+    syncAfterSignIn.style.display = isGuest? "none" : "block";
+    fromGuestBtn.style.display = isGuest? "block" : "none";
 
     if (isGuest)  {
-        accountDropdown.appendChild(fromGuestBtn);
         fromGuest.username.value = fromGuest.password.value = fromGuest.repeatPassword.value = "";
     }
-    else fromGuestBtn.remove();
-
-    accDropdown.close();
 
     changeU__header.style.display = changeP__header.style.display = isGuest? "none" : "flex";
 }

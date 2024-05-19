@@ -2,7 +2,7 @@ import { data, loadLocaldata } from "./userdata.js";
 import { decryptLocalData, getLocalData, setLocalData, watchFiles, encryptLocalData } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
 import { sendNotification } from "../view/fx.js";
-import { deriveBytes, getDoomed } from "./clientsync.js";
+import { deriveBytes, getDoomed, syncIfNotSyncing } from "./clientsync.js";
 const { createHash } = require('crypto');
 const { ipcRenderer } = require("electron");
 
@@ -105,7 +105,10 @@ window.addEventListener("load", async () => {
     
     setTitleScreen(false);
 
-    if (!isGuest()) getDoomed();
+    if (!isGuest()) {
+        if (data.settings["sync-after-sign-in"]) syncIfNotSyncing();
+        else getDoomed();
+    } 
 });
 
 ipcRenderer.on("cleanup", async () => {

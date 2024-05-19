@@ -1,7 +1,7 @@
 import * as userdata from "./account/userdata.js";
 import * as play from "./play.js";
 import * as acc from "./account/account.js";
-import { allFiles } from "./account/files.js";
+import { allFiles, reserved } from "./account/files.js";
 
 
 const songs = ["LaEgpNBt-bQ","shyRW65dvn0","eSW2LVbPThw","rB7XFQgJHBI","p0s0_4KO9t4","lzHtVBFE9jU"]
@@ -39,7 +39,7 @@ document.body.addEventListener("keydown", async (e) => {
             break;
 
         case "M":
-            console.log(allFiles);
+            console.log(reserved);
             break;
         
     }

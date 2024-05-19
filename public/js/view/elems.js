@@ -3,7 +3,7 @@ import { togglePlay } from "../play.js";
 import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
 import { removeTooltip, sendNotification, setToolTip, showError } from "./fx.js";
-import { syncBtnHandler } from "../account/clientsync.js";
+import { syncIfNotSyncing } from "../account/clientsync.js";
 import { allFiles, deleteSongFile, getFileSize, missingFiles, uploadSongFile } from "../account/files.js";
 import * as yt from "../new-song/getyt.js";
 import { initNewSong } from "../new-song/newSong.js";
@@ -177,7 +177,7 @@ export function createSongEntry(song, playlist, before) {
         const resolve__sync = createElement("button", null, "resolve__sync menu-option", resolve__nav, "get from server");
         // can only resolve via sync if songfile exists on server (song isnt new) and TODO: if theres wifi
         if (song.syncStatus === "synced") {
-            resolve__sync.addEventListener("click",syncBtnHandler);
+            resolve__sync.addEventListener("click", () => syncIfNotSyncing());
         }
         else resolve__sync.classList.add("menu-option__disabled");
         
@@ -408,7 +408,7 @@ export async function createStragglerEntry(basename, isDirectory) {
 }
 export async function deleteStragglerEntry(basename) {
     const stragglerEntry = allFiles.get(basename);
-    if (!stragglerEntry) return;
+    if (!stragglerEntry || !(stragglerEntry instanceof HTMLElement) ) return;
     stragglerEntry.remove();
     allFiles.delete(basename);
     if (!stragglersList.hasChildNodes()) stragglers.style.display = "none";

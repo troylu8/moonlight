@@ -15,7 +15,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 /**
  * @param {boolean} complete if true, delete all userfiles at server and upload everything
  */
-export async function syncData(complete) {
+async function syncData(complete) {
     
     if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not signed in!");
 
@@ -190,17 +190,17 @@ export async function syncData(complete) {
 }
 
 let syncing = false;
-export async function syncBtnHandler() {
+export async function syncIfNotSyncing(complete) {
     if (syncing) return;
     syncing = true;
-    await syncData();
+    await syncData(complete);
     syncing = false;
 }
 
 
 const syncBtn = document.getElementById("sync");
 
-syncBtn.addEventListener("click", syncBtnHandler);
+syncBtn.addEventListener("click", () => syncIfNotSyncing());
 syncBtn.addEventListener("mouseenter", () => showError(syncBtn.tooltip.lastElementChild, ""));
 
 const syncDropdown = new Dropdown(syncBtn, document.getElementById("sync__dropdown"), null, null, true);

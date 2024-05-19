@@ -48,11 +48,10 @@ titleArea.addEventListener("input", () => {
 descArea.addEventListener("input", () => {
     currentlyEditing.setSyncStatus("local");
 
-    currentlyEditing.desc = descArea.value.replaceAll("\n", "<br>");
-    console.log(descArea.value.replaceAll("\n", "<br>"));
+    currentlyEditing.desc = descArea.value;
     
     if (data.curr.viewPlaylist === currentlyEditing) 
-        playlistDesc.innerHTML = currentlyEditing.desc;
+        playlistDesc.textContent = currentlyEditing.desc;
 });
 
 

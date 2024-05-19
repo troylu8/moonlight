@@ -313,13 +313,8 @@ export async function loadLocaldata(uid) {
     
     data.trashqueue = new Map(json.trashqueue);
 
-    for (const sid in json.songs)         
-        new Song(sid, json.songs[sid], false);
-
-    for (let pid in json.playlists) {
-        const playlistJSON = json.playlists[pid];
-        new Playlist(pid, playlistJSON, false);
-    }
+    for (const sid in json.songs) new Song(sid, json.songs[sid], false);
+    for (const pid in json.playlists) new Playlist(pid, json.playlists[pid], false);
 
     play.setSong( data.songs.get(json.curr.song) );
 
