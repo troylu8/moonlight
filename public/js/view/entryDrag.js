@@ -23,6 +23,7 @@ export function dragabbleEntry(entry, playlist) {
 
     /** the dragging entry will be dropped before this entry */
     let destination;
+    let start; 
     let dragBuffer;
 
     addDragEvent(entry, 
@@ -52,17 +53,18 @@ export function dragabbleEntry(entry, playlist) {
             dragBuffer.style.minHeight = rect.height + "px";
             entry.parentElement.insertBefore(dragBuffer, entry);
 
-            destination = entry;
+            // destination = entry;
+            destination = start = nextSongEntry(entry);
         },
 
         (e) => {
             ["width", "height", "top", "left", "position", "pointer-events", "background-color"]
                 .forEach(p => entry.style.removeProperty(p));
-            
+                
+            if (destination !== start) playlist.setSyncStatus("local");
+
             dragBuffer.replaceWith(entry);
             dragBuffer = destination = null;
-
-            playlist.setSyncStatus("local");
         }
     )
 }

@@ -1,7 +1,7 @@
 import * as acc from "../account/account.js"
 import Dropdown from "./dropdown.js";
 import { audio } from "../play.js";
-import { sendNotification, showError } from "./fx.js";
+import { setSyncIcon, showError } from "./fx.js";
 import { data, nullifyData } from "../account/userdata.js";
 
 const titlescreen = document.getElementById("titlescreen");
@@ -11,7 +11,10 @@ export function setTitleScreen(active) {
     titlescreen.style.display = active? "grid" : "none";
     primary.style.display = active? "none" : "block";
     
-    if (active) audio.pause();
+    if (active) {
+        audio.pause();
+        setSyncIcon(false);
+    }
 }
 
 
@@ -51,7 +54,6 @@ function initAccCreator(elems) {
         if (res === "success")  {
             setTitleScreen(false);
             updateForUsername(username.value);
-            sendNotification("welcome, " + username.value);    
         }
         else showError(error, res);
     });

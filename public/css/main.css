@@ -41,7 +41,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-right: 15px;
+    padding: 0 10px;
+    box-sizing: border-box;
 
     cursor: grab;
     user-select: none;
@@ -95,10 +96,17 @@
     margin-left: min(50px, 15%);
 }
 
+
 .syncStatus {
+    display: none;
     min-width: 20px;
     min-height: 20px;
 }
+/* add or remove this from body to show/hide all sync icons */
+.show-unsynced-icons .syncStatus {
+    display: block;
+}
+
 .song__state svg, .syncStatus svg {
     width: 20px;
     height: 20px;
@@ -154,7 +162,7 @@
 
 .drag__buffer {
     background-color: var(--accent-color);
-    margin-right: 15px;
+    padding: 0 10px;
     border-radius: 5px;
     /* height is programmatically set to equal songEntry height */
 }

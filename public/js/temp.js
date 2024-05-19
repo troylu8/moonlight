@@ -13,10 +13,8 @@ document.getElementById("info__title").onclick = () => {
     userdata.data.saveDataLocal();
 }
 document.getElementById("info__artist").onclick = () => {
-    if (userdata.data.settings["stay-signed-in"]) {
-        console.log("caching uid, username, pass");
-        acc.user.saveLocal();
-    }
+    console.log("caching uid, username, pass");
+    acc.user.saveLocal();
 }
 
 document.body.addEventListener("keydown", async (e) => {

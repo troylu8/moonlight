@@ -86,14 +86,18 @@ const defaultUserData = JSON.stringify({
         "shuffle": false,
         "volume": 0.5,
         "sidebarWidth": "350px",
-        "playlistsWidth": "220px"
+        "playlistsWidth": "220px",
+        "stay-signed-in": true,
+        "sync-after-sign-in": true,
+        "pause-while-seek": false,
+        "show-unsynced-icons": true
     },
     "curr": {},
     "playlists": {},
     "songs": {},
     "trashqueue": [],
     }, 
-    undefined, 4
+    null, 4
 );
 
 export async function readUserdata(uid) {

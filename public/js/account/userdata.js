@@ -40,7 +40,7 @@ export class Song {
     setSyncStatus(syncStatus) {
         this.syncStatus = syncStatus;
 
-        if (syncStatus === "local") fx.setSynced(false);
+        if (syncStatus === "local") fx.setSyncIcon(false);
 
         for (const songEntry of this.songEntries.values())
             elems.setEntrySyncStatus(songEntry, syncStatus);
@@ -170,7 +170,7 @@ export class Playlist {
     setSyncStatus(syncStatus) {
         this.syncStatus = syncStatus;
 
-        if (syncStatus === "local") fx.setSynced(false);
+        if (syncStatus === "local") fx.setSyncIcon(false);
 
         elems.setEntrySyncStatus(this.playlistEntry, syncStatus);
     }

@@ -21,17 +21,14 @@ export function genID(len) {
     return res;
 }
 
-export let guestID;
-function fetchGuestID() {
-    guestID = getLocalData("guest id");
-    return guestID;
-}
+export let guestID = getLocalData("guest id");
+
 function saveNewGuestID() {
     guestID = genID(14);
     setLocalData("guest id", guestID);
 }
 
-export function isGuest() { return data && user.uid === guestID; }
+export function isGuest() { return user.uid === guestID; }
 
 export let user = {
 
@@ -86,10 +83,15 @@ export let user = {
     }
 }
 
-export async function loadAcc(uid, username, password) {
-    await user.setInfo(uid, username, password);
+export async function loadAcc(uid, username, password, hash1) {
+    await user.setInfo(uid, username, password, hash1);
     await loadLocaldata(user.uid);
     watchFiles(global.userDir + "/songs");
+
+    if (uid !== "guest") {
+        if (data.settings["sync-after-sign-in"]) syncIfNotSyncing();
+        else getDoomed();
+    }
 }
 
 window.addEventListener("load", async () => {
@@ -97,18 +99,14 @@ window.addEventListener("load", async () => {
     const uid = getLocalData("uid");
     if (!uid) return;
 
-    const username = getLocalData("username");
-    const password = await decryptLocalData("key");
-    console.log("saved pass: ", password);
+    if (isGuest()) await loadAcc("guest");
+    else {
+        const username = getLocalData("username");
+        const password = await decryptLocalData("key");
+        await loadAcc(uid, username, password);
+    }
 
-    await loadAcc(uid, username, password);
-    
     setTitleScreen(false);
-
-    if (!isGuest()) {
-        if (data.settings["sync-after-sign-in"]) syncIfNotSyncing();
-        else getDoomed();
-    } 
 });
 
 ipcRenderer.on("cleanup", async () => {

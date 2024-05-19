@@ -209,3 +209,12 @@
 #discord > svg:hover {
     fill: #5865F2;
 }
+
+#show-unsynced-icons + label {
+    display: inline-flex;
+    align-items: center;
+}
+#show-unsynced-icons + label > div {
+    width: 20px;
+    height: 20px;
+}

@@ -32,12 +32,9 @@ export function setSpin(spin) {
  * @param {HTMLElement} elem 
  * @param {number} rpm 
  */
-export function setRPM(elem, rpm) {
+function setRPM(elem, rpm) {
     if (rpm === 0) {
         elem.style.animationPlayState = "paused";
-        elem.style.animation = "none";
-        elem.offsetHeight;
-        elem.style.animation = null;
     }
     else {
         elem.style.animationPlayState = "running";
@@ -48,20 +45,25 @@ export function setRPM(elem, rpm) {
 const sync__circle = document.getElementById("sync__circle");
 const sync__done = document.getElementById("sync__done");
 export function startSyncSpin() {
-    setSynced(false);
+    setSyncIcon(false);
     setRPM(sync__circle, 40);
 }
 export function stopSyncSpin(success = true) {
-    setSynced(success);
-    
+    setSyncIcon(success);
     setRPM(sync__circle, 0);
+
+    // reset circle animation
+    sync__circle.style.animation = "none";
+    sync__circle.offsetHeight;
+    sync__circle.style.animation = null;
 }
 
 let synced = false;
 
-export function setSynced(val) {
-    if (synced === val) return;
-    synced = val;
+/** @param {boolean} check `true` to display checkmark, `false` for the sync symbol */
+export function setSyncIcon(check) {
+    if (synced === check) return;
+    synced = check;
 
     sync__circle.style.display = synced? "none" : "block";
     sync__done.style.display = synced? "block" : "none";

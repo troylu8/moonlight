@@ -23,12 +23,19 @@ document.getElementById("user-settings-btn").addEventListener("click", () => {
     accDropdown.close();
 });
 
+const showUnsyncedIcons = document.getElementById("show-unsynced-icons");
+function showUnsyncedHandler() {
+    if (showUnsyncedIcons.checked)  document.body.classList.add("show-unsynced-icons");
+    else                            document.body.classList.remove("show-unsynced-icons");
+}
+showUnsyncedIcons.addEventListener("change", showUnsyncedHandler);
+
 export async function initSettingsCheckboxes() {
     for (const elem of document.getElementsByClassName("settings-field")) {    
-        const updateMap = () => data.settings[elem.id] = elem.checked ?? elem.value;
-        elem.addEventListener("change", updateMap);
-        updateMap();
+        elem.addEventListener("change", () => data.settings[elem.id] = elem.checked);
+        elem.checked = data.settings[elem.id];
     }
+    showUnsyncedHandler();
 }
 
 const deleteAllBtn = document.getElementById("stragglers__delete-all");
@@ -155,3 +162,4 @@ initAccEditor(
         return true;
     }
 );
+

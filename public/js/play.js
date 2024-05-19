@@ -161,9 +161,17 @@ audio.addEventListener("timeupdate", () => {
 });
 audio.addEventListener("ended", () => nextBtn.dispatchEvent(new Event("click")));
 
-addDragEvent(seek, () => {
-    seekPassed.textContent = getTimeDisplay(seek.value).padStart(seekTotal.textContent.length);
-}); 
+addDragEvent(seek, 
+    () => {
+        seekPassed.textContent = getTimeDisplay(seek.value).padStart(seekTotal.textContent.length);
+    },
+    () => {
+        if (data.settings["pause-while-seek"]) audio.pause();
+    },
+    () => {
+        if (data.settings["pause-while-seek"]) audio.play();
+    }
+); 
 
 seek.addEventListener("mouseup", () => { audio.currentTime = seek.value; });
 
