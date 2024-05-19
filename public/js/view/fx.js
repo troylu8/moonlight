@@ -28,9 +28,16 @@ export function setSpin(spin) {
     spinning = spin;
 }
 
+/**
+ * @param {HTMLElement} elem 
+ * @param {number} rpm 
+ */
 export function setRPM(elem, rpm) {
     if (rpm === 0) {
         elem.style.animationPlayState = "paused";
+        elem.style.animation = "none";
+        elem.offsetHeight;
+        elem.style.animation = null;
     }
     else {
         elem.style.animationPlayState = "running";
@@ -46,6 +53,7 @@ export function startSyncSpin() {
 }
 export function stopSyncSpin(success = true) {
     setSynced(success);
+    
     setRPM(sync__circle, 0);
 }
 

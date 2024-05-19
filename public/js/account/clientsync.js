@@ -198,9 +198,13 @@ syncBtn.addEventListener("mouseenter", () => showError(syncBtn.tooltip.lastEleme
 
 const syncDropdown = new Dropdown(syncBtn, document.getElementById("sync__dropdown"), null, null, true);
 const verifyInput = document.getElementById("verify-password__input");
+const verifyBtn = document.getElementById("verify-password__btn");
 const verifyError = document.getElementById("verify-password__error");
 
-document.getElementById("verify-password__btn").addEventListener("click", async () => {
+verifyInput.addEventListener("keydown", (e) => { if (e.key === "Enter") verifyBtn.click() });
+verifyBtn.addEventListener("click", async () => {
+
+    startSyncSpin();
 
     await user.setPassword(verifyInput.value.trim());
 
@@ -214,8 +218,11 @@ document.getElementById("verify-password__btn").addEventListener("click", async 
             "Content-Type": "application/json"
         }
     }).catch(fetchErrHandler);
-    if (!res) return;
 
+    stopSyncSpin(false);
+
+    if (!res) return;
+    
     if (res.status === 401) return showError(verifyError, "wrong password");
 
     syncDropdown.close();
