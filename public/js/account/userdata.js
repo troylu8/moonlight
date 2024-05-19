@@ -300,13 +300,13 @@ class UserData {
     }
 };
 
+
 /** @type {UserData}  */
 export let data;
 
 export async function loadLocaldata(uid) {
-    if (data) {
-        for (const playlist of data.playlists.values()) playlist.removeElements();
-    }
+    elems.clearPlaylistElems();
+
     data = new UserData();
     
     const json = await readUserdata(uid);

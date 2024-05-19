@@ -70,13 +70,13 @@ document.getElementById("sign-out").addEventListener("click", async () => {
     setSignInActive(true);
 
     setTitleScreen(true);
-
+    
+    await data.saveDataLocal();
+    nullifyData();
+    
     console.log("clearing cache");
     acc.user.clearInfo();
     acc.user.saveLocal();
-
-    await data.saveDataLocal();
-    nullifyData();
 });
 
 const usernameDisplay = document.getElementById("username-display");

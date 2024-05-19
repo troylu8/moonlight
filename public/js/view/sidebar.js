@@ -1,7 +1,8 @@
 import { updateSongEntries, songSettings, clearCurrentlyEditing } from "../settings/songSettings.js";
-import { mainDiv } from "./elems.js";
 
 export let open = false;
+
+const mainDiv = document.getElementById("main-div");
 
 const sidebar = document.getElementById("sidebar-div");
 const options = document.getElementById("options-div");

@@ -247,10 +247,14 @@ export function deleteSongEntry(song, playlist) {
     song.songEntries.delete(entry);
 }
 
-export const mainDiv = document.getElementById("main-div");
+const playlistGroups = document.getElementById("playlist-groups");
 const playlistsNav = document.getElementById("playlists__nav");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
 const playlistsError = document.getElementById("song-settings__playlists__error");
+
+export function clearPlaylistElems() {
+    playlistGroups.innerHTML = playlistsNav.innerHTML = playlistCheckboxes.innerHTML = "";
+}
 
 /** PLAYLIST OPTION IN SONG SETTINGS */
 export function createPlaylistCheckboxEntry(playlist) {
@@ -313,7 +317,7 @@ export function createPlaylistEntry(playlist) {
  * @param {Playlist} playlist
  */
 function createPlaylistGroup(playlist) {
-    const playlist__group = createElement("nav", "group:" + playlist.id, "playlist__group hiding-scroll", mainDiv);
+    const playlist__group = createElement("nav", "group:" + playlist.id, "playlist__group hiding-scroll", playlistGroups);
     playlist.groupElem = playlist__group;
 
     for (const song of playlist.songs) {

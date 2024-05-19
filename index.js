@@ -3,8 +3,6 @@ const { ipcMain, dialog } = require('electron');
 const fs = require('fs');
 const { dirname } = require('path');
 
-console.log("ready!");
-
 app.whenReady().then( async () => {
     const win = new BrowserWindow({
         width: 800,
