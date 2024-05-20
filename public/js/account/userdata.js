@@ -211,7 +211,7 @@ export class Playlist {
             data.songs.get(sid).addToPlaylist(this, false);
 
         if (this === data.curr.viewPlaylist) {
-            elems.playlistHeader.textContent = this.title;
+            elems.playlistTitle.textContent = this.title;
             elems.playlistDesc.innerHTML = this.desc;
             this.playlistEntry.firstElementChild.textContent = this.title;
         }

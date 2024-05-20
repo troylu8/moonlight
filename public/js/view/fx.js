@@ -3,8 +3,20 @@ import { data } from "../account/userdata.js";
 import { activeSidebarElem } from "./sidebar.js";
 
 const circle = document.getElementById("play__circle");
+
 const play = document.getElementById("play__play");
+const playlist__play = document.getElementById("playlist-play__play");
+
 const pause = document.getElementById("play__pause");
+const playlist__pause = document.getElementById("playlist-play__pause");
+
+/**
+ * @param {boolean} playing `true` to display the pause button, `false` for the play button 
+ */
+export function setPlaylistPlay(playing) {
+    playlist__pause.style.display = playing? "block" : "none";   
+    playlist__play.style.display = playing? "none" : "block";
+}
 
 const rpm = 15;
 let spinning = false;
@@ -13,6 +25,7 @@ export function toggleSpin() {
     setSpin(!spinning);
 }
 export function setSpin(spin) {
+    if (spin && data.curr.viewPlaylist === data.curr.listenPlaylist) setPlaylistPlay(true);
     if (spin === spinning) return;
 
     setRPM(circle, spin? rpm : 0);
@@ -23,6 +36,7 @@ export function setSpin(spin) {
     } else {
         pause.style.display = "none";
         play.style.display = "block";
+        setPlaylistPlay(false);
     }
     
     spinning = spin;

@@ -14,6 +14,24 @@
 
     z-index: 2;
 }
+
+#playlist-header {
+    display: flex;
+}
+#playlist-play {
+    min-width: 50px;
+    height: 50px;
+    margin-right: 20px;
+    cursor: pointer;
+}
+#playlist-play__pause {
+    display: none;
+}
+#playlist-header__info {
+    display: flex;
+    flex-direction: column;
+}
+
 #playlist-groups {
     display: flex;
     flex-direction: column;
@@ -24,6 +42,7 @@
     text-wrap: nowrap;
     text-overflow: ellipsis;
     white-space: pre-line;
+    font-size: smaller;
 }
 
 .playlist__group {

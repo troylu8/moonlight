@@ -1,6 +1,6 @@
 import { setSidebarContent, setSidebarOpen } from "../view/sidebar.js";
 import { Playlist, data } from "../account/userdata.js";
-import { playlistHeader, playlistDesc, setViewPlaylist, getTimeDisplay } from "../view/elems.js";
+import { playlistTitle, playlistDesc, setViewPlaylist, getTimeDisplay } from "../view/elems.js";
 import { genID } from "../account/account.js";
 import { initDeleteBtn } from "../view/fx.js";
 
@@ -45,7 +45,7 @@ titleArea.addEventListener("input", () => {
     currentlyEditing.title = titleArea.value;
 
     if (data.curr.viewPlaylist === currentlyEditing) 
-        playlistHeader.textContent = titleArea.value;    
+        playlistTitle.textContent = titleArea.value;    
 
     currentlyEditing.playlistEntry.firstElementChild.textContent = titleArea.value;
     currentlyEditing.checkboxDiv.lastElementChild.textContent = titleArea.value;

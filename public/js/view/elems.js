@@ -1,8 +1,8 @@
 import * as songSettings from "../settings/songSettings.js";
-import { togglePlay } from "../play.js";
+import { audio, togglePlay } from "../play.js";
 import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
-import { removeTooltip, sendNotification, setToolTip, showError } from "./fx.js";
+import { removeTooltip, sendNotification, setPlaylistPlay, setToolTip, showError } from "./fx.js";
 import { syncIfNotSyncing } from "../account/clientsync.js";
 import { allFiles, deleteSongFile, getFileSize, missingFiles, uploadSongFile } from "../account/files.js";
 import * as yt from "../new-song/getyt.js";
@@ -155,9 +155,10 @@ export function createSongEntry(song, playlist, before) {
     song__state.addEventListener("click", () => {
         if (song.state !== "playable") return;
 
+        if (data.curr.viewPlaylist !== data.curr.listenPlaylist) data.updateListenPlaylist();
+
         togglePlay(song);
 
-        if (data.curr.viewPlaylist !== data.curr.listenPlaylist) data.updateListenPlaylist();
         data.curr.listenPlaylist.cycle.updateCurrIndex();
     });
     songEntry.firstChild.insertBefore(song__state, song__info);
@@ -329,7 +330,7 @@ function createPlaylistGroup(playlist) {
 
 /** @type {HTMLElement} */
 let activePlaylistGroup;
-export const playlistHeader = document.getElementById("playlist-header");
+export const playlistTitle = document.getElementById("playlist-title");
 export const playlistDesc = document.getElementById("playlist-desc");
 
 /** 
@@ -347,24 +348,25 @@ export function setViewPlaylist(playlist, setAsListenPlaylist) {
     if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
 
     if (!playlist) {
-        playlistHeader.textContent = "-";
+        playlistTitle.textContent = "-";
         playlistDesc.innerHTML = "-";
+        setPlaylistPlay(false);
     }
     else {
-        if (!playlist.groupElem) 
-            playlist.groupElem = createPlaylistGroup(playlist);
+        if (!playlist.groupElem) playlist.groupElem = createPlaylistGroup(playlist);
     
-        playlistHeader.textContent = playlist.title;
+        playlistTitle.textContent = playlist.title;
         playlistDesc.innerHTML = playlist.desc;
         songSettings.updateSongEntries();
     
         activePlaylistGroup = playlist.groupElem;
         activePlaylistGroup.style.display = "flex";
     
-        if (songSettings.currentlyEditing) 
-            songSettings.setLiveElements(activePlaylistGroup);
+        if (songSettings.currentlyEditing) songSettings.setLiveElements(activePlaylistGroup);
     
         playlist.playlistEntry.classList.add("view-playlist");
+        
+        setPlaylistPlay((data.curr.viewPlaylist === data.curr.listenPlaylist)? !audio.paused : false);
     }
 
     if (setAsListenPlaylist) data.updateListenPlaylist();

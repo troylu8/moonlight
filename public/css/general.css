@@ -44,11 +44,7 @@ button {
     cursor: pointer;
 }
 button:hover {
-    /* filter: brightness(110%); */
     outline: none;
-}
-button:active {
-    /* filter: brightness(120%); */
 }
 
 a {
@@ -206,7 +202,6 @@ input[type="file"] {
 }
 
 .horizontal-dragger {
-
     position: absolute;
     width: 10px;
     height: 100%;
@@ -215,22 +210,9 @@ input[type="file"] {
 
     z-index: 10;
 }
-.horizontal-dragger > div {
-    position: absolute;
-    width: 3px;
-    height: 80%;
-    background-color: var(--accent-color);
-    border-radius: 3px;
-
-    margin: auto;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-}
 
 #sidebar__dragger {
-    right: -5px;
+    left: -5px;
     display: none;
 }
 #playlists__dragger {

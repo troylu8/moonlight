@@ -137,6 +137,17 @@ export const toBeDeleted = {
 
 
 document.getElementById("play").addEventListener("click", () => togglePlay());
+document.getElementById("playlist-play").addEventListener("click", () => {
+    if (data.curr.viewPlaylist === data.curr.listenPlaylist) return togglePlay();
+
+    data.updateListenPlaylist();
+
+    if (data.settings.shuffle) {
+        togglePlay(data.curr.listenPlaylist.cycle.shuffleArr[0]);
+    }
+    else togglePlay(data.curr.listenPlaylist.groupElem.firstElementChild.song);
+    
+});
 
 
 const seek = document.getElementById("seek__slider");
