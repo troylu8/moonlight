@@ -77,13 +77,6 @@ export async function initNewSong(songData, playlist, openSettings, before) {
     allFiles.set(song.filename, song);
 }
 
-// INFO: for NW    
-// const fileInput = document.getElementById("song-upload__input");
-// fileInput.addEventListener("change", async () => {
-//     const songData = await uploadSongFile(uid, fileInput.value, true);
-//     if (songData instanceof Object) initNewSong(songData);
-// });
-
 document.getElementById("song-upload").addEventListener("click", async () => {
     if (!data.curr.viewPlaylist) return showError(error, "select a playlist to add song");
     // fileInput.click();

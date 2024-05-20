@@ -2,13 +2,6 @@
     "name": "yue",
     "version": "0.0.1",
     "description": "",
-    "// use this as the main field with nw:": "public/index.html",
-    "// for nw   window": {
-        "title": "window title",
-        "width": 500,
-        "height": 500,
-        "position": "center"
-    },
     "main": "index.js",
     "keywords": [],
     "author": "",

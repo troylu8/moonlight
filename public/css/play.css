@@ -9,8 +9,10 @@
     display: grid;
     grid-template-columns: 3fr 4fr 3fr;
 
+    box-sizing: border-box;
     height: var(--play-div-height);
     padding: 0 15px;
+    border-top: solid 2px var(--border-color);
 }
 
 #info {

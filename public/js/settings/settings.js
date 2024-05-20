@@ -1,7 +1,7 @@
 import { setSidebarContent } from "../view/sidebar.js";
 import { accDropdown } from "../view/signinElems.js";
 import { data } from "../account/userdata.js";
-import { disableBtn, enableBtn, initDeleteBtn, sendNotification, showError } from "../view/fx.js";
+import { disableBtn, enableBtn, initDeleteBtn, sendNotification, shiftDown, showError } from "../view/fx.js";
 import { stragglersList } from "../view/elems.js";
 import * as acc from "../account/account.js";
 import { syncIfNotSyncing } from "../account/clientsync.js";
@@ -30,6 +30,11 @@ function showUnsyncedHandler() {
 }
 showUnsyncedIcons.addEventListener("change", showUnsyncedHandler);
 
+function updateColor(cssvar, value) {
+    document.body.style.setProperty(cssvar, value);
+    document.getElementById(cssvar + "__display").style.backgroundColor = value;
+}
+
 export function initSettings() {
     for (const elem of document.getElementsByClassName("settings-checkbox")) {    
         elem.addEventListener("change", () => data.settings[elem.id] = elem.checked);
@@ -37,19 +42,31 @@ export function initSettings() {
     }
     showUnsyncedHandler();
 
-    function updateColor(cssvar, value) {
-        document.body.style.setProperty(cssvar, value);
-        document.getElementById(cssvar + "__display").style.backgroundColor = value;
-    }
     for (const elem of document.getElementsByClassName("settings-color")) {    
         elem.addEventListener("input", () => {
             data.settings[elem.id] = elem.value;
             updateColor(elem.id, elem.value);
         });
-        elem.value = data.settings[elem.id];
-        updateColor(elem.id, elem.value);
+
+        if (!data.settings[elem.id]) applyDefaultColor(elem);
+        else {
+            elem.value = data.settings[elem.id];
+            updateColor(elem.id, elem.value);
+        }
     }
 }
+
+function applyDefaultColor(colorElem) {
+    colorElem.value = data.settings[colorElem.id] = getComputedStyle(document.body).getPropertyValue(colorElem.id);
+    updateColor(colorElem.id, `var(${colorElem.id}-default)`);
+}
+
+const resetColors = document.getElementById("reset-colors");
+resetColors.addEventListener("click", () => {
+    if (!shiftDown) return resetColors.textContent = "[shift + click] reset colors";
+    for (const elem of document.getElementsByClassName("settings-color")) applyDefaultColor(elem);
+    resetColors.textContent = "reset colors";
+});
 
 const deleteAllBtn = document.getElementById("stragglers__delete-all");
 const deleteAllErr = document.getElementById("stragglers__delete-all__error");

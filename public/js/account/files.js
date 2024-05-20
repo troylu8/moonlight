@@ -88,12 +88,6 @@ const defaultUserData = JSON.stringify({
         "sidebarWidth": "350px",
         "playlistsWidth": "220px",
 
-        "--background-color": "#202020",
-        "--background-color-side": "#2c2c2c",
-        "--background-color-main": "#434343",
-        "--primary-color": "#e4e8ea",
-        "--accent-color": "#9C55E8",
-
         "stay-signed-in": true,
         "sync-after-sign-in": true,
         "pause-while-seek": false,

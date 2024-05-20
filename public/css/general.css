@@ -6,20 +6,21 @@
 
     --movement-transition: 0.2s;
 
-    --background-color: #202020;
-    --background-color-side: #2c2c2c;
-    --background-color-main: #434343;
-    --primary-color: #e4e8ea;
-    --accent-color: #9C55E8;
-    --warning-color: rgb(215, 169, 140);
+    --background-color-default: #202331;
+    --background-color-main-default: #272a3a;
+    --primary-color-default: #f7f3e9;
+    --accent-color-default: #d25232; 
+    --border-color-default: #202331;
+
+    --background-color: var(--background-color-default);
+    --background-color-main: var(--background-color-main-default);
+    --primary-color: var(--primary-color-default);
+    --accent-color: var(--accent-color-default); 
+    --border-color: var(--border-color-default);
+
     --error-color: #d13030;
     --disabled-color: #b9b9b9;
 
-    /* --background-color: #f8f1e0;
-    --background-color-side: #f8f1e0;
-    --background-color-main: #f8f1e0;
-    --primary-color: #2d2b2b;
-    --accent-color: #8b704b; */
 }
 
 @font-face {
@@ -122,7 +123,7 @@ h1, h2, h3, p {
 }
 
 h3 {
-    margin-top: 15px;
+    margin: 15px 0;
     display: flex;
     align-items: center;
     gap: 5px;

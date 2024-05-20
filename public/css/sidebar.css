@@ -1,7 +1,7 @@
 /* right:  calc(var(--sidebar-div-width) - 350px);  */
 #sidebar-div {
 
-    background-color: var(--background-color-side);
+    background-color: var(--background-color);
 
     position: fixed;
 
@@ -9,6 +9,8 @@
     right:  calc(var(--sidebar-div-width) * -1); 
     top: 0;
     bottom: var(--play-div-height);
+
+    border-left: solid 2px var(--border-color);
 
     display: flex;
     flex-direction: column;
@@ -231,6 +233,7 @@
     max-height: 20px;
 }
 
+
 div:has( > input[type="color"]) {
     position: relative;
 }
@@ -248,4 +251,27 @@ input[type="color"] + label > div {
     height: 20px;
     border-radius: 5px;
     border: solid 2px white;
+}
+
+input[type="checkbox"] {
+    display: none;
+}
+
+input[type="checkbox"] + label::before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    width: 12px;
+    height: 12px;
+    border: solid 2px var(--accent-color);
+    border-radius: 5px;
+    margin-right: 5px;
+}
+
+input[type="checkbox"]:checked + label::before {
+    background-color: var(--accent-color);
+}
+
+label, label > div {
+    cursor: pointer;
 }
