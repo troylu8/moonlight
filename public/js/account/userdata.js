@@ -139,6 +139,8 @@ export class Song {
     }
 }
 
+const createPlaylistPrompt = document.getElementById("create-playlist-prompt");
+
 export class Playlist {
     
     constructor(id, options, changeSyncStatus) {
@@ -163,6 +165,7 @@ export class Playlist {
 
         elems.createPlaylistEntry(this);
         elems.createPlaylistCheckboxEntry(this);
+        createPlaylistPrompt.style.display = "none";
 
         /** @type {Set<Song>} */
         this.songs = new Set();
@@ -188,10 +191,11 @@ export class Playlist {
             song.removeFromPlaylist(this);
             if (song.playlists.size === 0) song.delete();
         } 
-        
-        data.playlists.delete(this.id);
 
         this.removeElements();
+        
+        data.playlists.delete(this.id);
+        if (data.playlists.size === 0) createPlaylistPrompt.style.display = "block";
 
         console.log("deleted playlist " + this.title);
     }

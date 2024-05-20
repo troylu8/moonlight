@@ -20,6 +20,13 @@
     justify-content: space-between;
     align-items: center;
 }
+
+#create-playlist-prompt {
+    opacity: 0.8;
+    font-size: small;
+    margin-top: 20px;
+}
+
 #playlists__nav {
     margin-top: 15px;
     

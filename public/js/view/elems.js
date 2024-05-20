@@ -248,6 +248,7 @@ export function deleteSongEntry(song, playlist) {
     song.songEntries.delete(entry);
 }
 
+
 const playlistGroups = document.getElementById("playlist-groups");
 const playlistsNav = document.getElementById("playlists__nav");
 const playlistCheckboxes = document.getElementById("song-settings__playlists");
@@ -282,7 +283,6 @@ export function createPlaylistCheckboxEntry(playlist) {
     const label = createElement("label", null, null, option, playlist.title);
     label.setAttribute("for", "song-settings__playlist:" + playlist.id);
 }
-
 
 /** PLAYLIST ENTRY IN LEFT NAV 
  * @param {Playlist} playlist
@@ -330,9 +330,9 @@ function createPlaylistGroup(playlist) {
 
 /** @type {HTMLElement} */
 let activePlaylistGroup;
+const playlistPlay = document.getElementById("playlist-play");
 export const playlistTitle = document.getElementById("playlist-title");
 export const playlistDesc = document.getElementById("playlist-desc");
-
 /** 
  * @param {Playlist} playlist
  * @param {boolean} setAsListenPlaylist
@@ -348,24 +348,25 @@ export function setViewPlaylist(playlist, setAsListenPlaylist) {
     if (activePlaylistGroup) activePlaylistGroup.style.display = "none";
 
     if (!playlist) {
-        playlistTitle.textContent = "-";
-        playlistDesc.innerHTML = "-";
+        playlistTitle.textContent = playlistDesc.innerHTML = "";
+        playlistPlay.style.display = "none";
         setPlaylistPlay(false);
     }
     else {
         if (!playlist.groupElem) playlist.groupElem = createPlaylistGroup(playlist);
-    
+        
         playlistTitle.textContent = playlist.title;
         playlistDesc.innerHTML = playlist.desc;
         songSettings.updateSongEntries();
-    
+        
         activePlaylistGroup = playlist.groupElem;
         activePlaylistGroup.style.display = "flex";
-    
+        
         if (songSettings.currentlyEditing) songSettings.setLiveElements(activePlaylistGroup);
-    
+        
         playlist.playlistEntry.classList.add("view-playlist");
         
+        playlistPlay.style.display = "block";
         setPlaylistPlay((data.curr.viewPlaylist === data.curr.listenPlaylist)? !audio.paused : false);
     }
 

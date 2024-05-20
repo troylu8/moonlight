@@ -138,13 +138,13 @@ export const toBeDeleted = {
 
 document.getElementById("play").addEventListener("click", () => togglePlay());
 document.getElementById("playlist-play").addEventListener("click", () => {
+    if (data.curr.viewPlaylist.songs.size === 0) return;
+
     if (data.curr.viewPlaylist === data.curr.listenPlaylist) return togglePlay();
 
     data.updateListenPlaylist();
 
-    if (data.settings.shuffle) {
-        togglePlay(data.curr.listenPlaylist.cycle.shuffleArr[0]);
-    }
+    if (data.settings.shuffle) togglePlay(data.curr.listenPlaylist.cycle.shuffleArr[0]);
     else togglePlay(data.curr.listenPlaylist.groupElem.firstElementChild.song);
     
 });
@@ -170,7 +170,13 @@ audio.addEventListener("timeupdate", () => {
     seek.updateSliderColors(); 
     seekPassed.textContent = getTimeDisplay(audio.currentTime).padStart(seekTotal.textContent.length);
 });
-audio.addEventListener("ended", () => nextBtn.dispatchEvent(new Event("click")));
+audio.addEventListener("ended", () => {
+    if (data.curr.listenPlaylist.songs.size === 1) {
+        setSong(data.curr.song);
+        audio.play();
+    }
+    else nextBtn.dispatchEvent(new Event("click"));
+});
 
 addDragEvent(seek, 
     () => {

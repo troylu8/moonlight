@@ -55,12 +55,12 @@
 }
 .soft-link, #playlist-settings__metadata {
     font-size: smaller;
-    opacity: 80%;
+    opacity: 0.8;
     transition: 0.2s;
 }
 .soft-link:hover {
     cursor: pointer;
-    opacity: 100%;
+    opacity: 1;
 }
 
 #song-settings__filename, .straggler__basename {
