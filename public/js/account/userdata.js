@@ -4,7 +4,7 @@ import { PlaylistCycle } from "../play.js";
 import { updateSongEntries } from "../settings/songSettings.js";
 import * as acc from "./account.js";
 import { deleteSongFile, missingFiles, readUserdata, reserved, writeUserdata } from "./files.js";
-import { initSettingsCheckboxes } from "../settings/settings.js";
+import { initSettings } from "../settings/settings.js";
 import * as fx from "../view/fx.js";
 
 export class Song {
@@ -315,6 +315,7 @@ export let data;
 
 export async function loadLocaldata(uid) {
     elems.clearPlaylistElems();
+    createPlaylistPrompt.style.display = "block";
 
     data = new UserData();
     
@@ -330,7 +331,7 @@ export async function loadLocaldata(uid) {
     elems.setViewPlaylist(data.playlists.get(json.curr.listenPlaylist), true);
 
     data.settings = json.settings;
-    initSettingsCheckboxes();
+    initSettings();
     play.setShuffle(json.settings.shuffle);
     play.audio.volume = json.settings.volume;
     document.body.style.setProperty("--sidebar-div-width", data.settings.sidebarWidth);

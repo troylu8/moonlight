@@ -135,7 +135,6 @@ export function setVolumeIcon(type) {
     activeVolumeIcon.style.display = "block";
 }
 
-// TEXTAREAS
 for (const tArea of document.getElementsByClassName("auto-height")) {
     tArea.resize = () => {
         tArea.style.height = '1px';

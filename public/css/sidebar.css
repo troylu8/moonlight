@@ -90,7 +90,8 @@
     display: flex;
     flex-direction: column;
 
-    border: solid 2px white;
+    background-color: var(--background-color-main);
+    border-radius: 5px;
 }
 #song-settings__playlists {
     height: 100%;
@@ -153,10 +154,12 @@
     height: 1em;
     width: 100%;
     
-    padding: 0;
-    background-color: var(--background-color-side);
+    padding: 4px;
+    border-radius: 2px;
+    box-sizing: border-box;
+
+    background-color: var(--primary-color);
     color: var(--accent-color);
-    border-radius: 0;
     outline: none;
     border: none;
 
@@ -165,7 +168,7 @@
 }
 
 .settings__field textarea:focus, .settings__field textarea:hover {
-    box-shadow: 0 2px 0 var(--accent-color);
+    box-shadow: 0 4px 0 var(--accent-color);
 }
 
 .delete-btn {
@@ -195,6 +198,10 @@
     height: 20px;
 }
 
+#settings-list > div {
+    margin-bottom: 10px;
+}  
+
 #discord {
     display: flex;
     align-items: center;
@@ -222,4 +229,23 @@
     min-height: 20px;
     max-width: 20px;
     max-height: 20px;
+}
+
+div:has( > input[type="color"]) {
+    position: relative;
+}
+input[type="color"] {
+    position: absolute;
+    visibility: hidden;
+    height: 0px;
+    top: 100%;
+}
+input[type="color"] + label > div {
+    display: inline-block;
+    vertical-align: middle;
+
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: solid 2px white;
 }

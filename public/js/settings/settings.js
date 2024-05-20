@@ -30,12 +30,25 @@ function showUnsyncedHandler() {
 }
 showUnsyncedIcons.addEventListener("change", showUnsyncedHandler);
 
-export async function initSettingsCheckboxes() {
-    for (const elem of document.getElementsByClassName("settings-field")) {    
+export function initSettings() {
+    for (const elem of document.getElementsByClassName("settings-checkbox")) {    
         elem.addEventListener("change", () => data.settings[elem.id] = elem.checked);
         elem.checked = data.settings[elem.id];
     }
     showUnsyncedHandler();
+
+    function updateColor(cssvar, value) {
+        document.body.style.setProperty(cssvar, value);
+        document.getElementById(cssvar + "__display").style.backgroundColor = value;
+    }
+    for (const elem of document.getElementsByClassName("settings-color")) {    
+        elem.addEventListener("input", () => {
+            data.settings[elem.id] = elem.value;
+            updateColor(elem.id, elem.value);
+        });
+        elem.value = data.settings[elem.id];
+        updateColor(elem.id, elem.value);
+    }
 }
 
 const deleteAllBtn = document.getElementById("stragglers__delete-all");

@@ -22,7 +22,8 @@
 .options-btn {
     position: relative;
     cursor: pointer;
-    width: 25px;
+    min-width: 25px;
+    max-width: 25px;
     height: 25px;
 }
 .options-btn svg {
@@ -155,7 +156,7 @@
 }
 
 #search-yt__btn {
-    width: 30px;
+    min-width: 30px;
     height: 30px;
     padding: 3px;
 }
