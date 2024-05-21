@@ -5,7 +5,7 @@ import { disableBtn, enableBtn, initDeleteBtn, sendNotification, shiftDown, show
 import { stragglersList } from "../view/elems.js";
 import * as acc from "../account/account.js";
 import { syncIfNotSyncing } from "../account/clientsync.js";
-const { ipcRenderer } = require("electron");
+const { ipcRenderer, shell } = require("electron");
 const { createHash } = require('crypto');
 
 
@@ -193,3 +193,6 @@ initAccEditor(
     }
 );
 
+document.getElementById("discord").addEventListener("click", () => {
+    shell.openExternal("https://www.discord.gg/3yt3mNMcnK");
+})
