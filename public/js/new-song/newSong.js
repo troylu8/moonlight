@@ -71,8 +71,8 @@ input.onkeydown = (e) => { if (e.key === "Enter") button.onclick(); }
 
 export async function initNewSong(songData, playlist, openSettings, before) {    
     const song = new Song(songData.id, songData);
-    const songElems = song.addToPlaylist(playlist ?? data.curr.viewPlaylist, true, before); 
-    if (openSettings ?? true) openSongSettings(song, songElems[1], songElems[2]);
+    const songEntry = song.addToPlaylist(playlist ?? data.curr.viewPlaylist, true, before); 
+    if (openSettings ?? true) openSongSettings(song, songEntry.titleElem, songEntry.artistElem);
     
     allFiles.set(song.filename, song);
 }

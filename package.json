@@ -1,7 +1,7 @@
 {
-    "name": "yue",
-    "version": "0.0.1",
-    "description": "",
+    "name": "moonlight",
+    "version": "1.0.0",
+    "description": "a simple music player for those late nights",
     "main": "index.js",
     "keywords": [],
     "author": "",
@@ -9,7 +9,9 @@
     "scripts": {
         "start": "electron .",
         "rebuild": "electron-rebuild -f -w better-sqlite3",
-        "//note": "dont forget that `npm rebuild` is NOT the same as `npm run rebuild` !!! "
+        "//note": "dont forget that `npm rebuild` is NOT the same as `npm run rebuild` !!! ",
+        "package": "electron-forge package",
+        "make": "electron-forge make"
     },
     "electronmon": {
         "patterns": [
@@ -23,12 +25,21 @@
         "better-sqlite3": "^9.6.0",
         "chokidar": "^3.6.0",
         "cors": "^2.8.5",
+        "electron-squirrel-startup": "^1.0.1",
         "express": "^4.18.3",
         "snappy": "^7.2.2",
         "yt-search": "^2.10.4",
         "ytdl-core": "^4.11.5"
     },
     "devDependencies": {
+        "@electron-forge/cli": "^7.4.0",
+        "@electron-forge/maker-deb": "^7.4.0",
+        "@electron-forge/maker-rpm": "^7.4.0",
+        "@electron-forge/maker-squirrel": "^7.4.0",
+        "@electron-forge/maker-zip": "^7.4.0",
+        "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
+        "@electron-forge/plugin-fuses": "^7.4.0",
+        "@electron/fuses": "^1.8.0",
         "electron": "^30.0.1",
         "electron-rebuild": "^3.2.9",
         "electronmon": "^2.0.2"

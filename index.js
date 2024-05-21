@@ -7,11 +7,12 @@ app.whenReady().then( async () => {
     const win = new BrowserWindow({
         width: 800,
         height: 600,
+        icon: __dirname + "/public/resources/other/moonlight.ico",
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
         },
-        show: false
+        show: false,
     });
     win.setMenu(null);
 

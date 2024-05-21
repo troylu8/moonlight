@@ -300,6 +300,8 @@ export function addDragEvent(elem, ondrag, onmousedown, onmouseup) {
     if (elem.dragging === undefined) {
         elem.dragging = false;
         elem.addEventListener("mousedown", (e) => { 
+            if (e.button !== 0) return;
+            
             window.getSelection().empty();
             elem.dragging = true; 
             document.body.style.userSelect = "none";

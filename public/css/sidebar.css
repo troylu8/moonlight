@@ -10,6 +10,7 @@
     top: 0;
     bottom: var(--play-div-height);
 
+    box-sizing: border-box;
     border-left: solid 2px var(--border-color);
 
     display: flex;
