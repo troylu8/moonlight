@@ -1,10 +1,5 @@
 node_modules
 resources
-userfiles
-auth
-*.key
 *.db
 *.db-shm
 *.db-wal
-out/
-moonlight_*

@@ -12,9 +12,9 @@ A simple music player for those late nights.
 ## installation
 
 download and extract one of these:
- - [windows](https://www.dropbox.com/scl/fi/ch8zgfwqpu5hjskyo835m/moonlight-win32-x64.zip?rlkey=weu53bpiqmsch8qkdjd8nmcwl&st=mi5ti28x&dl=1)
- - [mac](https://www.dropbox.com/scl/fi/n13cy4vv00yryf8qrahk0/moonlight-darwin-x64.zip?rlkey=4rrsqs772d9ufnt57c68fv1t6&st=bmf09lu1&dl=1)
- - [linux](https://www.dropbox.com/scl/fi/ry8vne6h0p5tqftnr97hf/moonlight-linux-x64.zip?rlkey=ce1zr6vcomevrtq1bz8jjhz2l&st=z49bze19&dl=1)
+ - [windows](https://www.dropbox.com/scl/fi/npuvv90k560os4um6wu4b/moonlight-win32-x64.zip?rlkey=k5j3ckd1rsxb8wy9jcyhxhnar&st=spn3exu0&dl=1)
+ - [mac](https://www.dropbox.com/scl/fi/jff1zy332s8sgd87tszun/moonlight-darwin-x64.zip?rlkey=76wfvyv5s05cqb8qjy2o2hae4&st=m6xrjpuz&dl=1)
+ - [linux](https://www.dropbox.com/scl/fi/2bykr4v1xh8mx3csp6c99/moonlight-linux-x64.zip?rlkey=opsy0rkzio0bstgeusrvtrzla&st=fxx7ftfq&dl=1)
 
 open the extracted folder and run `moonlight.exe`/`moonlight.app`/`moonlight`
 
