@@ -34,7 +34,6 @@ function updateColor(cssvar, value) {
     document.body.style.setProperty(cssvar, value);
     document.getElementById(cssvar + "__display").style.backgroundColor = value;
     if (cssvar === "--background-color") ipcRenderer.invoke("set-titlebar-color", getComputedStyle(document.body).getPropertyValue(cssvar));
-
 }
 
 export function initSettings() {
@@ -127,7 +126,7 @@ initAccEditor(
         if (username === "") return showError(changeU__error, "username cannot be empty");
         if (username === acc.user.username) return showError(changeU__error, "this is your current username");
 
-        const res = await fetch(`https://localhost:5001/change-username/${acc.user.uid}`, {
+        const res = await fetch(`https://172.115.50.238:39999/change-username/${acc.user.uid}`, {
             method: "PUT",
             body: JSON.stringify({
                 username: username,
@@ -168,7 +167,7 @@ initAccEditor(
         const newHash1 = createHash("sha256").update(newPassword).digest("hex");
         if (newPassword !== changeP__repeat.value.trim()) return showError(changeP__error, "passwords don't match");
         
-        const res = await fetch(`https://localhost:5001/change-password/${acc.user.uid}`, {
+        const res = await fetch(`https://172.115.50.238:39999/change-password/${acc.user.uid}`, {
             method: "PUT",
             body: JSON.stringify({
                 oldHash1: createHash("sha256").update(oldPassword).digest("hex"),
@@ -181,15 +180,12 @@ initAccEditor(
         if (!res) return;
         if (res.status === 401) return showError(changeP__error, "wrong password");
 
-        console.log("password change success, syncing");
-
         // sync with updated hash but still using old key 
         acc.user.hash1 = newHash1;
         await syncIfNotSyncing()
 
         // sync again with the new key
         await acc.user.setPassword(newPassword, newHash1);
-        console.log(acc.user);
         await syncIfNotSyncing(true);
 
         sendNotification("password change success");

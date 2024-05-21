@@ -123,7 +123,6 @@ async function syncData(complete) {
             ), "utf8" ),
             files: {
                 sendToClient: requestedFiles.map(path => {
-                    console.log(path);
                     return encrypt(path, "utf8", user.iv)
                 } ),
                 delete: complete? "*" : Array.from(data.trashqueue.values()).map(filename => encrypt(filename, "utf8", user.iv)),
@@ -132,7 +131,7 @@ async function syncData(complete) {
         
         zipToServer.addFile("meta.json", JSON.stringify(toServer));
 
-        const res = await fetch(`https://localhost:5001/sync/${user.uid}/${user.username}/${user.hash1}/${deviceID}`, {
+        const res = await fetch(`https://172.115.50.238:39999/sync/${user.uid}/${user.username}/${user.hash1}/${deviceID}`, {
             method: 'PUT',
             body: JSON.stringify(zipToServer.toBuffer().toJSON()),
             headers: {
@@ -143,7 +142,6 @@ async function syncData(complete) {
         if (res.status === 401) throw new Error("wrong password");
 
         const resJSON = await res.json();
-        console.log("resJSON", resJSON);
 
         if (resJSON.newUsername) {
             user.setUsername(resJSON.newUsername);
@@ -215,7 +213,7 @@ verifyBtn.addEventListener("click", async () => {
 
     await user.setPassword(verifyInput.value.trim());
 
-    const res = await fetch("https://localhost:5001/sign-in", {
+    const res = await fetch("https://172.115.50.238:39999/sign-in", {
         method: "POST",
         body: JSON.stringify({
             username: user.username,
@@ -288,7 +286,7 @@ function decrypt(text, outputEncoding) {
 
 
 async function getData() {
-    const res = await fetch(`https://localhost:5001/get-data/${user.uid}/${user.hash1}`).catch(fetchErrHandler); 
+    const res = await fetch(`https://172.115.50.238:39999/get-data/${user.uid}/${user.hash1}`).catch(fetchErrHandler); 
     if (!res) return;
     
     const ciphertext = await res.text();

@@ -73,7 +73,6 @@ export function getLocalData(key) {
 
 export async function decryptLocalData(key) {
     const ciphertext = getLocalData(key);
-    console.log("cipher", ciphertext);
     return ciphertext? ( await ipcRenderer.invoke("decrypt", ciphertext) ) : null;
 }
 export async function encryptLocalData(key, value) { 
@@ -192,7 +191,6 @@ export const uploadSongFile = promisify(
         }
 
         reserved.add(newBase);
-        console.log("reserving", newBase);
 
         const readStream = fs.createReadStream(path);
         const writeStream = fs.createWriteStream(dest);
@@ -314,7 +312,6 @@ export async function watchFiles(dir) {
         });
     
         watcher.on("unlink", (filename) => {
-            console.log(filename, "unlink");
     
             const obj = allFiles.get(filename);
     

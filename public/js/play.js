@@ -244,7 +244,6 @@ export class PlaylistCycle {
     }
 
     _reshuffle(randomizeCurrSong) {
-        // console.log("reshuffling..");
 
         this.shuffleArr = [];
         this.currIndex = 0;
@@ -256,7 +255,6 @@ export class PlaylistCycle {
 
         const recentsArr = history.slice( -Math.ceil(this.shuffleArr.length/4) ).map(sid => data.songs.get(sid));
         const recents = new Set(recentsArr);
-        console.log("recents:", recentsArr.map(s => s.title));
         kickAway(this.shuffleArr, randomizeCurrSong? this.currIndex : (this.currIndex + 1) % this.shuffleArr.length, recents);
     }
 
@@ -300,7 +298,6 @@ export class PlaylistCycle {
 
         // if not at the top of history stack, play next in stack
         if (!inThePresent()) {
-            console.log("not at top of history yet");
             
             let song;
             do {
@@ -343,10 +340,6 @@ export class PlaylistCycle {
         if (playSong) audio.play();
     }
 
-    print() {
-        console.log("shuffleArr: ", this.shuffleArr.map(s => (s == null)? "null" : s.title));
-        console.log("currIndex: ", this.currIndex);
-    }
 }
 
 function rand(min, max) {
@@ -399,7 +392,6 @@ export function setShuffle(shuffle) {
     
     if (shuffle && data.curr.listenPlaylist) data.curr.listenPlaylist.cycle.updateCurrIndex();
     
-    console.log("shuffle ", shuffle);
     shuffleSvg.style.stroke = shuffle? "var(--accent-color)" : "var(--primary-color)";
 }
 

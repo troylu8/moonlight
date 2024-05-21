@@ -123,7 +123,6 @@ document.body.addEventListener("click", (e) => {
     if (!song__contextMenu.contains(e.target)) closeContextMenu();
 });
 document.getElementById("song__context-menu__edit").addEventListener("click", () => {
-    console.log(focusedSongEntry);
     songSettings.openSongSettings(focusedSongEntry.song, focusedSongEntry.titleElem, focusedSongEntry.artistElem);
     closeContextMenu();
 });
@@ -207,7 +206,6 @@ export function createSongEntry(song, playlist, before) {
         focusedSongEntry = songEntry;
         
         songEntry.style.outline = "solid 2px var(--accent-color)";
-        console.log(songEntry.style);
 
         e.preventDefault();
     });

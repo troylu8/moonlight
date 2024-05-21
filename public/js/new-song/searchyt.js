@@ -3,7 +3,6 @@ const yts = require('yt-search');
 
 
 export async function searchYT(query) {
-    console.log("searching for ", query);
     const res = await yts(query);
 
     const all = res.all.filter(sr => sr.type === "video" || sr.type === "list");

@@ -1,7 +1,7 @@
 import * as acc from "../account/account.js"
 import Dropdown from "./dropdown.js";
 import { audio } from "../play.js";
-import { disableBtn, enableBtn, setSyncIcon, showError } from "./fx.js";
+import { disableBtn, enableBtn, sendNotification, setSyncIcon, showError } from "./fx.js";
 import { data, nullifyData } from "../account/userdata.js";
 
 const titlescreen = document.getElementById("titlescreen");
@@ -56,6 +56,7 @@ function initAccCreator(elems) {
         if (res === "success")  {
             setTitleScreen(false);
             updateForUsername(username.value);
+            sendNotification("welcome, " + username.value);
         }
         else showError(error, res);
 
@@ -78,8 +79,7 @@ document.getElementById("sign-out").addEventListener("click", async () => {
     
     await data.saveDataLocal();
     nullifyData();
-    
-    console.log("clearing cache");
+
     acc.user.clearInfo();
     acc.user.saveLocal();
 });

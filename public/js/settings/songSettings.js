@@ -30,7 +30,6 @@ export function clearCurrentlyEditing() { currentlyEditing = null; }
 export function setLiveElements(playlistGroup) {
     song__titleLive = playlistGroup.querySelector(".song__title\\\:" + currentlyEditing.id);
     song__artistLive = playlistGroup.querySelector(".song__artist\\\:" + currentlyEditing.id);
-    console.log("set live elements");
 }
 
 export function openSongSettings(song, song__title, song__artist) {
@@ -112,8 +111,6 @@ export function updateSongEntries() {
         playingTitleElem.textContent = titleArea.value;
         playingArtistElem.textContent = artistArea.value;
     }   
-
-    console.log("all entries updated");
 
     allEntriesUpdated = true;
 }

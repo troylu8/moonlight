@@ -30,6 +30,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+#info__title {
+    font-weight: bold;
+    font-size: large;
+}
+#info__artist {
+    font-size: small;
+}
 
 #main-control {
     display: flex;

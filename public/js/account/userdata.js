@@ -196,8 +196,6 @@ export class Playlist {
         
         data.playlists.delete(this.id);
         if (data.playlists.size === 0) createPlaylistPrompt.style.display = "block";
-
-        console.log("deleted playlist " + this.title);
     }
 
     removeElements() {

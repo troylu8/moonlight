@@ -47,7 +47,7 @@ async function getPlaylistSongs(ytpid) {
     let nextPageToken;
     do {
         const json = await fetchPlaylistItems(nextPageToken);
-        if (json.error) return console.log(json.error);
+        if (json.error) return sendNotification(json.error);
         
         pushed = pushToSongs(json.items);
         nextPageToken = json.nextPageToken;

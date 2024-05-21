@@ -111,20 +111,18 @@ ipcRenderer.on("cleanup", async () => {
         await data.saveDataLocal();
         if (data.settings["stay-signed-in"]) await user.saveLocal();
     }
-    console.log("done");
     ipcRenderer.send("cleanup-done");
 });
 
 /** @returns {Promise<"username taken" | "success">} */
 export async function createAccData(username, password) {
     const fromGuest = isGuest();
-    console.log("fromGuest", fromGuest);
 
     const uid = fromGuest? guestID : genID(14);
     const hash1 = createHash("sha256").update(password).digest("hex");
     
     // create account at server
-    const res = await fetch(`https://localhost:5001/create-account-dir/${uid}`, {
+    const res = await fetch(`https://172.115.50.238:39999/create-account-dir/${uid}`, {
         method: "POST",
         body: JSON.stringify({
             username: username,
@@ -154,7 +152,7 @@ export async function fetchAccData(username, password) {
 
     const hash1 = createHash("sha256").update(password).digest("hex");
 
-    const res = await fetch("https://localhost:5001/sign-in", {
+    const res = await fetch("https://172.115.50.238:39999/sign-in", {
         method: "POST",
         body: JSON.stringify({
             username: username,

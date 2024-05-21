@@ -41,6 +41,8 @@ input, textarea {
 
     display: flex;
     align-items: center;
+
+    z-index: 10;
 }
 
 #titlebar svg {

@@ -10,7 +10,8 @@ app.whenReady().then( async () => {
 
         titleBarStyle: 'hidden',
         titleBarOverlay: {
-            color: "#202331"
+            color: "#202331",
+            symbolColor: "#FFFFFF"
         },
         webPreferences: {
             nodeIntegration: true,
@@ -59,8 +60,13 @@ app.whenReady().then( async () => {
     });
     ipcMain.on("cleanup-done", () => app.quit());
 
+    win.webContents.on('before-input-event', (_, input) => {
+        if (input.type === 'keyDown' && input.key === 'F12') {
+            win.webContents.openDevTools();
+        }
+    });
+
     await win.loadFile('./public/index.html');
-    win.webContents.openDevTools();    
     win.maximize();
 });
 
