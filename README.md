@@ -16,7 +16,7 @@ download and extract one of these:
  - [mac](https://www.dropbox.com/scl/fi/n13cy4vv00yryf8qrahk0/moonlight-darwin-x64.zip?rlkey=4rrsqs772d9ufnt57c68fv1t6&st=bmf09lu1&dl=1)
  - [linux](https://www.dropbox.com/scl/fi/ry8vne6h0p5tqftnr97hf/moonlight-linux-x64.zip?rlkey=ce1zr6vcomevrtq1bz8jjhz2l&st=z49bze19&dl=1)
 
-open the extracted folder and run `moonlight.exe`
+open the extracted folder and run `moonlight.exe`/`moonlight.app`/`moonlight`
 
 to **uninstall**, simply delete the extracted folder
 
