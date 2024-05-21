@@ -387,7 +387,8 @@ const nextBtn = document.getElementById("next");
 nextBtn.addEventListener("click", () => 
     data.curr.listenPlaylist.cycle.setSongNext(true)
 );
-document.getElementById("prev").addEventListener("click", async () => 
+const prevBtn = document.getElementById("prev");
+prevBtn.addEventListener("click", async () => 
     data.curr.listenPlaylist.cycle.setSongPrev(true)
 );
 
@@ -403,3 +404,12 @@ export function setShuffle(shuffle) {
 }
 
 document.getElementById("shuffle").addEventListener("click", () => setShuffle(!data.settings.shuffle));
+
+
+document.body.addEventListener("keydown", (e) => {
+    if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
+
+    if (e.key === " ") togglePlay();
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") prevBtn.click();
+    else if (e.key === "ArrowRight" || e.key === "ArrowDown") nextBtn.click();
+});

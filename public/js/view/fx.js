@@ -1,6 +1,7 @@
 import { audio } from "../play.js";
 import { data } from "../account/userdata.js";
 import { activeSidebarElem } from "./sidebar.js";
+const {ipcRenderer} = require("electron");
 
 const circle = document.getElementById("play__circle");
 
@@ -134,6 +135,7 @@ export function setVolumeIcon(type) {
     activeVolumeIcon = volumeIcons[type];
     activeVolumeIcon.style.display = "block";
 }
+
 
 for (const tArea of document.getElementsByClassName("auto-height")) {
     tArea.resize = () => {
@@ -406,3 +408,7 @@ export function disableBtn(btn) {
     btn.style.backgroundColor = "var(--disabled-color)";
     btn.setAttribute("disabled", "");
 }
+
+document.getElementById("minimize-to-tray").addEventListener("click", () => {
+    ipcRenderer.invoke("minimize-to-tray");
+});

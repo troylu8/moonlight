@@ -1,5 +1,4 @@
-const { app, BrowserWindow, safeStorage, shell} = require('electron');
-const { ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, safeStorage, shell, Tray, ipcMain, dialog } = require('electron');
 const fs = require('fs');
 const { dirname } = require('path');
 
@@ -43,12 +42,22 @@ app.whenReady().then( async () => {
         });
     });
 
+    ipcMain.handle("minimize-to-tray", () => {
+        win.hide();
+
+        const tray = new Tray(__dirname + "/public/resources/other/moonlight.ico");
+        tray.setToolTip("moonlight");
+        tray.addListener("click", () => {
+            win.show();
+            tray.destroy();
+        });
+    });
+
     win.once("close", (e) => {
         win.webContents.send("cleanup");
         e.preventDefault();
     });
     ipcMain.on("cleanup-done", () => app.quit());
-
 
     await win.loadFile('./public/index.html');
     win.webContents.openDevTools();    
