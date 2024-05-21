@@ -1,9 +1,11 @@
+import { fetchErrHandler } from '../account/account.js';
 import { createSearchResultEntry } from '../view/elems.js';
 const yts = require('yt-search');
 
 
 export async function searchYT(query) {
-    const res = await yts(query);
+    const res = await yts(query).catch(fetchErrHandler);
+    if (!res) return searchResults.close(true);
 
     const all = res.all.filter(sr => sr.type === "video" || sr.type === "list");
     

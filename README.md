@@ -1,7 +1,8 @@
 <link rel="shortcut icon" type="image/x-icon" href="moonlight.png">
 
 # moonlight 
-![https://img.shields.io/badge/-github-%23181717?logo=github](https://github.com/troylu8/moonlight) ![https://img.shields.io/badge/-discord-%235865F2?logo=discord&logoColor=%23FFFFFF](https://www.discord.gg/3yt3mNMcnK)
+[![github](https://img.shields.io/badge/-github-%23181717?logo=github)](https://github.com/troylu8/moonlight)
+[![discord](https://img.shields.io/badge/-discord-%235865F2?logo=discord&logoColor=%23FFFFFF)](https://www.discord.gg/3yt3mNMcnK)
 
 A simple music player for those late nights.
 

@@ -1,7 +1,7 @@
 import {  addBytes, allFiles, makeUnique, reserved } from '../account/files.js';
 import { Playlist, Song } from '../account/userdata.js';
 import { Tracker } from './tracker.js';
-import { genID } from '../account/account.js';
+import { fetchErrHandler, genID } from '../account/account.js';
 import { new__dropdown } from './newSong.js';
 import { setViewPlaylist } from '../view/elems.js';
 import { sendNotification } from '../view/fx.js';
@@ -153,8 +153,8 @@ export async function downloadPlaylist(ytpid, cb) {
 }
 
 async function ytOEmbed(url) {
-    const res = await fetch("https://www.youtube.com/oembed?format=json&url=" + url);
-    return await res.json(); 
+    const res = await fetch("https://www.youtube.com/oembed?format=json&url=" + url).catch(fetchErrHandler);
+    return res? await res.json() : null; 
 }
 
 
@@ -167,7 +167,7 @@ export async function downloadSong(ytsid, cb) {
     let stop = false;
     
     const oembed = await ytOEmbed("https://www.youtube.com/watch?v=" + ytsid);
-    if ( !oembed ) return cb(new Error("video doesnt exist"));
+    if ( !oembed ) return cb(new Error("video doesnt exist or no internet"));
 
     const tracker = new Tracker(oembed.title, Infinity, () => stop = true);
 

@@ -7,4 +7,4 @@ auth
 *.db-shm
 *.db-wal
 out/
-moonlight-*
+moonlight_*
