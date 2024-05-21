@@ -1,4 +1,4 @@
-<link rel="shortcut icon" type="image/x-icon" href="public/resources/other/moonlight.ico?">
+<link rel="shortcut icon" type="image/x-icon" href="moonlight.ico?">
 
 # moonlight [https://img.shields.io/badge/-github-%23181717?logo=github
 ](https://github.com/troylu8/moonlight) [https://img.shields.io/badge/-discord-%235865F2?logo=discord&logoColor=%23FFFFFF](https://www.discord.gg/3yt3mNMcnK)
