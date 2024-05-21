@@ -1,4 +1,5 @@
 :root {
+    --titlebar-div-height: 30px;
     --playlists-div-width: 220px;
     --sidebar-div-width: 350px;
     --options-div-height: 40px;
@@ -21,6 +22,31 @@
     --error-color: #d13030;
     --disabled-color: #b9b9b9;
 
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+input, textarea {
+    user-select: auto;
+}
+
+#titlebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--titlebar-div-height);
+    background-color: var(--background-color);
+    -webkit-app-region: drag;
+
+    display: flex;
+    align-items: center;
+}
+
+#titlebar > svg {
+    width: 19px;
+    height: 19px;
+    margin: 3px 10px 3px 5px;
 }
 
 @font-face {

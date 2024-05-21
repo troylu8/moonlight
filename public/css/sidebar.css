@@ -7,7 +7,7 @@
 
     width: var(--sidebar-div-width);
     right:  calc(var(--sidebar-div-width) * -1); 
-    top: 0;
+top: var(--titlebar-div-height);
     bottom: var(--play-div-height);
 
     box-sizing: border-box;

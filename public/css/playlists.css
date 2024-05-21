@@ -5,7 +5,7 @@
 
     position: fixed;
     left: 0;
-    top: 0;
+    top: var(--titlebar-div-height);
     bottom: var(--play-div-height);
 
     box-sizing: border-box;

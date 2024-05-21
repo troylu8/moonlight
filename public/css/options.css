@@ -2,7 +2,7 @@
     background-color: var(--background-color-main);
 
     position: fixed;
-    top: 0;
+    top: var(--titlebar-div-height);
     left: var(--playlists-div-width);
     right: 0;
     height: var(--options-div-height);

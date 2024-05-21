@@ -8,6 +8,11 @@ app.whenReady().then( async () => {
         width: 800,
         height: 600,
         icon: __dirname + "/public/resources/other/moonlight.ico",
+
+        titleBarStyle: 'hidden',
+        titleBarOverlay: {
+            color: "#202331"
+        },
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
@@ -15,6 +20,28 @@ app.whenReady().then( async () => {
         show: false,
     });
     win.setMenu(null);
+
+    ipcMain.handle("set-titlebar-color", (e, colorHex) => {
+
+        function gray(hex) {
+            hex = hex.toLowerCase();
+            
+            function hexDigitToInt(hex) {
+                return (hex.charCodeAt(0) >= "a".charCodeAt(0))? 
+                        10 + hex.charCodeAt(0) - "a".charCodeAt(0) :
+                        Number(hex);
+            }
+        
+            return  (hexDigitToInt(hex[1]) * 16 + hexDigitToInt(hex[2])) * 0.3 +
+                    (hexDigitToInt(hex[3]) * 16 + hexDigitToInt(hex[4])) * 0.59 +
+                    (hexDigitToInt(hex[5]) * 16 + hexDigitToInt(hex[6])) * 0.11;
+        }
+
+        win.setTitleBarOverlay({
+            color: colorHex,
+            symbolColor: (gray(colorHex) > 127)? "#000000" : "#ffffff"
+        });
+    });
 
     win.once("close", (e) => {
         win.webContents.send("cleanup");

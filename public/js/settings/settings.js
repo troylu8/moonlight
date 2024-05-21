@@ -33,6 +33,8 @@ showUnsyncedIcons.addEventListener("change", showUnsyncedHandler);
 function updateColor(cssvar, value) {
     document.body.style.setProperty(cssvar, value);
     document.getElementById(cssvar + "__display").style.backgroundColor = value;
+    if (cssvar === "--background-color") ipcRenderer.invoke("set-titlebar-color", getComputedStyle(document.body).getPropertyValue(cssvar));
+
 }
 
 export function initSettings() {
@@ -57,7 +59,7 @@ export function initSettings() {
 }
 
 function applyDefaultColor(colorElem) {
-    colorElem.value = data.settings[colorElem.id] = getComputedStyle(document.body).getPropertyValue(colorElem.id);
+    data.settings[colorElem.id] = getComputedStyle(document.body).getPropertyValue(colorElem.id + "-default");
     updateColor(colorElem.id, `var(${colorElem.id}-default)`);
 }
 

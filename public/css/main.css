@@ -3,7 +3,7 @@
     position: fixed;
     left: var(--playlists-div-width);
     right: 0;
-    top: var(--options-div-height);
+    top: calc(var(--titlebar-div-height) + var(--options-div-height));
     bottom: var(--play-div-height);
     padding: 15px;
 
@@ -65,7 +65,6 @@
     box-sizing: border-box;
 
     cursor: grab;
-    user-select: none;
 
     border-radius: 5px;
 }
