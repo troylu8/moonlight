@@ -7,7 +7,7 @@ When you hit the sync button, your files are encrypted with your **actual passwo
 So if I peek into your files, without your **actual password**, all I'll ever see is encrypted gibberish.
 
 What I see:
-<img src="on-my-end.png" alt="what it looks like on my end" width="750px">
+<p><img src="on-my-end.png" alt="what it looks like on my end" width="750px"></p>
 
 This is also why it takes forever to change your password - everything has to be re-encrypted and re-uploaded.
 
