@@ -3,7 +3,6 @@ import {  missingFiles, reserved, deviceID, allFiles } from "./files.js";
 import { disableBtn, enableBtn, sendNotification, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
 import { fetchErrHandler, isGuest, user } from "./account.js";
 import Dropdown from "../view/dropdown.js";
-const { Readable, Duplex } = require("stream");
 const fs = require('fs');
 const snappy = require('snappy');
 const Zip = require("adm-zip");
@@ -75,7 +74,7 @@ async function syncData(complete) {
                     const filename = encrypt("songs/" + item.filename, "utf8", user.iv);
                     const compressed = await snappy.compress(await fs.promises.readFile(global.userDir + "\\songs\\" + item.filename), {copyOutputData: true});
                     zipToServer.addFile(filename, encrypt(compressed));
-                    console.log("added", item.filename);
+                    //console.log("added", item.filename);
                 }
 
                 // update/override serverJSON with local item
@@ -90,10 +89,10 @@ async function syncData(complete) {
     await syncCategory("songs");
     await syncCategory("playlists");
 
-    console.log("sending userdata at ", Date.now());
+    //console.log("sending userdata at ", Date.now());
     const userdataRes = await fetch(`https://172.115.50.238:39999/sync/userdata/${user.uid}/${user.username}/${user.hash1}`, {
         method: "PUT", 
-        body: encrypt( JSON.stringify(serverJSON,
+        body: encrypt(JSON.stringify(serverJSON,
             function(key, value) {
             
                 if ([                            
@@ -124,14 +123,13 @@ async function syncData(complete) {
         sendNotification("username was changed to ", resJSON.newUsername);
     } 
 
-
     const editPromise = new Promise( async (res, rej) => {
         const start = Date.now()
-        console.log("starting edit at ", start);
+        //console.log("starting edit at ", start);
         const deleteMe =    complete? "all" : 
                             data.trashqueue.size === 0? "none" :
                             Array.from(data.trashqueue.values()).map(filename => encrypt(filename, "utf8", user.iv)).join("-");
-        console.log("deleteMe: ", deleteMe);
+        //console.log("deleteMe: ", deleteMe);
         await fetch(`https://172.115.50.238:39999/sync/edit/${user.uid}/${user.hash1}/${deleteMe}`, {
             method: 'PUT',
             body: await zipToServer.toBufferPromise(),
@@ -141,20 +139,20 @@ async function syncData(complete) {
         }).catch(fetchErrHandler);
         
         const end = Date.now();
-        console.log("received edit at", end );
-        console.log("total edit time", end - start);
+        //console.log("received edit at", end );
+        //console.log("total edit time", end - start);
 
         res();
     });
 
     const orderPromise = new Promise(async (res, rej) => {
         if (requestedFiles.length === 0) {
-            console.log("skipping order");
+            //console.log("skipping order");
             res();
         }
         else {
             const start = Date.now();
-            console.log("starting order get at", start);
+            //console.log("starting order get at", start);
             const getRes = await fetch(`https://172.115.50.238:39999/sync/order/${user.uid}/${user.hash1}`, {
                 method: 'PUT',
                 body: JSON.stringify({
@@ -167,27 +165,25 @@ async function syncData(complete) {
                 }
             }).catch(fetchErrHandler);
             const end = Date.now();
-            console.log("received order at, ", end);
-            console.log("total order time", end - start);
+            //console.log("received order at, ", end);
+            //console.log("total order time", end - start);
 
-            console.log(getRes.body);
             const arr = [];
 
             const reader = getRes.body.getReader();
-            console.log(reader);
             while (true) {
                 const {done, value} = await reader.read();
                 if (done) break;
                 arr.push(value);
             }
 
-            console.log("concating now");
+            //console.log("concating now");
             const buf = Buffer.concat(arr);
-            console.log("resolved as buffer at", Date.now(), buf);
+            //console.log("resolved as buffer at", Date.now(), buf);
 
             const serverZIP = new Zip(buf);
 
-            console.log(serverZIP);
+            //console.log(serverZIP);
 
             for (const entry of serverZIP.getEntries()) {
                 entry.getDataAsync( async (buf, err) => {
@@ -201,13 +197,13 @@ async function syncData(complete) {
             }
 
             res();
-            
+
         }
     });
 
     await Promise.all([editPromise, orderPromise]);
 
-    console.log("these just synced: ", unsynced);
+    //console.log("these just synced: ", unsynced);
 
     for (const item of unsynced) item.setSyncStatus("synced");
     for (const songData of newItems.songs) {
