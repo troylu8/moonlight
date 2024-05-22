@@ -127,12 +127,7 @@ export async function getFileSize(path) {
 }
 
 
-/**  insert sid into end of basename if already used by another song*/
-export async function makeUnique(basename, sid, ignoreMissingFiles) {
-    
-    // if theres no songs with this filename, and no error songs waiting for this filename
-    if ( !(allFiles.get(basename) instanceof Song) && (ignoreMissingFiles || !missingFiles.has(basename)) ) return basename;
-
+export async function postpendSID(basename, sid) {
     const i = basename.lastIndexOf(".");
     return basename.substring(0, i) + " " + sid + basename.substring(i);
 }
@@ -171,7 +166,7 @@ export const uploadSongFile = promisify(
 
         const originalBase = tracker.titleElem.textContent = basename(path);
 
-        const dest = global.userDir + "/songs/" + await makeUnique(originalBase, sid, !createSongData);
+        const dest = global.userDir + "/songs/" + await postpendSID(originalBase, sid);
         const newBase = basename(dest);
 
         const songData = createSongData ? {

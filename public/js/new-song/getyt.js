@@ -1,4 +1,4 @@
-import {  addBytes, allFiles, makeUnique, reserved } from '../account/files.js';
+import {  addBytes, allFiles, postpendSID, reserved } from '../account/files.js';
 import { Playlist, Song } from '../account/userdata.js';
 import { Tracker } from './tracker.js';
 import { fetchErrHandler, genID } from '../account/account.js';
@@ -7,12 +7,6 @@ import { setViewPlaylist } from '../view/elems.js';
 import { sendNotification } from '../view/fx.js';
 const ytdl = require('ytdl-core');
 const fs = require("fs");
-
-async function getQualityOptions(url) {
-    const info = await ytdl.getInfo(url);
-    const audioFormats = ytdl.filterFormats(info.formats, "audio");
-    return audioFormats.map(format => format.audioBitrate).sort((a,b) => b-a);
-}
 
 function cleanFileName(str) {
     return str.replace(/[/\\?%*:|"<>]/g, '-')
@@ -102,7 +96,6 @@ class BST {
                 p = p.right;
             }
         }
-
         return res;
     }
 }
@@ -133,7 +126,7 @@ export async function downloadPlaylist(ytpid, cb) {
             const song = new Song(songData.id, songData);
             allFiles.set(song.filename, song);
 
-            const entry = song.addToPlaylist(playlist, true, indexToEntry.getAfter(s.index))[0];
+            const entry = song.addToPlaylist(playlist, true, indexToEntry.getAfter(s.index));
             indexToEntry.add(s.index, entry);
             
             if (++complete === songs.length) {
@@ -141,20 +134,20 @@ export async function downloadPlaylist(ytpid, cb) {
                 if (unavailable !== 0) {
                     sendNotification(
                         unavailable + 
-                        ((unavailable === 1)? " song was " : " songs were") +
+                        ((unavailable === 1)? " song was " : " songs were ") +
                         "unable to be downloaded",
                         "var(--error-color)"
                     );
                 }
                 cb(playlist);
             } 
-        });   
+        });
     }
 }
 
 async function ytOEmbed(url) {
     const res = await fetch("https://www.youtube.com/oembed?format=json&url=" + url).catch(fetchErrHandler);
-    return res? await res.json() : null; 
+    return (res && res.ok)? await res.json() : null;
 }
 
 
@@ -179,7 +172,7 @@ export async function downloadSong(ytsid, cb) {
     tracker.titleElem.textContent = info.videoDetails.title;
 
     const sid = genID(14);
-    const filename = await makeUnique(cleanFileName(info.videoDetails.title) + ".mp3", sid);
+    const filename = await postpendSID(cleanFileName(info.videoDetails.title) + ".mp3", sid);
     const path = global.userDir + "/songs/" + filename;
     reserved.add(filename);
     

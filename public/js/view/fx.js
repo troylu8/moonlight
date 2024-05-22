@@ -232,7 +232,7 @@ export function setToolTip(parent, innerHTML, gap) {
     parent.addEventListener("wheel", () => {
         tooltip.style.visibility = "hidden";
         hide();
-    });
+    }, {passive: true});
 
     parent.appendChild(tooltip);
     return tooltip;

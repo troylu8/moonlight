@@ -186,4 +186,5 @@ export async function fetchAccData(username, password) {
 
 export function fetchErrHandler(err) {
     sendNotification("can't connect to server", "var(--error-color)");
+    throw new Error("can't connect to server")
 }

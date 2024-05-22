@@ -3,6 +3,7 @@ import {  missingFiles, reserved, deviceID, allFiles } from "./files.js";
 import { disableBtn, enableBtn, sendNotification, showError, startSyncSpin, stopSyncSpin } from "../view/fx.js";
 import { fetchErrHandler, isGuest, user } from "./account.js";
 import Dropdown from "../view/dropdown.js";
+const { Readable, Duplex } = require("stream");
 const fs = require('fs');
 const snappy = require('snappy');
 const Zip = require("adm-zip");
@@ -17,180 +18,232 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
  */
 async function syncData(complete) {
     
-    if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not signed in!");
+    const serverJSON = complete? {playlists:{}, songs:{}} : await getData();
+    if (!serverJSON) throw new Error("can't connect to server");
 
-    startSyncSpin();
-    sendNotification("syncing...");
+    const requestedFiles = Array.from(missingFiles.keys())
+                            .filter(fn => missingFiles.get(fn).syncStatus !== "local")
+                            .map(fn => "songs/" + fn);
+    const zipToServer = new Zip();
 
+    /** if sync is successful, call `.setSyncStatus("synced")` on all these items */
+    const unsynced = [];
 
-    try {
-        const serverJSON = complete? {playlists:{}, songs:{}} : await getData();
-        if (!serverJSON) throw new Error("can't connect to server");
+    /** if sync is successful, delete these items */
+    const deleted = [];
+    const newItems = {
+        songs: [],
+        playlists: []
+    };
+    
+    /** @param {"songs" | "playlists"} category */
+    const syncCategory = async (category) => {
 
-        const requestedFiles = Array.from(missingFiles.keys())
-                                .filter(fn => missingFiles.get(fn).syncStatus !== "local")
-                                .map(fn => "songs/" + fn);
-        const zipToServer = new Zip();
+        for (const id of Object.keys(serverJSON[category])) {
+            const itemData = serverJSON[category][id];
+            const item = data[category].get(id);
 
-        /** if sync is successful, call `.setSyncStatus("synced")` on all these items */
-        const unsynced = [];
+            // WANTS - if client doesnt have this song/playlist && not in trash queue
+            if (!item) {
+                if (!data.trashqueue.has(id)) {
+                    itemData.id = id;
+                    newItems[category].push(itemData);
 
-        /** if sync is successful, delete these items */
-        const deleted = [];
-        const newItems = {
-            songs: [],
-            playlists: []
-        };
-        
-        /** @param {"songs" | "playlists"} category */
-        const syncCategory = async (category) => {
-
-            for (const id of Object.keys(serverJSON[category])) {
-                const itemData = serverJSON[category][id];
-                const item = data[category].get(id);
-
-                // WANTS - if client doesnt have this song/playlist && not in trash queue
-                if (!item) {
-                    if (!data.trashqueue.has(id)) {
-                        itemData.id = id;
-                        newItems[category].push(itemData);
-
-                        if (category === "songs") {
-                            requestedFiles.push("songs/" + itemData.filename);
-                            reserved.add("songs/" + itemData.filename);
-                        }
+                    if (category === "songs") {
+                        requestedFiles.push("songs/" + itemData.filename);
+                        reserved.add("songs/" + itemData.filename);
                     }
                 }
-
-                // if client has song/playlist, but it hasnt been synced to latest changes 
-                else if (item.syncStatus === "synced" && itemData.lastUpdatedBy !== deviceID) {
-                    item.update(itemData);
-                } 
-                    
             }
-                    
-            for (const item of data[category].values()) {
-                // ignore errored local songs
-                if (item.state === "error" && item.syncStatus === "local") continue;
+
+            // if client has song/playlist, but it hasnt been synced to latest changes 
+            else if (item.syncStatus === "synced" && itemData.lastUpdatedBy !== deviceID) {
+                item.update(itemData);
+            } 
                 
-                else if (item.syncStatus === "local" || complete) {
-                    unsynced.push(item);
-
-                    // if song didn't exist in serverJSON before, add file
-                    if (category === "songs" && !serverJSON[category][item.id]) {          
-                        const filename = encrypt("songs/" + item.filename, "utf8", user.iv);
-
-                        const compressed = await snappy.compress(await fs.promises.readFile(global.userDir + "\\songs\\" + item.filename), {copyOutputData: true});
-                        zipToServer.addFile(filename, encrypt(compressed));
-                    }
-
-                    // update/override serverJSON with local item
-                    item.lastUpdatedBy = deviceID;
-                    serverJSON[category][item.id] = item;
-                } 
-                else if (!serverJSON[category][item.id]) deleted.push(item);
-            }
+        }
+                
+        for (const item of data[category].values()) {
+            // ignore errored local songs
+            if (item.state === "error" && item.syncStatus === "local") continue;
             
-        }
+            else if (item.syncStatus === "local" || complete) {
+                unsynced.push(item);
 
-        await syncCategory("songs");
-        await syncCategory("playlists");
-    
-    
-        const toServer = {
-            userdata: encrypt( JSON.stringify(serverJSON,
-                function(key, value) {
-                
-                    if ([                            
-                        "groupElem",
-                        "songEntries",
-                        "playlistEntry",
-                        "checkboxDiv",
-                        "id",
-                        "cycle",
-                        "syncStatus",
-                        "state"
-                    ].includes(key)) return undefined;
-    
-    
-                    if (key === "songs" && this.getOrderedSIDs) return this.getOrderedSIDs();
-    
-                    // remove song.playlists, but keep serverJSON.playlists
-                    if (key === "playlists") return this.songs? value : undefined;
-    
-                    return value;
+                // if song didn't exist in serverJSON before, add file
+                if (category === "songs" && !serverJSON[category][item.id]) {          
+                    const filename = encrypt("songs/" + item.filename, "utf8", user.iv);
+                    const compressed = await snappy.compress(await fs.promises.readFile(global.userDir + "\\songs\\" + item.filename), {copyOutputData: true});
+                    zipToServer.addFile(filename, encrypt(compressed));
+                    console.log("added", item.filename);
                 }
-            ), "utf8" ),
-            files: {
-                sendToClient: requestedFiles.map(path => {
-                    return encrypt(path, "utf8", user.iv)
-                } ),
-                delete: complete? "*" : Array.from(data.trashqueue.values()).map(filename => encrypt(filename, "utf8", user.iv)),
-            }
-        };
-        
-        zipToServer.addFile("meta.json", JSON.stringify(toServer));
 
-        const res = await fetch(`https://172.115.50.238:39999/sync/${user.uid}/${user.username}/${user.hash1}/${deviceID}`, {
-            method: 'PUT',
-            body: JSON.stringify(zipToServer.toBuffer().toJSON()),
-            headers: {
-                "Content-Type": "application/json"
-            }
-        }).catch(fetchErrHandler);
-        if (!res) throw new Error("can't connect to server");
-        if (res.status === 401) throw new Error("wrong password");
-
-        const resJSON = await res.json();
-
-        if (resJSON.newUsername) {
-            user.setUsername(resJSON.newUsername);
-            sendNotification("username was changed to ", resJSON.newUsername);
-        }
-
-
-        const serverZIP = new Zip(Buffer.from(resJSON.data));
-
-        for (const entry of serverZIP.getEntries()) {
-            entry.getDataAsync( async (buf, err) => {
-                if (err) throw new Error(err);
-    
-                await fs.promises.writeFile(
-                    global.userDir + "/" + decrypt(entry.entryName, "utf8", user.iv), 
-                    await snappy.uncompress(decrypt(buf.toString()), {copyOutputData: true})
-                );
-            });
+                // update/override serverJSON with local item
+                item.lastUpdatedBy = deviceID;
+                serverJSON[category][item.id] = item;
+            } 
+            else if (!serverJSON[category][item.id]) deleted.push(item);
         }
         
-        for (const item of unsynced) item.setSyncStatus("synced");
-        for (const songData of newItems.songs) {
-            songData.syncStatus = "synced";
-            allFiles.set(songData.filename, new Song(songData.id, songData, false));
-        } 
-        for (const playlistData of newItems.playlists) {
-            playlistData.syncStatus = "synced";
-            new Playlist(playlistData.id, playlistData, false);
-        }
-        data.trashqueue.clear();
-
-        for (const item of deleted) item.delete();
-
-        stopSyncSpin();
-        sendNotification("sync complete!");
-
-    } catch (err) {
-        stopSyncSpin(false);
-        if (err.message === "wrong password") syncDropdown.open();
     }
 
-    
+    await syncCategory("songs");
+    await syncCategory("playlists");
+
+    console.log("sending userdata at ", Date.now());
+    const userdataRes = await fetch(`https://172.115.50.238:39999/sync/userdata/${user.uid}/${user.username}/${user.hash1}`, {
+        method: "PUT", 
+        body: encrypt( JSON.stringify(serverJSON,
+            function(key, value) {
+            
+                if ([                            
+                    "groupElem",
+                    "songEntries",
+                    "playlistEntry",
+                    "checkboxDiv",
+                    "id",
+                    "cycle",
+                    "syncStatus",
+                    "state"
+                ].includes(key)) return undefined;
+
+
+                if (key === "songs" && this.getOrderedSIDs) return this.getOrderedSIDs();
+
+                // remove song.playlists, but keep serverJSON.playlists
+                if (key === "playlists") return this.songs? value : undefined;
+
+                return value;
+            }
+        ), "utf8")
+    }).catch(fetchErrHandler);
+    if (userdataRes.status === 401) throw new Error("wrong password");
+    let newUsername = await userdataRes.text();
+    if (newUsername) {
+        user.setUsername(newUsername); 
+        sendNotification("username was changed to ", resJSON.newUsername);
+    } 
+
+
+    const editPromise = new Promise( async (res, rej) => {
+        const start = Date.now()
+        console.log("starting edit at ", start);
+        const deleteMe =    complete? "all" : 
+                            data.trashqueue.size === 0? "none" :
+                            Array.from(data.trashqueue.values()).map(filename => encrypt(filename, "utf8", user.iv)).join("-");
+        console.log("deleteMe: ", deleteMe);
+        await fetch(`https://172.115.50.238:39999/sync/edit/${user.uid}/${user.hash1}/${deleteMe}`, {
+            method: 'PUT',
+            body: await zipToServer.toBufferPromise(),
+            headers: {
+                "Content-Type": "application/octet-stream",
+            }
+        }).catch(fetchErrHandler);
+        
+        const end = Date.now();
+        console.log("received edit at", end );
+        console.log("total edit time", end - start);
+
+        res();
+    });
+
+    const orderPromise = new Promise(async (res, rej) => {
+        if (requestedFiles.length === 0) {
+            console.log("skipping order");
+            res();
+        }
+        else {
+            const start = Date.now();
+            console.log("starting order get at", start);
+            const getRes = await fetch(`https://172.115.50.238:39999/sync/order/${user.uid}/${user.hash1}`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    sendToClient: requestedFiles.map(path => {
+                        return encrypt(path, "utf8", user.iv)
+                    }),
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            }).catch(fetchErrHandler);
+            const end = Date.now();
+            console.log("received order at, ", end);
+            console.log("total order time", end - start);
+
+            console.log(getRes.body);
+            const arr = [];
+
+            const reader = getRes.body.getReader();
+            console.log(reader);
+            while (true) {
+                const {done, value} = await reader.read();
+                if (done) break;
+                arr.push(value);
+            }
+
+            console.log("concating now");
+            const buf = Buffer.concat(arr);
+            console.log("resolved as buffer at", Date.now(), buf);
+
+            const serverZIP = new Zip(buf);
+
+            console.log(serverZIP);
+
+            for (const entry of serverZIP.getEntries()) {
+                entry.getDataAsync( async (buf, err) => {
+                    if (err) throw new Error(err);
+
+                    await fs.promises.writeFile(
+                        global.userDir + "/" + decrypt(entry.entryName, "utf8", user.iv), 
+                        await snappy.uncompress(decrypt(buf.toString()), {copyOutputData: true})
+                    );
+                });
+            }
+
+            res();
+            
+        }
+    });
+
+    await Promise.all([editPromise, orderPromise]);
+
+    console.log("these just synced: ", unsynced);
+
+    for (const item of unsynced) item.setSyncStatus("synced");
+    for (const songData of newItems.songs) {
+        songData.syncStatus = "synced";
+        allFiles.set(songData.filename, new Song(songData.id, songData, false));
+    } 
+    for (const playlistData of newItems.playlists) {
+        playlistData.syncStatus = "synced";
+        new Playlist(playlistData.id, playlistData, false);
+    }
+    data.trashqueue.clear();
+
+    for (const item of deleted) item.delete();
 }
 
 let syncing = false;
 export async function syncIfNotSyncing(complete) {
+
+    if (isGuest()) return showError(syncBtn.tooltip.lastElementChild, "not signed in!");
+
     if (syncing) return;
     syncing = true;
-    await syncData(complete);
+
+    startSyncSpin();
+    sendNotification("syncing...");
+
+    try {
+        await syncData(complete);
+        stopSyncSpin();
+        sendNotification("sync complete!");
+    } catch (err) {
+        stopSyncSpin(false);
+        if (err.message === "wrong password") syncDropdown.open();
+        throw err;
+    }
+    
     syncing = false;
 }
 
@@ -232,7 +285,7 @@ verifyBtn.addEventListener("click", async () => {
     if (res.status === 401) return showError(verifyError, "wrong password");
 
     syncDropdown.close();
-    await syncData();
+    await syncIfNotSyncing();
     
 });
 
