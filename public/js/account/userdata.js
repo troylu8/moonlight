@@ -124,7 +124,7 @@ export class Song {
             else data.curr.listenPlaylist.cycle.setSongNext(!play.audio.paused);
         }
 
-        data.trashqueue.set(this.id, "songs/" + this.filename);
+        if (!acc.isGuest()) data.trashqueue.set(this.id, "songs/" + this.filename);
 
         for (const playlist of this.playlists) this.removeFromPlaylist(playlist);
 

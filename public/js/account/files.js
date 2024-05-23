@@ -120,7 +120,7 @@ export async function writeUserdata(uid, userdataStr) {
 
 
 export async function deleteSongFile(name) {
-    await fs.promises.rm(global.userDir + "/songs/" + name, {recursive: true});
+    await fs.promises.unlink(global.userDir + "/songs/" + name);
 }
 export async function getFileSize(path) {
     return (await fs.promises.stat(path)).size;
