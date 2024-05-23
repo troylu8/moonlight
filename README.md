@@ -14,7 +14,6 @@ A simple music player for those late nights.
 
 download and extract one of these:
  - [windows](https://www.dropbox.com/scl/fi/meg7vjraike6t9nb9snhh/moonlight-win32-x64.zip?rlkey=34uwzi0fhxpd85d6sfedyfpfk&st=p0qnbyzh&dl=1)
- - [mac](https://www.dropbox.com/scl/fi/bczwhcffqszngkyyyytwr/moonlight-darwin-x64.zip?rlkey=njqe7l8djcqqpp1ztnhxce4v8&st=vnb6lddt&dl=1)
  
 open the extracted folder and run `moonlight.exe`/`moonlight.app`/`moonlight`
 
