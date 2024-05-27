@@ -1,4 +1,4 @@
-const { app, BrowserWindow, safeStorage, shell, Tray, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, safeStorage, shell, Tray, ipcMain, dialog, globalShortcut } = require('electron');
 const fs = require('fs');
 const { dirname } = require('path');
 
@@ -64,6 +64,10 @@ app.whenReady().then( async () => {
         if (input.type === 'keyDown' && input.key === 'F12') {
             win.webContents.openDevTools();
         }
+    });
+
+    ["MediaNextTrack", "MediaPreviousTrack", "MediaStop", "MediaPlayPause"].forEach((val) => {
+        globalShortcut.register(val, () => win.webContents.send(val));
     });
 
     await win.loadFile('./public/index.html');

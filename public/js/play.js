@@ -2,7 +2,7 @@ import { addDragEvent } from "./view/fx.js";
 import { getTimeDisplay } from "./view/elems.js";
 import { setSpin, updateVolumeIcon } from "./view/fx.js";
 import { data, Playlist, Song } from "./account/userdata.js";
-
+const { ipcRenderer } = require("electron");
 
 class SpinningAudio extends Audio {
     play() {
@@ -405,3 +405,8 @@ document.body.addEventListener("keydown", (e) => {
     else if (e.key === "ArrowLeft" || e.key === "ArrowUp") prevBtn.click();
     else if (e.key === "ArrowRight" || e.key === "ArrowDown") nextBtn.click();
 });
+
+ipcRenderer.on("MediaPreviousTrack", () => prevBtn.click());
+ipcRenderer.on("MediaNextTrack", () => nextBtn.click());
+ipcRenderer.on("MediaStop ", () => audio.pause());
+ipcRenderer.on("MediaPlayPause", () => togglePlay());
