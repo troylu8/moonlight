@@ -13,7 +13,7 @@ A simple music player for those late nights.
 ## installation
 
 download and extract one of these:
- - [windows](https://www.dropbox.com/scl/fi/meg7vjraike6t9nb9snhh/moonlight-win32-x64.zip?rlkey=34uwzi0fhxpd85d6sfedyfpfk&st=p0qnbyzh&dl=1)
+ - [windows](https://www.dropbox.com/scl/fi/2rmzk6g1bq442ymt3o7pu/moonlight-win32-x64.zip?rlkey=n2dkuvwevzmnwyoqhouab1aib&st=z52mksbs&dl=1)
  
 open the extracted folder and run `moonlight.exe`/`moonlight.app`/`moonlight`
 
