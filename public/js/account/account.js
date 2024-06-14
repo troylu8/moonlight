@@ -104,6 +104,7 @@ window.addEventListener("load", async () => {
     }
 
     setTitleScreen(false);
+    updateForUsername(user.username, isGuest());
 });
 
 ipcRenderer.on("cleanup", async () => {
