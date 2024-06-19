@@ -170,6 +170,7 @@ export async function downloadSong(ytsid, cb) {
     if (stop) return cb();  // destroy request comes in while getting info 
 
     tracker.titleElem.textContent = info.videoDetails.title;
+    
 
     const sid = genID(14);
     const filename = await postpendSID(cleanFileName(info.videoDetails.title) + ".mp3", sid);
