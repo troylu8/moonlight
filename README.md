@@ -12,10 +12,10 @@ A simple music player for those late nights.
 
 ## installation
 
-download and extract one of these:
- - [windows](https://www.dropbox.com/scl/fi/2rmzk6g1bq442ymt3o7pu/moonlight-win32-x64.zip?rlkey=n2dkuvwevzmnwyoqhouab1aib&st=z52mksbs&dl=1)
+download and extract this:
+ - [windows](https://www.dropbox.com/scl/fi/njjnbg9a0sqn83nlcdtoa/moonlight-win32-x64.zip?rlkey=47qeactjc45mmh5ers3mkuzh6&st=a715t3ey&dl=1)
  
-open the extracted folder and run `moonlight.exe`/`moonlight.app`/`moonlight`
+open the extracted folder and run `moonlight.exe`
 
 to **uninstall**, simply delete the extracted folder
 
@@ -33,6 +33,6 @@ When syncing your data, all of your files (`.mp3`, `.wav`, etc.) are sent to my 
 
 **I cannot snoop into the files you upload, even if I wanted to,** as they are encrypted prior to uploading. [more details](readme-resources/privacy.md)
 
-So feel free to listen to [anything you want](https://www.youtube.com/watch?v=lrbOiYrMSPk) - I can't judge! 
+So feel free to listen to [anything you want](https://www.youtube.com/watch?v=lrbOiYrMSPk) - I can't judge! :)
 
 ### [view server repository here](https://github.com/troylu8/moonlight-server) 
