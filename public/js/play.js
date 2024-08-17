@@ -15,10 +15,7 @@ class SpinningAudio extends Audio {
         if ((inThePresent() && history[historyIndex] != data.curr.song.id)) {
             history.push(data.curr.song.id);
             historyIndex++;
-            console.log("added to history");
         }
-
-        console.log(history, historyIndex);
 
         setSpin(true);
         return super.play();
@@ -350,11 +347,6 @@ export class PlaylistCycle {
     }
 
 }
-
-//TEMP
-window.addEventListener("keydown", (e) => {
-    if (e.key == "h") console.log(history, historyIndex);
-});
 
 function rand(min, max) {
     return min + Math.floor(Math.random() * ((max - min) + 1));

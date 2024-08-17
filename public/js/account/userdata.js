@@ -148,7 +148,7 @@ export class Playlist {
         this.id = id;
         this.title = options.title;
         this.desc = options.desc ?? "";
-        this.duration = options.duration ?? 0;
+        this.duration = 0;
         
         /** @type {HTMLElement} */
         this.playlistEntry = null;
@@ -172,6 +172,7 @@ export class Playlist {
         if (options.songs) {
             for (const sid of options.songs) data.songs.get(sid).addToPlaylist(this, changeSyncStatus);
         }
+        if (options.duration) this.duration = options.duration;
     }
 
     /** @param {"local" | "synced" | "doomed"} syncStatus cannot set `syncStatus` to `local` when it is `new`*/

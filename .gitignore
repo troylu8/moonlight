@@ -3,3 +3,4 @@ resources
 *.db
 *.db-shm
 *.db-wal
+.vscode
