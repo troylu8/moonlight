@@ -4,15 +4,21 @@ import { setSpin, updateVolumeIcon } from "./view/fx.js";
 import { data, Playlist, Song } from "./account/userdata.js";
 const { ipcRenderer } = require("electron");
 
+
+
+
 class SpinningAudio extends Audio {
     play() {
         if (this.src === "") return;
         
         // add to history
-        if (inThePresent() && history[historyIndex] != data.curr.song.id) {
+        if ((inThePresent() && history[historyIndex] != data.curr.song.id)) {
             history.push(data.curr.song.id);
             historyIndex++;
+            console.log("added to history");
         }
+
+        console.log(history, historyIndex);
 
         setSpin(true);
         return super.play();
@@ -45,12 +51,15 @@ export const artistElem = document.getElementById("info__artist");
 
 /** 
  * @type {Array<string>} song history, contains ids instead of object references so that deleted songs can be garbage collected */
-export const history = [];
+let history = [];
 /** @type {number} points to current song */
-export let historyIndex = -1;
+let historyIndex = -1;
 
 function inThePresent() {
     return historyIndex === history.length-1;
+}
+export function beheadHistory() {
+    history = history.slice(0, historyIndex + 1);
 }
 
 /** set a new currently playing song, will reset seek to beginning
@@ -281,7 +290,7 @@ export class PlaylistCycle {
         else {
             let song;
             do {
-                if (historyIndex-- === 0) {
+                if (historyIndex === 0) {
                     setSong(data.curr.song); // if no more history, replay curr song from beginning
                     return audio.play();
                 } 
@@ -341,6 +350,11 @@ export class PlaylistCycle {
     }
 
 }
+
+//TEMP
+window.addEventListener("keydown", (e) => {
+    if (e.key == "h") console.log(history, historyIndex);
+});
 
 function rand(min, max) {
     return min + Math.floor(Math.random() * ((max - min) + 1));

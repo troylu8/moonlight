@@ -85,7 +85,7 @@ document.getElementById("song-upload").addEventListener("click", async () => {
         title: "upload song ",
         properties: ['openFile'],
         filters: [
-            { name: 'music', extensions: ["mp3", "wav", "m4a", "avi"] },
+            { name: 'music', extensions: ["mp3", "wav", "m4a", "avi", "ogg"] },
         ],
     });
     if (dialog.canceled) return;

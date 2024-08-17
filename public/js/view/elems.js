@@ -1,5 +1,5 @@
 import * as songSettings from "../settings/songSettings.js";
-import { audio, togglePlay } from "../play.js";
+import { audio, beheadHistory, togglePlay } from "../play.js";
 import { data, Playlist, Song } from "../account/userdata.js";
 import { openPlaylistSettings } from "../settings/playlistSettings.js";
 import { removeTooltip, sendNotification, setPlaylistPlay, setToolTip, showError } from "./fx.js";
@@ -216,6 +216,7 @@ export function createSongEntry(song, playlist, before) {
 
         if (data.curr.viewPlaylist !== data.curr.listenPlaylist) data.updateListenPlaylist();
 
+        beheadHistory();
         togglePlay(song);
 
         data.curr.listenPlaylist.cycle.updateCurrIndex();
@@ -246,7 +247,7 @@ export function createSongEntry(song, playlist, before) {
                 title: "link file to song - " + song.title,
                 properties: ['openFile'],
                 filters: [
-                    { name: 'music', extensions: ["mp3", "wav", "m4a", "avi"] },
+                    { name: 'music', extensions: ["mp3", "wav", "m4a", "avi", "ogg"] },
                 ],
             });
             if (dialog.canceled) return;
