@@ -309,24 +309,24 @@ export const deriveBytes = promisify(
 );
 
 
-function encrypt(input, inputEncoding, IV) {
+export function encrypt(input, inputEncoding, IV, key = user.key) {
     if (!input) return;
 
     const iv = IV ?? randomBytes(16);
 
-    const cipher = createCipheriv("aes-256-gcm", user.key, iv);
+    const cipher = createCipheriv("aes-256-gcm", key, iv);
 
     return  iv.toString("hex") + ".." + 
             cipher.update(input, inputEncoding, "hex") + cipher.final("hex") + ".." +
             cipher.getAuthTag().toString("hex");
 }
 
-function decrypt(text, outputEncoding) {
+export function decrypt(text, outputEncoding, key = user.key) {
     if (!text) return;
 
     const [ iv, ciphertext, authTag ] = text.split("..");
 
-    const decipher = createDecipheriv("aes-256-gcm", user.key, Buffer.from(iv, "hex"));
+    const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "hex"));
     decipher.setAuthTag(Buffer.from(authTag, "hex"));
 
     const res = decipher.update(ciphertext, "hex", outputEncoding);

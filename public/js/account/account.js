@@ -2,7 +2,7 @@ import { data, loadLocaldata } from "./userdata.js";
 import { decryptLocalData, getLocalData, setLocalData, watchFiles, encryptLocalData } from "./files.js";
 import { setTitleScreen, updateForUsername } from "../view/signinElems.js";
 import { sendNotification } from "../view/fx.js";
-import { deriveBytes, getDoomed, syncIfNotSyncing } from "./clientsync.js";
+import { decrypt, deriveBytes, getDoomed, syncIfNotSyncing } from "./clientsync.js";
 const { createHash } = require('crypto');
 const { ipcRenderer } = require("electron");
 
@@ -62,7 +62,12 @@ export let user = {
     },
     async setPassword(password, hash1) {
         this.password = password;
-        this.key = await deriveBytes(password, 32);
+
+        // use password to decrypt key and iv
+        decrypt(getLocalData("secret"), undefined, await deriveBytes(password, 32));
+        
+
+        this.key = ;
         this.iv = await deriveBytes(password, 16)
         this.hash1 = hash1 ?? createHash("sha256").update(password).digest("hex");    
     },

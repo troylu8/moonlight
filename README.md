@@ -8,12 +8,14 @@
 
 A simple music player for those late nights.
 
+note: accounts and sync functions are down as I dont have a server to host it on. please use the "continue without account" option
+
 ![app preview](readme-resources/preview.png)
 
 ## installation
 
 download and extract this:
- - [windows](https://www.dropbox.com/scl/fi/njjnbg9a0sqn83nlcdtoa/moonlight-win32-x64.zip?rlkey=47qeactjc45mmh5ers3mkuzh6&st=a715t3ey&dl=1)
+ - [windows](https://www.dropbox.com/scl/fi/utiskx0q65j0jvqyosnja/moonlight-win32-x64.zip?rlkey=1kra4gskj7a7zvvz2msft5bkp&st=nl71hnmk&dl=1)
  
 open the extracted folder and run `moonlight.exe`
 
